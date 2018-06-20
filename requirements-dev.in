@@ -1,0 +1,13 @@
+black
+bumpversion
+flake8
+coverage
+pytest-cov
+pytest-flakes
+pytest-pep8
+pytest
+Sphinx
+tox
+twine
+wheel
+
