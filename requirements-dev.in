@@ -1,13 +1,13 @@
 black
 bumpversion
-flake8
 coverage
+flake8
+pycodestyle
+pytest
 pytest-cov
 pytest-flakes
 pytest-pep8
-pytest
 Sphinx
 tox
 twine
 wheel
-

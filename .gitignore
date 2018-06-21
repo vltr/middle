@@ -64,3 +64,6 @@ docs/_build
 .appveyor.token
 *.bak
 .python-version
+.venv
+playground.py
+requirements.txt

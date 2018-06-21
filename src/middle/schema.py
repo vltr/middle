@@ -1,7 +1,9 @@
+import re
 from functools import partial
 from functools import singledispatch
 
 import attr
+from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
 from .converters import converter
 from .converters import model_converter
@@ -10,6 +12,9 @@ from .validators import max_str_len
 from .validators import min_max_str_len
 from .validators import min_str_len
 from .validators import str_pattern
+
+_reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
+_attr_s_kwargs = {"cmp": False}
 
 
 def field(*args, **kwargs):
@@ -27,11 +32,35 @@ def field(*args, **kwargs):
 class ModelMeta(type):
     def __new__(mcls, name, bases, attrs):
         if bases:
+            annotations = attrs.get("__annotations__", {})
+            for k, v in annotations.items():
+                if _reserved_keys.match(k):
+                    continue
+                if k not in attrs:
+                    attrs.update(
+                        {k: _translate_to_attrib(k, None, annotations, name)}
+                    )
             for k, f in attrs.items():
-                annotations = attrs.get("__annotations__", {})
+                if _reserved_keys.match(k):
+                    continue
+                if not isinstance(f, _CountingAttr):
+                    f, type_ = _translate_to_attrib(k, f, annotations, name)
+                    attrs[k] = f
+                    annotations.update({k: type_})
                 _implement_converter(f, k, annotations)
                 _implement_validators(f, k, annotations)
-        return attr.s(super().__new__(mcls, name, bases, attrs))
+            if "__annotations__" not in attrs:
+                attrs["__annotations__"] = annotations
+            else:
+                for k in annotations:
+                    if k not in attrs["__annotations__"]:
+                        attrs["__annotations__"].update({k: annotations[k]})
+        attr_kwargs = _attr_s_kwargs.copy()
+        if attrs.get("__attr_s_kwargs__", None) is not None:
+            attr_kwargs = attrs.get("__attr_s_kwargs__")
+            if "init" in attr_kwargs:
+                attr_kwargs.pop("init")
+        return attr.s(**attr_kwargs)(super().__new__(mcls, name, bases, attrs))
 
     def __call__(cls, *args, **kwargs):
         if args:
@@ -48,6 +77,26 @@ class ModelMeta(type):
                         }
                     )
         return super().__call__(**kwargs)
+
+
+class Model(metaclass=ModelMeta):
+    pass
+
+
+# --------------------------------------------------------------- #
+# Simple member definition to attr.ib
+# --------------------------------------------------------------- #
+
+
+def _translate_to_attrib(key, data, annotations, cls_name):
+    if not isinstance(data, dict):
+        data = {}
+    type_ = data.pop("type", annotations.get(key, None))
+    if type_ is None:
+        raise TypeError(
+            "type not specified for field {}.{}".format(cls_name, key)
+        )
+    return field(**data), type_
 
 
 # --------------------------------------------------------------- #
@@ -110,7 +159,3 @@ def _implement_validator(type_, field):
     # TODO number (minimum, maximum, exclusive_minimum, exclusive_maximum, multiple_of)
     # TODO array (one_of, min_items, max_items, unique_items)
     # TODO object (min_properties, max_properties)
-
-
-class Model(metaclass=ModelMeta):
-    pass

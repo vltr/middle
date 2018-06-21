@@ -1,7 +1,11 @@
 import cProfile
 import sys
-from enum import Enum, IntEnum, unique
-from typing import Dict, List, Set
+from enum import Enum
+from enum import IntEnum
+from enum import unique
+from typing import Dict
+from typing import List
+from typing import Set
 
 # --------------------------------------------------------------- #
 # Import boilerplate
@@ -9,8 +13,9 @@ from typing import Dict, List, Set
 
 try:
     import timy
-    from cattr import structure, unstructure
-    from middle import schema, utils
+    import middle
+    from cattr import structure
+    from cattr import unstructure
 except ImportError:
     print(
         "To run this script, you must install these dependencies:",
@@ -59,35 +64,36 @@ class CityRegionEnum(str, Enum):
     BOREAL = "BOREAL"
 
 
-class City(schema.Model):
-    name = schema.field(type=str, description="The city name")
-    region = schema.field(
+class City(middle.Model):
+    name = middle.field(type=str, description="The city name")
+    region = middle.field(
         type=CityRegionEnum, description="The region this city is located"
     )
 
 
-class Game(schema.Model):
-    name: str = schema.field(description="The name of the game")
-    platform: PlatformEnum = schema.field(
-        description="Which platform it runs on", pattern="^\d+x\d+$"
+class Game(middle.Model):
+    name: str = middle.field(description="The name of the game")
+    platform: PlatformEnum = middle.field(
+        description="Which platform it runs on"
     )
-    score: float = schema.field(description="The average score of the game")
-    resolution_tested: str = schema.field(
-        description="The resolution which the game was tested"
+    score: float = middle.field(description="The average score of the game")
+    resolution_tested: str = middle.field(
+        description="The resolution which the game was tested",
+        pattern="^\d+x\d+$",
     )
-    genre: List[str] = schema.field(
+    genre: List[str] = middle.field(
         description="One or more genres this game is part of"
     )
-    rating: Dict[str, float] = schema.field(
+    rating: Dict[str, float] = middle.field(
         description="Ratings given on specialized websites"
     )
-    players: Set[str] = schema.field(
+    players: Set[str] = middle.field(
         description="Some of the notorious players of this game"
     )
-    language: LanguageEnum = schema.field(
+    language: LanguageEnum = middle.field(
         description="The main language of the game"
     )
-    awesome_city: City = schema.field(description="One awesome city built")
+    awesome_city: City = middle.field(description="One awesome city built")
 
 
 # --------------------------------------------------------------- #
@@ -120,7 +126,7 @@ def test_cattr():
 
 
 def test_middle():
-    p = utils.asdict(MODEL_INSTANCE)
+    p = middle.asdict(MODEL_INSTANCE)
     assert isinstance(p, dict)
     game = Game(**p)
     assert isinstance(game, Game)

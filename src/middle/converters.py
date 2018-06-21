@@ -17,10 +17,11 @@ from typing import Set
 
 import attr
 
+from .compat import IS_PY37
 from .compat import GenericType
-from .compat import convert_to_utc
-from .compat import dt_from_iso_string
-from .compat import dt_from_timestamp
+from .dtutils import convert_to_utc
+from .dtutils import dt_from_iso_string
+from .dtutils import dt_from_timestamp
 
 
 def model_converter(model_cls, value):
@@ -99,37 +100,70 @@ def _converter_enum(type_):
     return type_
 
 
-@converter.register(GenericType)
-def _converter_generic_meta(type_):
-    if type_.__base__ in (
-        List,
-        Set,
-        MutableSet,
-        Sequence,
-        Collection,
-        Iterable,
-        MutableSequence,
-        FrozenSet,
-    ):
-        if type_.__args__:
-            return partial(
-                _iterable_converter,
-                converter(type_.__args__[0]),
-                type_.__base__ == Set,
-            )
-    elif type_.__base__ in (Dict, Mapping, MutableMapping):
-        if type_.__args__:
-            return partial(
-                _dict_converter,
-                converter(type_.__args__[0]),
-                converter(type_.__args__[1]),
-            )
-    else:
-        print("converters.py")
-        from IPython import embed
+if IS_PY37:
+    @converter.register(GenericType)
+    def _converter_generic_meta(type_):
+        if type_._name in (
+            "List",
+            "Set",
+            "MutableSet",
+            "Sequence",
+            "Collection",
+            "Iterable",
+            "MutableSequence",
+            "FrozenSet",
+        ):
+            if type_.__args__:
+                return partial(
+                    _iterable_converter,
+                    converter(type_.__args__[0]),
+                    type_._name in ("Set", "MutableSet", "FrozenSet"),
+                )
+        elif type_._name in ("Dict", "Mapping", "MutableMapping"):
+            if type_.__args__:
+                return partial(
+                    _dict_converter,
+                    converter(type_.__args__[0]),
+                    converter(type_.__args__[1]),
+                )
+        else:
+            print("converters.py")
+            # from IPython import embed
 
-        embed()
-        raise TypeError("This type is not supported")
+            # embed()
+            raise TypeError("This type is not supported")
+else:
+    @converter.register(GenericType)
+    def _converter_generic_meta(type_):
+        if type_.__base__ in (
+            List,
+            Set,
+            MutableSet,
+            Sequence,
+            Collection,
+            Iterable,
+            MutableSequence,
+            FrozenSet,
+        ):
+            if type_.__args__:
+                return partial(
+                    _iterable_converter,
+                    converter(type_.__args__[0]),
+                    type_.__base__ in (Set, MutableSet, FrozenSet),
+                )
+        elif type_.__base__ in (Dict, Mapping, MutableMapping):
+            if type_.__args__:
+                return partial(
+                    _dict_converter,
+                    converter(type_.__args__[0]),
+                    converter(type_.__args__[1]),
+                )
+        else:
+            print("converters.py")
+            # from IPython import embed
+
+            # embed()
+            raise TypeError("This type is not supported")
 
 
 # List, MutableSequence, Sequence, Collection, Iterable

@@ -5,8 +5,7 @@ from typing import Dict
 from typing import List
 from typing import Set
 
-from middle import schema
-from middle import utils
+import middle
 
 
 @unique
@@ -32,36 +31,21 @@ class CityRegionEnum(str, Enum):
     BOREAL = "BOREAL"
 
 
-class City(schema.Model):
-    name = schema.field(type=str, description="The city name")
-    region = schema.field(
-        type=CityRegionEnum, description="The region this city is located"
-    )
+class City(middle.Model):
+    name = {"type": str}
+    region = {"type": CityRegionEnum}
 
 
-class Game(schema.Model):
-    name: str = schema.field(description="The name of the game")
-    platform: PlatformEnum = schema.field(
-        description="Which platform it runs on"
-    )
-    score: float = schema.field(description="The average score of the game")
-    resolution_tested: str = schema.field(
-        description="The resolution which the game was tested",
-        pattern="^\d+x\d+$",
-    )
-    genre: List[str] = schema.field(
-        description="One or more genres this game is part of"
-    )
-    rating: Dict[str, float] = schema.field(
-        description="Ratings given on specialized websites"
-    )
-    players: Set[str] = schema.field(
-        description="Some of the notorious players of this game"
-    )
-    language: LanguageEnum = schema.field(
-        description="The main language of the game"
-    )
-    awesome_city: City = schema.field(description="One awesome city built")
+class Game(middle.Model):
+    name: str
+    platform: PlatformEnum
+    score: float
+    resolution_tested: str = {"pattern": "^\d+x\d+$"}
+    genre: List[str]
+    rating: Dict[str, float]
+    players: Set[str]
+    language: LanguageEnum
+    awesome_city: City
 
 
 def test_instance():
@@ -93,7 +77,7 @@ def test_instance_to_dict():
         awesome_city=City(name="Blumenau", region=CityRegionEnum.TEMPERATE),
     )
 
-    data = utils.asdict(game)
+    data = middle.asdict(game)
     assert isinstance(data, dict)
     assert isinstance(data.get("awesome_city", None), dict)
     assert data.get("awesome_city").get("region") == "TEMPERATE"

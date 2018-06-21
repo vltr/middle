@@ -17,8 +17,9 @@ from typing import Set
 
 import attr
 
+from .compat import IS_PY37
 from .compat import GenericType
-from .compat import dt_to_iso_string
+from .dtutils import dt_to_iso_string
 from .schema import ModelMeta
 
 
@@ -51,11 +52,11 @@ def _raw_model_meta(value):
 
 
 def _raw_list(value):
-    return [_raw_value(v)(v) for v in value]
+    return [_raw_value(type(v))(v) for v in value]
 
 
 def _raw_set(value):
-    return {_raw_value(v)(v) for v in value}
+    return {_raw_value(type(v))(v) for v in value}
 
 
 # def _raw_tuple(value):
@@ -63,7 +64,10 @@ def _raw_set(value):
 
 
 def _raw_dict(value):
-    return {_raw_value(k)(k): _raw_value(v)(v) for k, v in value.items()}
+    return {
+        _raw_value(type(k))(k): _raw_value(type(v))(v)
+        for k, v in value.items()
+    }
 
 
 @lru_cache(typed=True)
@@ -88,25 +92,49 @@ def _raw_value_model_meta(type_):
     return _raw_model_meta
 
 
-@_raw_value.register(GenericType)
-def _raw_value_generic_meta(type_):
-    if type_.__base__ in (
-        List,
-        Sequence,
-        Collection,
-        Iterable,
-        MutableSequence,
-    ):
-        return _raw_list
-    elif type_.__base__ in (Set, MutableSet, FrozenSet):
-        return _raw_set
-    # elif type_.__base__ == Tuple:
-    #     return _raw_tuple
-    elif type_.__base__ in (Dict, Mapping, MutableMapping):
-        return _raw_dict
-    else:
-        print("utils.py")
-        from IPython import embed
+if IS_PY37:
+    @_raw_value.register(GenericType)
+    def _raw_value_generic_meta(type_):
+        if type_._name in (
+            "List",
+            "Sequence",
+            "Collection",
+            "Iterable",
+            "MutableSequence",
+        ):
+            return _raw_list
+        elif type_._name in ("Set", "MutableSet", "FrozenSet"):
+            return _raw_set
+        # elif type_._name == Tuple:
+        #     return _raw_tuple
+        elif type_._name in ("Dict", "Mapping", "MutableMapping"):
+            return _raw_dict
+        else:
+            print("utils.py")
+            # from IPython import embed
 
-        embed()
-        raise TypeError("This type is not supported")
+            # embed()
+            raise TypeError("This type is not supported")
+else:
+    @_raw_value.register(GenericType)
+    def _raw_value_generic_meta(type_):
+        if type_.__base__ in (
+            List,
+            Sequence,
+            Collection,
+            Iterable,
+            MutableSequence,
+        ):
+            return _raw_list
+        elif type_.__base__ in (Set, MutableSet, FrozenSet):
+            return _raw_set
+        # elif type_.__base__ == Tuple:
+        #     return _raw_tuple
+        elif type_.__base__ in (Dict, Mapping, MutableMapping):
+            return _raw_dict
+        else:
+            print("utils.py")
+            # from IPython import embed
+
+            # embed()
+            raise TypeError("This type is not supported")

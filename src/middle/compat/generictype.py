@@ -8,4 +8,4 @@ else:
     from typing import GenericMeta as GenericType
 
 
-__all__ = ("GenericType",)
+__all__ = ("IS_PY37", "GenericType",)

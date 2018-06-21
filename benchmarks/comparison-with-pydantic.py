@@ -13,17 +13,16 @@ from typing import Set
 
 try:
     import timy
-    from marshmallow import fields
-    from marshmallow import Schema
-    from marshmallow.schema import MarshalResult
-    from middle import schema
+    import middle
+    from pydantic import BaseModel
+    from pydantic import constr
 except ImportError:
     print(
         "To run this script, you must install these dependencies:",
         file=sys.stderr,
     )
-    print("- marshmallow", file=sys.stderr)
     print("- middle", file=sys.stderr)
+    print("- pydantic", file=sys.stderr)
     print("- timy", file=sys.stderr)
     sys.exit(1)
 
@@ -38,7 +37,7 @@ if "short" in sys.argv:
 
 
 # --------------------------------------------------------------- #
-# Enum definition
+# Object definition
 # --------------------------------------------------------------- #
 
 
@@ -65,65 +64,55 @@ class CityRegionEnum(str, Enum):
     BOREAL = "BOREAL"
 
 
-# --------------------------------------------------------------- #
-# Caja model definition
-# --------------------------------------------------------------- #
-
-
-class MiddleCity(schema.Model):
-    name = schema.field(type=str, description="The city name")
-    region = schema.field(
+class CityModel(middle.Model):
+    name = middle.field(type=str, description="The city name")
+    region = middle.field(
         type=CityRegionEnum, description="The region this city is located"
     )
 
 
-class MiddleGame(schema.Model):
-    name: str = schema.field(description="The name of the game")
-    platform: PlatformEnum = schema.field(
+class CityPydantic(BaseModel):
+    name: str = ...
+    region: CityRegionEnum = ...
+
+
+class GameModel(middle.Model):
+    name: str = middle.field(description="The name of the game")
+    platform: PlatformEnum = middle.field(
         description="Which platform it runs on"
     )
-    score: float = schema.field(description="The average score of the game")
-    resolution_tested: str = schema.field(
+    score: float = middle.field(description="The average score of the game")
+    resolution_tested: str = middle.field(
         description="The resolution which the game was tested",
         pattern="^\d+x\d+$",
     )
-    genre: List[str] = schema.field(
+    genre: List[str] = middle.field(
         description="One or more genres this game is part of"
     )
-    rating: Dict[str, float] = schema.field(
+    rating: Dict[str, float] = middle.field(
         description="Ratings given on specialized websites"
     )
-    players: Set[str] = schema.field(
+    players: Set[str] = middle.field(
         description="Some of the notorious players of this game"
     )
-    language: LanguageEnum = schema.field(
+    language: LanguageEnum = middle.field(
         description="The main language of the game"
     )
-    awesome_city: MiddleCity = schema.field(
+    awesome_city: CityModel = middle.field(
         description="One awesome city built"
     )
 
 
-# --------------------------------------------------------------- #
-# marshmallow model definition
-# --------------------------------------------------------------- #
-
-
-class CitySchema(Schema):
-    name = fields.Str()
-    region = fields.Str()
-
-
-class GameSchema(Schema):
-    name = fields.Str()
-    platform = fields.Str()
-    score = fields.Float()
-    resolution_tested = fields.Str()
-    genre = fields.List(fields.Str())
-    rating = fields.Dict(values=fields.Float(), keys=fields.Str())
-    players = fields.List(fields.Str())
-    language = fields.Integer()
-    awesome_city = fields.Nested(CitySchema)
+class GamePydantic(BaseModel):
+    name: str = ...
+    platform: PlatformEnum = ...
+    score: float = ...
+    resolution_tested: constr(regex="^\d+x\d+$") = ...
+    genre: List[str] = ...
+    rating: Dict[str, float] = ...
+    players: Set[str] = ...
+    language: LanguageEnum = ...
+    awesome_city: CityPydantic = ...
 
 
 # --------------------------------------------------------------- #
@@ -147,16 +136,20 @@ MODEL_INSTANCE = {
 # --------------------------------------------------------------- #
 
 
-def test_marshmallow():
-    game = GameSchema().dump(MODEL_INSTANCE)
-    assert isinstance(game, MarshalResult)
-    assert "awesome_city" in game.data
+def test_pydantic():
+    game = GamePydantic(**MODEL_INSTANCE)
+    assert isinstance(game, GamePydantic)
+    assert isinstance(game.awesome_city, CityPydantic)
+    p = game.dict()
+    assert isinstance(p, dict)
 
 
 def test_middle():
-    game = MiddleGame(**MODEL_INSTANCE)
-    assert isinstance(game, MiddleGame)
-    assert isinstance(game.awesome_city, MiddleCity)
+    game = GameModel(**MODEL_INSTANCE)
+    assert isinstance(game, GameModel)
+    assert isinstance(game.awesome_city, CityModel)
+    p = middle.asdict(game)
+    assert isinstance(p, dict)
 
 
 # --------------------------------------------------------------- #
@@ -167,7 +160,7 @@ def test_middle():
 def main():
     if "profile" in sys.argv:
         cProfile.run(
-            "for i in range({}): test_marshmallow()".format(TOTAL_LOOPS),
+            "for i in range({}): test_pydantic()".format(TOTAL_LOOPS),
             sort="tottime",
         )
         cProfile.run(
@@ -175,8 +168,8 @@ def main():
             sort="tottime",
         )
     else:
-        timy.timer(ident="marshmallow", loops=TOTAL_LOOPS)(
-            test_marshmallow
+        timy.timer(ident="pydantic", loops=TOTAL_LOOPS)(
+            test_pydantic
         ).__call__()
         timy.timer(ident="middle", loops=TOTAL_LOOPS)(test_middle).__call__()
 
