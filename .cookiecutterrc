@@ -40,7 +40,7 @@ default_context:
     project_short_description: 'Flexible, extensible Python data structures for general usage'
     release_date:              'today'
     repo_name:                 'middle'
-    requiresio:                'yes'
+    requiresio:                'no'
     scrutinizer:               'no'
     sphinx_doctest:            'no'
     sphinx_theme:              'sphinx-rtd-theme'

@@ -16,10 +16,6 @@
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/vltr/middle
 
-.. image:: https://requires.io/github/vltr/middle/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/vltr/middle/requirements/?branch=master
-
 .. image:: https://codecov.io/github/vltr/middle/coverage.svg?branch=master
     :alt: Coverage Status
     :target: https://codecov.io/github/vltr/middle
@@ -101,10 +97,11 @@ TODO
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
 - If possible, fine grain the converters, so a ``str`` input value of ``{}`` doesn't end up as ``str({})``;
-- Get ``date`` and ``datetime`` converters to be customizeable, instead of an ``if isinstance`` statement;
+- Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Lots of documentation;
 - More benchmarks;
 - Support more types (provided in the Python standard library), if possible;
+- Implement more validators and a registerable for more metadata options;
 
 Documentation
 =============
@@ -116,12 +113,12 @@ Inspiration and Thanks
 
 I really got inspired to create this library by observing a lot of other libraries and tools, specially:
 
-- `attrs <http://www.attrs.org>`_: how such a simple library can be such flexible, extendable and fast?
+- `attrs <http://www.attrs.org/en/stable/>`_: how such a simple library can be such flexible, extendable and fast?
 - `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dicts`` and to instances again;
 - `pydantic <https://pydantic-docs.helpmanual.io/>`_: for such pythonic and beautiful approach on creating classes using ``typing`` hints;
-- `mashmallow <https://marshmallow.readthedocs.io/>`_: it is one of the most feature rich modelling APIs I've seen;
+- `mashmallow <https://marshmallow.readthedocs.io/en/latest/>`_: it is one of the most feature rich modelling APIs I've seen;
 - `apistar <https://docs.apistar.com/>`_: it's almost magical!
-- `Sanic <http://sanic.readthedocs.io/>`_: "*Gotta go fast!*"
+- `Sanic <http://sanic.readthedocs.io/en/latest/>`_: "*Gotta go fast!*"
 
 License
 =======

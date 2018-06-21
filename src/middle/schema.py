@@ -8,9 +8,11 @@ from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_aliases
+from .validators import max_num_value
 from .validators import max_str_len
-from .validators import min_max_str_len
+from .validators import min_num_value
 from .validators import min_str_len
+from .validators import num_multiple_of
 from .validators import str_pattern
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
@@ -135,27 +137,27 @@ def _implement_validators(field, key, annotations):
 
 @singledispatch
 def _implement_validator(type_, field):
+    validators = []
     if type_ == str:
-        validator = None
-        if (
-            "min_length" in field.metadata
-            and "max_length" not in field.metadata
-        ):
-            validator = min_str_len
-        elif (
-            "max_length" in field.metadata
-            and "min_length" not in field.metadata
-        ):
-            validator = max_str_len
-        elif "min_length" in field.metadata and "max_length" in field.metadata:
-            validator = min_max_str_len
-
+        if "min_length" in field.metadata:
+            validators.append(min_str_len)
+        if "max_length" in field.metadata:
+            validators.append(max_str_len)
         if "pattern" in field.metadata:
-            validator = str_pattern
+            validators.append(str_pattern)
 
-        if validator is not None:
-            field.validator(validator)
         # TODO implement format
-    # TODO number (minimum, maximum, exclusive_minimum, exclusive_maximum, multiple_of)
+    elif type_ in (int, float):
+        if "minimum" in field.metadata:
+            validators.append(min_num_value)
+        if "maximum" in field.metadata:
+            validators.append(max_num_value)
+        if "multiple_of" in field.metadata:
+            validators.append(num_multiple_of)
+
     # TODO array (one_of, min_items, max_items, unique_items)
     # TODO object (min_properties, max_properties)
+
+    if len(validators):
+        for validator in validators:
+            field.validator(validator)

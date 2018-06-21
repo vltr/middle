@@ -1,5 +1,5 @@
 metadata_aliases = {
-    "all": ["description", "nullable", "required"],
+    "all": ["description", "nullable"],
     "number": [
         "minimum",
         "maximum",
