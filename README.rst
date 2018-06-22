@@ -24,10 +24,6 @@
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/middle
 
-.. image:: https://img.shields.io/github/commits-since/vltr/middle/v0.1.0.svg
-    :alt: Commits since latest release
-    :target: https://github.com/vltr/middle/compare/v0.1.0...master
-
 .. image:: https://img.shields.io/pypi/wheel/middle.svg
     :alt: PyPI Wheel
     :target: https://pypi.python.org/pypi/middle
@@ -114,7 +110,7 @@ Inspiration and Thanks
 I really got inspired to create this library by observing a lot of other libraries and tools, specially:
 
 - `attrs <http://www.attrs.org/en/stable/>`_: how such a simple library can be such flexible, extendable and fast?
-- `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dicts`` and to instances again;
+- `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dict``s and to instances again;
 - `pydantic <https://pydantic-docs.helpmanual.io/>`_: for such pythonic and beautiful approach on creating classes using ``typing`` hints;
 - `mashmallow <https://marshmallow.readthedocs.io/en/latest/>`_: it is one of the most feature rich modelling APIs I've seen;
 - `apistar <https://docs.apistar.com/>`_: it's almost magical!
@@ -123,4 +119,4 @@ I really got inspired to create this library by observing a lot of other librari
 License
 =======
 
-``middle`` is free software distributed under the `MIT <https://choosealicense.com/licenses/mit/>`_ license.
+``middle`` is a free software distributed under the `MIT <https://choosealicense.com/licenses/mit/>`_ license.

@@ -1,6 +1,5 @@
 import re
 from functools import partial
-from functools import singledispatch
 
 import attr
 from attr._make import _CountingAttr  # NOTE: this is internal to attrs
@@ -8,12 +7,7 @@ from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_aliases
-from .validators import max_num_value
-from .validators import max_str_len
-from .validators import min_num_value
-from .validators import min_str_len
-from .validators import num_multiple_of
-from .validators import str_pattern
+from .validators import validators
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
 _attr_s_kwargs = {"cmp": False}
@@ -49,7 +43,7 @@ class ModelMeta(type):
                     f, type_ = _translate_to_attrib(k, f, annotations, name)
                     attrs[k] = f
                     annotations.update({k: type_})
-                _implement_converter(f, k, annotations)
+                _implement_converters(f, k, annotations)
                 _implement_validators(f, k, annotations)
             if "__annotations__" not in attrs:
                 attrs["__annotations__"] = annotations
@@ -111,7 +105,7 @@ def _converter_model_meta(type_):
     return partial(model_converter, type_)
 
 
-def _implement_converter(field, key, annotations):
+def _implement_converters(field, key, annotations):
     converter_fn = None
 
     if hasattr(field, "type") and field.type:
@@ -127,37 +121,10 @@ def _implement_converter(field, key, annotations):
 # Validators
 # --------------------------------------------------------------- #
 
-
 def _implement_validators(field, key, annotations):
     if hasattr(field, "type") and field.type:
-        _implement_validator(field.type, field)
+        for v in validators(field.type, field):
+            field.validator(v)
     elif key in annotations:
-        _implement_validator(annotations.get(key), field)
-
-
-@singledispatch
-def _implement_validator(type_, field):
-    validators = []
-    if type_ == str:
-        if "min_length" in field.metadata:
-            validators.append(min_str_len)
-        if "max_length" in field.metadata:
-            validators.append(max_str_len)
-        if "pattern" in field.metadata:
-            validators.append(str_pattern)
-
-        # TODO implement format
-    elif type_ in (int, float):
-        if "minimum" in field.metadata:
-            validators.append(min_num_value)
-        if "maximum" in field.metadata:
-            validators.append(max_num_value)
-        if "multiple_of" in field.metadata:
-            validators.append(num_multiple_of)
-
-    # TODO array (one_of, min_items, max_items, unique_items)
-    # TODO object (min_properties, max_properties)
-
-    if len(validators):
-        for validator in validators:
-            field.validator(validator)
+        for v in validators(annotations.get(key), field):
+            field.validator(v)

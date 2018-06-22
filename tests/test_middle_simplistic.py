@@ -62,6 +62,10 @@ def test_instance():
     )
 
     assert isinstance(game, Game)
+    assert isinstance(game.platform, PlatformEnum)
+    assert isinstance(game.language, LanguageEnum)
+    assert isinstance(game.awesome_city, City)
+    assert isinstance(game.awesome_city.region, CityRegionEnum)
 
 
 def test_instance_to_dict():

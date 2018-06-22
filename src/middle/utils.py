@@ -30,17 +30,12 @@ def asdict(inst):
     }
 
 
-def _raw_primitive(value):
-    if isinstance(value, date):
-        return value.isoformat()
-    elif isinstance(value, datetime):
-        # return dt_to_iso_string(convert_to_utc(value))
-        return dt_to_iso_string(value)
-    return value
+TO_PRIMITIVE = {date: lambda v: v.isoformat(), datetime: dt_to_iso_string}
 
 
-# def _raw_date_datetime(value):
-#     return value.isoformat()
+def raw_primitive(value):
+    fn = TO_PRIMITIVE.get(type(value), None)
+    return value if fn is None else fn(value)
 
 
 def _raw_enum(value):
@@ -73,13 +68,7 @@ def _raw_dict(value):
 @lru_cache(typed=True)
 @singledispatch
 def _raw_value(type_):
-    return _raw_primitive
-
-
-# @_raw_value.register(date)
-# @_raw_value.register(datetime)
-# def _raw_value_datetime(type_):
-#     return _raw_date_datetime
+    return raw_primitive
 
 
 @_raw_value.register(EnumMeta)
@@ -93,6 +82,7 @@ def _raw_value_model_meta(type_):
 
 
 if IS_PY37:
+
     @_raw_value.register(GenericType)
     def _raw_value_generic_meta(type_):
         if type_._name in (
@@ -111,11 +101,11 @@ if IS_PY37:
             return _raw_dict
         else:
             print("utils.py")
-            # from IPython import embed
-
-            # embed()
             raise TypeError("This type is not supported")
+
+
 else:
+
     @_raw_value.register(GenericType)
     def _raw_value_generic_meta(type_):
         if type_.__base__ in (
@@ -134,7 +124,4 @@ else:
             return _raw_dict
         else:
             print("utils.py")
-            # from IPython import embed
-
-            # embed()
             raise TypeError("This type is not supported")

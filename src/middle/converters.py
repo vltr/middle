@@ -69,7 +69,7 @@ def _datetime_converter(value):
 
 def _bool_converter(value):
     if isinstance(value, str):
-        return value.lower() in ("true", "yes")
+        return value.lower() in ("true", "yes", "on")
     elif isinstance(value, (int, float)):
         return value > 0
     elif isinstance(value, bool):
@@ -79,20 +79,24 @@ def _bool_converter(value):
     )
 
 
+FOR_TYPE = {
+    bool: _bool_converter,
+    date: _date_converter,
+    datetime: _datetime_converter,
+    int: int,
+    float: float,
+    str: str,
+}
+
+
 @singledispatch
 def converter(type_):
-    if type_ in (int, float, str):
-        return type_
-    elif type_ == bool:
-        return _bool_converter
-    elif type_ == date:
-        return _date_converter
-    elif type_ == datetime:
-        return _datetime_converter
+    if type_ in FOR_TYPE:
+        return FOR_TYPE[type_]
     elif attr.has(type_):
         return partial(model_converter, type_)
     else:
-        raise TypeError("SEE ME!")
+        raise TypeError("SEE ME!")  # TODO
 
 
 @converter.register(EnumMeta)
@@ -101,6 +105,7 @@ def _converter_enum(type_):
 
 
 if IS_PY37:
+
     @converter.register(GenericType)
     def _converter_generic_meta(type_):
         if type_._name in (
@@ -131,8 +136,11 @@ if IS_PY37:
             # from IPython import embed
 
             # embed()
-            raise TypeError("This type is not supported")
+            raise TypeError("This type is not supported")  # TODO
+
+
 else:
+
     @converter.register(GenericType)
     def _converter_generic_meta(type_):
         if type_.__base__ in (
@@ -163,7 +171,7 @@ else:
             # from IPython import embed
 
             # embed()
-            raise TypeError("This type is not supported")
+            raise TypeError("This type is not supported")  # TODO
 
 
 # List, MutableSequence, Sequence, Collection, Iterable
