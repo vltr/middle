@@ -20,26 +20,6 @@ import pytest
 
 import middle
 
-# from middle.validators import ValidationError
-
-# from enum import EnumMeta
-# from functools import partial, singledispatch
-# from typing import (
-#     Collection,
-#     Dict,
-#     FrozenSet,
-#     GenericMeta,
-#     Iterable,
-#     List,
-#     Mapping,
-#     MutableMapping,
-#     MutableSequence,
-#     MutableSet,
-#     Sequence,
-#     Set,
-# )
-
-
 # #############################################################################
 # str
 

@@ -124,4 +124,6 @@ else:
             return _raw_dict
         else:
             print("utils.py")
+            from IPython import embed
+            embed()
             raise TypeError("This type is not supported")

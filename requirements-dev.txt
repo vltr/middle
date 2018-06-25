@@ -10,7 +10,7 @@ appdirs==1.4.3            # via black
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via black, pytest
 babel==2.6.0              # via sphinx
-black==18.6b3
+black==18.6b4
 bumpversion==0.5.3
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests

@@ -1,13 +1,19 @@
-metadata_aliases = {
-    "all": ["description", "nullable"],
-    "number": [
-        "minimum",
-        "maximum",
-        "exclusive_minimum",
-        "exclusive_maximum",
-        "multiple_of",
-    ],
-    "string": ["min_length", "max_length", "format", "pattern"],
-    "array": ["one_of", "min_items", "max_items", "unique_items"],
-    "object": ["min_properties", "max_properties"],
-}
+metadata_options = [
+    "description",
+    "nullable",
+    "minimum",
+    "maximum",
+    "exclusive_minimum",
+    "exclusive_maximum",
+    "multiple_of",
+    "min_length",
+    "max_length",
+    "format",
+    "pattern",
+    "one_of",
+    "min_items",
+    "max_items",
+    "unique_items",
+    "min_properties",
+    "max_properties",
+]

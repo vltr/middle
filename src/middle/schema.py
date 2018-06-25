@@ -6,7 +6,7 @@ from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
 from .converters import converter
 from .converters import model_converter
-from .options import metadata_aliases
+from .options import metadata_options
 from .validators import validators
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
@@ -14,14 +14,13 @@ _attr_s_kwargs = {"cmp": False}
 
 
 def field(*args, **kwargs):
-    for alias_group in metadata_aliases.values():
-        for alias in alias_group:
-            value = kwargs.pop(alias, None)
-            if value is not None:
-                if kwargs.get("metadata", None) is None:
-                    kwargs.update({"metadata": {alias: value}})
-                else:
-                    kwargs["metadata"].update({alias: value})
+    for alias in metadata_options:
+        value = kwargs.pop(alias, None)
+        if value is not None:
+            if kwargs.get("metadata", None) is None:
+                kwargs.update({"metadata": {alias: value}})
+            else:
+                kwargs["metadata"].update({alias: value})
     return attr.ib(*args, **kwargs)
 
 

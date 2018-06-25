@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import EnumMeta
 from functools import partial
 from functools import singledispatch
+# from typing import Any
 from typing import Collection
 from typing import Dict
 from typing import FrozenSet
@@ -14,6 +15,7 @@ from typing import MutableSequence
 from typing import MutableSet
 from typing import Sequence
 from typing import Set
+from typing import Union
 
 import attr
 
@@ -69,7 +71,7 @@ def _datetime_converter(value):
 
 def _bool_converter(value):
     if isinstance(value, str):
-        return value.lower() in ("true", "yes", "on")
+        return value.lower().strip() in ("true", "yes", "on", "1")
     elif isinstance(value, (int, float)):
         return value > 0
     elif isinstance(value, bool):
@@ -96,12 +98,25 @@ def converter(type_):
     elif attr.has(type_):
         return partial(model_converter, type_)
     else:
+        print("singledispatch.converter on converters.py")
+        from IPython import embed
+        embed()
         raise TypeError("SEE ME!")  # TODO
 
 
 @converter.register(EnumMeta)
 def _converter_enum(type_):
     return type_
+
+
+@converter.register(Union)
+def _converter_union(type_):
+    if type(None) in type_.__args__:
+        # there is a None, make it optional ?
+        pass
+    from IPython import embed
+    embed()
+    return None
 
 
 if IS_PY37:
@@ -168,15 +183,11 @@ else:
                 )
         else:
             print("converters.py")
-            # from IPython import embed
-
-            # embed()
+            from IPython import embed
+            embed()
             raise TypeError("This type is not supported")  # TODO
 
 
-# List, MutableSequence, Sequence, Collection, Iterable
-# Dict, MutableMapping, Mapping
-# MutableSet, Set, FrozenSet
-# Any, Optional, Union <<<
+# Optional, Union <<<
 # Tuple ?
 # Decimal ?

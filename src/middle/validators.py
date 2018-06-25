@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 from functools import partial
 from functools import singledispatch
 from typing import Collection
@@ -21,7 +22,7 @@ from .exceptions import ValidationError
 
 
 def min_str_len(meta_value, instance, attribute, value):
-    if len(value) <= meta_value:
+    if len(value) < meta_value:
         raise ValidationError(
             "'{}' must have a minimum length of {} chars".format(
                 attribute.name, meta_value
@@ -87,10 +88,10 @@ def num_multiple_of(meta_value, instance, attribute, value):
     is_multiple_of = True
     if (
         isinstance(meta_value, float)
-        and not (value * (1. / meta_value)).is_integer()
+        and float(Decimal(str(value)) % Decimal(str(meta_value))) != 0.
     ):
         is_multiple_of = False
-    if value % meta_value != 0:
+    if isinstance(meta_value, int) and value % meta_value != 0:
         is_multiple_of = False
     if not is_multiple_of:
         raise ValidationError(
@@ -116,6 +117,8 @@ def list_max_items(meta_value, instance, attribute, value):
 
 def list_unique_items(meta_value, instance, attribute, value):
     if meta_value:
+        if isinstance(value, set):
+            value = list(value)
         for v in value:
             if value.count(v) > 1:
                 raise ValidationError(
@@ -141,6 +144,31 @@ def dict_max_properties(meta_value, instance, attribute, value):
         )
 
 
+FOR_TYPE = {
+    "string": {
+        "min_length": min_str_len,
+        "max_length": max_str_len,
+        "pattern": str_pattern,
+        # {"format": ...},  # TODO
+    },
+    "number": {
+        "minimum": min_num_value,
+        "maximum": max_num_value,
+        "multiple_of": num_multiple_of,
+    },
+    "list": {
+        "min_items": list_min_items,
+        "max_items": list_max_items,
+        "unique_items": list_unique_items,
+        # {"one_of": ...},  # TODO
+    },
+    "dict": {
+        "min_properties": dict_min_properties,
+        "max_properties": dict_max_properties,
+    },
+}
+
+
 def _append_to(arr, dct, key, fn):
     if key in dct and dct.get(key) is not None:
         arr.append(partial(fn, dct.get(key)))
@@ -152,14 +180,11 @@ def validators(type_, field):
     validators = []
     appender = partial(_append_to, validators, field.metadata)
     if type_ == str:
-        validators = appender("min_length", min_str_len)
-        validators = appender("max_length", max_str_len)
-        validators = appender("pattern", str_pattern)
-        # TODO implement format
+        for k, v in FOR_TYPE["string"].items():
+            validators = appender(k, v)
     elif type_ in (int, float):
-        validators = appender("minimum", min_num_value)
-        validators = appender("maximum", max_num_value)
-        validators = appender("multiple_of", num_multiple_of)
+        for k, v in FOR_TYPE["number"].items():
+            validators = appender(k, v)
     elif attr.has(type_):
         pass
 
@@ -182,20 +207,16 @@ if IS_PY37:
             "MutableSequence",
             "FrozenSet",
         ):
-            # TODO array (one_of, min_items, max_items, unique_items)
-            # validators = appender("one_of", )
-            validators = appender("min_items", list_min_items)
-            validators = appender("max_items", list_max_items)
-            validators = appender("unique_items", list_unique_items)
+            for k, v in FOR_TYPE["list"].items():
+                validators = appender(k, v)
         elif type_._name in ("Dict", "Mapping", "MutableMapping"):
-            # TODO object (min_properties, max_properties)
-            validators = appender("min_properties", dict_min_properties)
-            validators = appender("max_properties", dict_max_properties)
+            for k, v in FOR_TYPE["dict"].items():
+                validators = appender(k, v)
         else:
-            print("converters.py")
-            # from IPython import embed
+            print("validators.py")
+            from IPython import embed
 
-            # embed()
+            embed()
             raise TypeError("This type is not supported")  # TODO
 
 
@@ -215,19 +236,15 @@ else:
             MutableSequence,
             FrozenSet,
         ):
-            # TODO array (one_of, min_items, max_items, unique_items)
-            # validators = appender("one_of", )
-            validators = appender("min_items", list_min_items)
-            validators = appender("max_items", list_max_items)
-            validators = appender("unique_items", list_unique_items)
+            for k, v in FOR_TYPE["list"].items():
+                validators = appender(k, v)
         elif type_.__base__ in (Dict, Mapping, MutableMapping):
-            # TODO object (min_properties, max_properties)
-            validators = appender("min_properties", dict_min_properties)
-            validators = appender("max_properties", dict_max_properties)
+            for k, v in FOR_TYPE["dict"].items():
+                validators = appender(k, v)
         else:
-            print("converters.py")
-            # from IPython import embed
+            print("validators.py")
+            from IPython import embed
 
-            # embed()
+            embed()
             raise TypeError("This type is not supported")  # TODO
         return validators
