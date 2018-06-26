@@ -1,24 +1,7 @@
 import re
 from decimal import Decimal
-from functools import partial
-from functools import singledispatch
-from typing import Collection
-from typing import Dict
-from typing import FrozenSet
-from typing import Iterable
-from typing import List
-from typing import Mapping
-from typing import MutableMapping
-from typing import MutableSequence
-from typing import MutableSet
-from typing import Sequence
-from typing import Set
 
-import attr
-
-from .compat import IS_PY37
-from .compat import GenericType
-from .exceptions import ValidationError
+from ..exceptions import ValidationError
 
 
 def min_str_len(meta_value, instance, attribute, value):
@@ -167,84 +150,3 @@ FOR_TYPE = {
         "max_properties": dict_max_properties,
     },
 }
-
-
-def _append_to(arr, dct, key, fn):
-    if key in dct and dct.get(key) is not None:
-        arr.append(partial(fn, dct.get(key)))
-    return arr
-
-
-@singledispatch
-def validators(type_, field):
-    validators = []
-    appender = partial(_append_to, validators, field.metadata)
-    if type_ == str:
-        for k, v in FOR_TYPE["string"].items():
-            validators = appender(k, v)
-    elif type_ in (int, float):
-        for k, v in FOR_TYPE["number"].items():
-            validators = appender(k, v)
-    elif attr.has(type_):
-        pass
-
-    return validators
-
-
-if IS_PY37:
-
-    @validators.register(GenericType)
-    def _validate_generic_meta(type_, field):
-        validators = []
-        appender = partial(_append_to, validators, field.metadata)
-        if type_._name in (
-            "List",
-            "Set",
-            "MutableSet",
-            "Sequence",
-            "Collection",
-            "Iterable",
-            "MutableSequence",
-            "FrozenSet",
-        ):
-            for k, v in FOR_TYPE["list"].items():
-                validators = appender(k, v)
-        elif type_._name in ("Dict", "Mapping", "MutableMapping"):
-            for k, v in FOR_TYPE["dict"].items():
-                validators = appender(k, v)
-        else:
-            print("validators.py")
-            from IPython import embed
-
-            embed()
-            raise TypeError("This type is not supported")  # TODO
-
-
-else:
-
-    @validators.register(GenericType)
-    def _validate_generic_meta(type_, field):
-        validators = []
-        appender = partial(_append_to, validators, field.metadata)
-        if type_.__base__ in (
-            List,
-            Set,
-            MutableSet,
-            Sequence,
-            Collection,
-            Iterable,
-            MutableSequence,
-            FrozenSet,
-        ):
-            for k, v in FOR_TYPE["list"].items():
-                validators = appender(k, v)
-        elif type_.__base__ in (Dict, Mapping, MutableMapping):
-            for k, v in FOR_TYPE["dict"].items():
-                validators = appender(k, v)
-        else:
-            print("validators.py")
-            from IPython import embed
-
-            embed()
-            raise TypeError("This type is not supported")  # TODO
-        return validators

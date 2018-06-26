@@ -13,10 +13,10 @@ from typing import Set
 
 try:
     import timy
+    import middle
     from marshmallow import fields
     from marshmallow import Schema
     from marshmallow.schema import MarshalResult
-    from middle import schema
 except ImportError:
     print(
         "To run this script, you must install these dependencies:",
@@ -66,40 +66,40 @@ class CityRegionEnum(str, Enum):
 
 
 # --------------------------------------------------------------- #
-# Caja model definition
+# middle model definition
 # --------------------------------------------------------------- #
 
 
-class MiddleCity(schema.Model):
-    name = schema.field(type=str, description="The city name")
-    region = schema.field(
+class MiddleCity(middle.Model):
+    name = middle.field(type=str, description="The city name")
+    region = middle.field(
         type=CityRegionEnum, description="The region this city is located"
     )
 
 
-class MiddleGame(schema.Model):
-    name: str = schema.field(description="The name of the game")
-    platform: PlatformEnum = schema.field(
+class MiddleGame(middle.Model):
+    name: str = middle.field(description="The name of the game")
+    platform: PlatformEnum = middle.field(
         description="Which platform it runs on"
     )
-    score: float = schema.field(description="The average score of the game")
-    resolution_tested: str = schema.field(
+    score: float = middle.field(description="The average score of the game")
+    resolution_tested: str = middle.field(
         description="The resolution which the game was tested",
         pattern="^\d+x\d+$",
     )
-    genre: List[str] = schema.field(
+    genre: List[str] = middle.field(
         description="One or more genres this game is part of"
     )
-    rating: Dict[str, float] = schema.field(
+    rating: Dict[str, float] = middle.field(
         description="Ratings given on specialized websites"
     )
-    players: Set[str] = schema.field(
+    players: Set[str] = middle.field(
         description="Some of the notorious players of this game"
     )
-    language: LanguageEnum = schema.field(
+    language: LanguageEnum = middle.field(
         description="The main language of the game"
     )
-    awesome_city: MiddleCity = schema.field(
+    awesome_city: MiddleCity = middle.field(
         description="One awesome city built"
     )
 

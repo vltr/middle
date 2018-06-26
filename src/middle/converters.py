@@ -1,9 +1,9 @@
+import re
 from datetime import date
 from datetime import datetime
 from enum import EnumMeta
 from functools import partial
 from functools import singledispatch
-# from typing import Any
 from typing import Collection
 from typing import Dict
 from typing import FrozenSet
@@ -15,15 +15,19 @@ from typing import MutableSequence
 from typing import MutableSet
 from typing import Sequence
 from typing import Set
-from typing import Union
+from typing import _Union
 
 import attr
 
 from .compat import IS_PY37
 from .compat import GenericType
+from .config import config
 from .dtutils import convert_to_utc
 from .dtutils import dt_from_iso_string
 from .dtutils import dt_from_timestamp
+from .exceptions import InvalidType
+
+_num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
 
 def model_converter(model_cls, value):
@@ -39,6 +43,33 @@ def _iterable_converter(value_converter, is_set, value):
 
 def _dict_converter(key_converter, value_converter, value):
     return {key_converter(k): value_converter(v) for k, v in value.items()}
+
+
+def _str_converter(value):
+    if isinstance(value, str):
+        return value
+    elif isinstance(value, bytes):
+        return value.decode("utf-8")
+    elif config.str_method and hasattr(value, "__str__"):
+        return str(value)
+    elif config.force_str:
+        return str(value)
+    raise TypeError(
+        'the value "{!s}" given should not be converted to str'.format(value)
+    )
+
+
+def _number_converter(type_, value):
+    if isinstance(value, type_):
+        return value
+    if isinstance(value, str):
+        if _num_re.match(value) is not None:
+            return type_(value)
+    raise TypeError(
+        'the value "{!s}" given should not be converted to {}'.format(
+            value, type_.__name__
+        )
+    )
 
 
 def _date_converter(value):
@@ -81,13 +112,49 @@ def _bool_converter(value):
     )
 
 
+def _multiple_types_converter(converters, value):
+    raised_exc = []
+    converted_values = []
+    # a rough "type-affinity" conversor
+    for c in converters:
+        try:
+            converted_values.append(c(value))
+        except TypeError:
+            continue
+        except Exception as e:
+            raised_exc.append(e)
+
+    if raised_exc:
+        pass  # TODO do something (?)
+
+    if converted_values:
+        if value in converted_values:  # there is a primitive in there
+            return value
+        else:
+            value_type = type(value)
+            for cv in converted_values:
+                if value_type == type(cv):  # it is the same type (at least)
+                    return cv
+
+    return value
+
+
+def _none_or_converter(converter, value):
+    if value is None:
+        return None
+    return converter(value)
+
+
 FOR_TYPE = {
     bool: _bool_converter,
     date: _date_converter,
     datetime: _datetime_converter,
-    int: int,
-    float: float,
-    str: str,
+    int: partial(_number_converter, int),
+    float: partial(_number_converter, float),
+    str: _str_converter,
+    bytes: _str_converter,
+    "MULTIPLE": _multiple_types_converter,
+    "NONE_OPT": _none_or_converter,
 }
 
 
@@ -100,6 +167,7 @@ def converter(type_):
     else:
         print("singledispatch.converter on converters.py")
         from IPython import embed
+
         embed()
         raise TypeError("SEE ME!")  # TODO
 
@@ -109,14 +177,29 @@ def _converter_enum(type_):
     return type_
 
 
-@converter.register(Union)
+@converter.register(_Union)
 def _converter_union(type_):
-    if type(None) in type_.__args__:
-        # there is a None, make it optional ?
-        pass
-    from IPython import embed
-    embed()
-    return None
+    if type_.__args__ is None:
+        raise InvalidType(
+            "Union must be set with at least two parameters, e.g. Union[int, str]"
+        )
+    ntype = type(None)
+    converter_fns = []
+    for arg in type_.__args__:
+        if arg == ntype:
+            continue
+        converter_fns.append(converter(arg))
+
+    if len(converter_fns) == 1:  # only possible is NoneType present
+        assert ntype in type_.__args__  # to make sure
+        return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
+    else:
+        if ntype in type_.__args__:
+            return partial(
+                FOR_TYPE["NONE_OPT"],
+                partial(FOR_TYPE["MULTIPLE"], converter_fns),
+            )
+        return partial(FOR_TYPE["MULTIPLE"], converter_fns)
 
 
 if IS_PY37:
@@ -184,10 +267,10 @@ else:
         else:
             print("converters.py")
             from IPython import embed
+
             embed()
             raise TypeError("This type is not supported")  # TODO
 
 
-# Optional, Union <<<
 # Tuple ?
 # Decimal ?

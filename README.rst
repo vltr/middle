@@ -1,3 +1,12 @@
+.. code-block:: text
+
+              __    __      __
+    .--------|__.--|  .  __|  .-----.
+    |        |  |  _  |-|  |  |  -__|
+    |__|__|__|__|_____| _  |__|_____|
+                     |_____|
+
+
 ==========
 ``middle``
 ==========
@@ -22,19 +31,23 @@
 
 .. image:: https://img.shields.io/pypi/v/middle.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.python.org/pypi/middle
+    :target: https://pypi.org/project/middle/
 
 .. image:: https://img.shields.io/pypi/wheel/middle.svg
     :alt: PyPI Wheel
-    :target: https://pypi.python.org/pypi/middle
+    :target: https://pypi.org/project/middle/
 
 .. image:: https://img.shields.io/pypi/pyversions/middle.svg
     :alt: Supported versions
-    :target: https://pypi.python.org/pypi/middle
+    :target: https://pypi.org/project/middle/
 
 .. image:: https://img.shields.io/pypi/implementation/middle.svg
     :alt: Supported implementations
-    :target: https://pypi.python.org/pypi/middle
+    :target: https://pypi.org/project/middle/
+
+.. image:: https://img.shields.io/pypi/status/middle.svg
+    :alt: PyPI - Status
+    :target: https://pypi.org/project/middle/
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :alt: Code style: black
@@ -53,10 +66,10 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 
     >>> class Game(middle.Model):
     ...     name: str = middle.field()
-    ...     score: float = middle.field()
+    ...     score: float = middle.field(minimum=0, maximum=10)
     ...     resolution_tested: str = middle.field(pattern="^\d+x\d+$")
-    ...     genre: List[str] = middle.field()
-    ...     rating: Dict[str, float] = middle.field()
+    ...     genre: List[str] = middle.field(unique_items=True)
+    ...     rating: Dict[str, float] = middle.field(max_properties=5)
 
     >>> data = {
     ...     "name": "Cities: Skylines",
@@ -92,17 +105,23 @@ TODO
 - Alias options to populate classes;
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
-- If possible, fine grain the converters, so a ``str`` input value of ``{}`` doesn't end up as ``str({})``;
-- Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Lots of documentation;
 - More benchmarks;
-- Support more types (provided in the Python standard library), if possible;
+- Some formatters;
+- Support more types (``typing.Union``, ``decimal.Decimal``), if possible (?);
+
+Done
+----
+
+- If possible, fine grain the converters, so a ``str`` input value of ``{}`` doesn't end up as ``str({})``;
+- Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Implement more validators and a registerable for more metadata options;
+
 
 Documentation
 =============
 
-https://middle.readthedocs.io/
+https://middle.readthedocs.io/en/latest/
 
 Inspiration and Thanks
 ======================
@@ -110,7 +129,7 @@ Inspiration and Thanks
 I really got inspired to create this library by observing a lot of other libraries and tools, specially:
 
 - `attrs <http://www.attrs.org/en/stable/>`_: how such a simple library can be such flexible, extendable and fast?
-- `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dict``s and to instances again;
+- `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dict`` and to instances again;
 - `pydantic <https://pydantic-docs.helpmanual.io/>`_: for such pythonic and beautiful approach on creating classes using ``typing`` hints;
 - `mashmallow <https://marshmallow.readthedocs.io/en/latest/>`_: it is one of the most feature rich modelling APIs I've seen;
 - `apistar <https://docs.apistar.com/>`_: it's almost magical!

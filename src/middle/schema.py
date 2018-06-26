@@ -7,7 +7,7 @@ from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_options
-from .validators import validators
+from .validators import apply_validators
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
 _attr_s_kwargs = {"cmp": False}
@@ -120,10 +120,11 @@ def _implement_converters(field, key, annotations):
 # Validators
 # --------------------------------------------------------------- #
 
+
 def _implement_validators(field, key, annotations):
     if hasattr(field, "type") and field.type:
-        for v in validators(field.type, field):
+        for v in apply_validators(field.type, field):
             field.validator(v)
     elif key in annotations:
-        for v in validators(annotations.get(key), field):
+        for v in apply_validators(annotations.get(key), field):
             field.validator(v)

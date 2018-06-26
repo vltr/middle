@@ -13,8 +13,10 @@ from typing import Mapping
 from typing import MutableMapping
 from typing import MutableSequence
 from typing import MutableSet
+from typing import Optional
 from typing import Sequence
 from typing import Set
+from typing import Union
 
 import pytest
 
@@ -47,6 +49,13 @@ def test_str_converter():
     assert isinstance(inst, TestModel)
     assert inst.name == "1"
 
+    with middle.config.temp(str_method=False):
+        with pytest.raises(TypeError):
+            TestModel(name=1)
+
+    with middle.config.temp(str_method=False, force_str=True):
+        TestModel(name=1).name == "1"
+
 
 # #############################################################################
 # int
@@ -54,26 +63,31 @@ def test_str_converter():
 
 def test_int_working():
     class TestModel(middle.Model):
-        age: int = middle.field()
+        const: int = middle.field()
 
-    inst = TestModel(age=42)
+    inst = TestModel(const=42)
 
     assert isinstance(inst, TestModel)
-    assert inst.age == 42
+    assert inst.const == 42
 
     data = middle.asdict(inst)
 
     assert isinstance(data, dict)
-    assert data.get("age", None) == 42
+    assert data.get("const", None) == 42
 
 
 def test_int_converter():
     class TestModel(middle.Model):
-        age: int = middle.field()
+        const: int = middle.field()
 
-    inst = TestModel(age="42")
+    inst = TestModel(const="42")
     assert isinstance(inst, TestModel)
-    assert inst.age == 42
+    assert inst.const == 42
+
+    with middle.config.temp():
+        pass
+
+    assert TestModel(const="-42").const == -42
 
 
 # #############################################################################
@@ -103,6 +117,12 @@ def test_float_converter():
     assert isinstance(inst, TestModel)
     assert inst.const == 3.14
 
+    assert TestModel(const="-3.14").const == -3.14
+    assert TestModel(const="+3.14").const == 3.14
+    assert TestModel(const=".14").const == 0.14
+    assert TestModel(const="1.").const == 1.0
+    assert TestModel(const="-.3").const == -0.3
+
 
 # #############################################################################
 # bool
@@ -131,8 +151,11 @@ def test_bool_converter():
     assert TestModel(broken="True").broken is True
     assert TestModel(broken="true").broken is True
     assert TestModel(broken="yes").broken is True
+    assert TestModel(broken="on").broken is True
+    assert TestModel(broken="On").broken is True
     assert TestModel(broken="TRUE").broken is True
     assert TestModel(broken="YES").broken is True
+    assert TestModel(broken="ON").broken is True
     assert TestModel(broken=1).broken is True
     assert TestModel(broken=10).broken is True
     assert TestModel(broken=1.5).broken is True
@@ -143,6 +166,9 @@ def test_bool_converter():
     assert TestModel(broken="BAR").broken is False
     assert TestModel(broken="False").broken is False
     assert TestModel(broken="NO").broken is False
+    assert TestModel(broken="off").broken is False
+    assert TestModel(broken="Off").broken is False
+    assert TestModel(broken="OFF").broken is False
     assert TestModel(broken=0).broken is False
     assert TestModel(broken=-1).broken is False
     assert TestModel(broken=-1.5).broken is False
@@ -403,7 +429,7 @@ def test_model_converter():
     with pytest.raises(TypeError):
         PersonModel(name="foo", age=1, children=[{}])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         PersonModel(name="foo", age="!", children=[])
 
 
@@ -453,6 +479,13 @@ def test_list_converter(list_type):
 
     class TestModel(middle.Model):
         names: list_type[str] = middle.field()
+
+    with middle.config.temp(str_method=False):
+        with pytest.raises(TypeError):
+            TestModel(names=[1, SomeJunk()])
+
+    with middle.config.temp(str_method=False, force_str=True):
+        assert TestModel(names=[1, SomeJunk()]) is not None
 
     inst = TestModel(names=[1, SomeJunk()])
     assert isinstance(inst, TestModel)
@@ -565,3 +598,55 @@ def test_dict_converter(dict_type):
     inst = TestModel(ratings={SomeJunk(): 5.0})
     assert isinstance(inst, TestModel)
     assert inst.ratings == {"hello": 5.0}
+
+
+# #############################################################################
+# Optional
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        pytest.param("foo", "foo", id="value_str"),
+        pytest.param(None, None, id="value_none"),
+        pytest.param(1, "1", id="value_str_from_int"),
+    ],
+)
+def test_optional_working(value, expected):
+    class TestModel(middle.Model):
+        name: Optional[str] = middle.field()
+
+    inst = TestModel(name=value)
+    assert isinstance(inst, TestModel)
+    assert inst.name == expected
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("name", None) == expected
+
+
+# #############################################################################
+# Union
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        pytest.param("foo", "foo", id="value_str"),
+        pytest.param(3.14, 3.14, id="value_float"),
+        pytest.param(-1, -1, id="value_int"),
+    ],
+)
+def test_union_working(value, expected):
+    class TestModel(middle.Model):
+        value: Union[str, int, float] = middle.field()
+
+    inst = TestModel(value=value)
+    assert isinstance(inst, TestModel)
+    assert inst.value == expected
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", None) == expected
