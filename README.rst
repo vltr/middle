@@ -46,7 +46,7 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 
 ``middle`` stands on the shoulders of ``attrs`` and aims to be as simple as possible to get data from complex objects to Python primitives and vice-versa, with validators, converters and a lot of sugar! ``middle`` can be used with your preferred web framework, background job application, configuration parsing and many others!
 
-.. code-block::pycon
+.. code-block:: pycon
 
     >>> from typing import Dict, List
     >>> import middle
