@@ -170,10 +170,9 @@ def converter(type_):
     elif attr.has(type_):
         return partial(model_converter, type_)
     else:
-        print("singledispatch.converter on converters.py")
-        from IPython import embed
-
-        embed()
+        # print("singledispatch.converter on converters.py")
+        # from IPython import embed
+        # embed()
         raise TypeError("SEE ME!")  # TODO
 
 
@@ -232,10 +231,9 @@ if IS_PY37:
                     )
                 return partial(FOR_TYPE["MULTIPLE"], converter_fns)
         else:
-            print("converters.py")
-            from IPython import embed
-
-            embed()
+            # print("converters.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")  # TODO
 
 
@@ -267,10 +265,9 @@ else:
                     converter(type_.__args__[1]),
                 )
         else:
-            print("converters.py")
-            from IPython import embed
-
-            embed()
+            # print("converters.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")  # TODO
 
     @converter.register(_Union)

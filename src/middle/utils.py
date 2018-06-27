@@ -105,10 +105,9 @@ if IS_PY37:
         elif hasattr(type_, "__origin__") and type_.__origin__ == Union:
             return raw_primitive
         else:
-            print("utils.py")
-            from IPython import embed
-
-            embed()
+            # print("utils.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")
 
 
@@ -131,8 +130,7 @@ else:
         elif type_.__base__ in (Dict, Mapping, MutableMapping):
             return _raw_dict
         else:
-            print("utils.py")
-            from IPython import embed
-
-            embed()
+            # print("utils.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")

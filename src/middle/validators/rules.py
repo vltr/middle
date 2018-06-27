@@ -49,11 +49,10 @@ def apply_validators(type_, field):
         validators.append(attr.validators.instance_of(type_))
     elif attr.has(type_):
         validators.append(attr.validators.instance_of(type_))
-    else:
-        print(">> apply_validators @ rules.py")
-        from IPython import embed
-
-        embed()
+    # else:
+    #     print(">> apply_validators @ rules.py")
+    #     from IPython import embed
+    #     embed()
 
     return validators
 
@@ -111,10 +110,9 @@ if IS_PY37:
                 return [attr.validators.instance_of(tuple(validator_types))]
             return []
         else:
-            print("validators.py")
-            from IPython import embed
-
-            embed()
+            # print("validators.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")  # TODO
         return validators
 
@@ -143,10 +141,9 @@ else:
                 validators = appender(k, v)
             validators.append(attr.validators.instance_of(dict))
         else:
-            print("validators.py")
-            from IPython import embed
-
-            embed()
+            # print("validators.py")
+            # from IPython import embed
+            # embed()
             raise TypeError("This type is not supported")  # TODO
         return validators
 
