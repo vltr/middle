@@ -15,7 +15,6 @@ from typing import MutableSequence
 from typing import MutableSet
 from typing import Sequence
 from typing import Set
-from typing import _Union
 
 import attr
 
@@ -26,6 +25,12 @@ from .dtutils import convert_to_utc
 from .dtutils import dt_from_iso_string
 from .dtutils import dt_from_timestamp
 from .exceptions import InvalidType
+
+if IS_PY37:
+    from typing import Union
+else:
+    from typing import _Union
+
 
 _num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
@@ -177,31 +182,6 @@ def _converter_enum(type_):
     return type_
 
 
-@converter.register(_Union)
-def _converter_union(type_):
-    if type_.__args__ is None:
-        raise InvalidType(
-            "Union must be set with at least two parameters, e.g. Union[int, str]"
-        )
-    ntype = type(None)
-    converter_fns = []
-    for arg in type_.__args__:
-        if arg == ntype:
-            continue
-        converter_fns.append(converter(arg))
-
-    if len(converter_fns) == 1:  # only possible is NoneType present
-        assert ntype in type_.__args__  # to make sure
-        return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
-    else:
-        if ntype in type_.__args__:
-            return partial(
-                FOR_TYPE["NONE_OPT"],
-                partial(FOR_TYPE["MULTIPLE"], converter_fns),
-            )
-        return partial(FOR_TYPE["MULTIPLE"], converter_fns)
-
-
 if IS_PY37:
 
     @converter.register(GenericType)
@@ -229,11 +209,33 @@ if IS_PY37:
                     converter(type_.__args__[0]),
                     converter(type_.__args__[1]),
                 )
+        elif hasattr(type_, "__origin__") and type_.__origin__ == Union:
+            if type_.__args__ is None:
+                raise InvalidType(
+                    "Union must be set with at least two parameters, e.g. Union[int, str]"
+                )
+            ntype = type(None)
+            converter_fns = []
+            for arg in type_.__args__:
+                if arg == ntype:
+                    continue
+                converter_fns.append(converter(arg))
+
+            if len(converter_fns) == 1:  # only possible is NoneType present
+                assert ntype in type_.__args__  # to make sure
+                return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
+            else:
+                if ntype in type_.__args__:
+                    return partial(
+                        FOR_TYPE["NONE_OPT"],
+                        partial(FOR_TYPE["MULTIPLE"], converter_fns),
+                    )
+                return partial(FOR_TYPE["MULTIPLE"], converter_fns)
         else:
             print("converters.py")
-            # from IPython import embed
+            from IPython import embed
 
-            # embed()
+            embed()
             raise TypeError("This type is not supported")  # TODO
 
 
@@ -270,6 +272,30 @@ else:
 
             embed()
             raise TypeError("This type is not supported")  # TODO
+
+    @converter.register(_Union)
+    def _converter_union(type_):
+        if type_.__args__ is None:
+            raise InvalidType(
+                "Union must be set with at least two parameters, e.g. Union[int, str]"
+            )
+        ntype = type(None)
+        converter_fns = []
+        for arg in type_.__args__:
+            if arg == ntype:
+                continue
+            converter_fns.append(converter(arg))
+
+        if len(converter_fns) == 1:  # only possible is NoneType present
+            assert ntype in type_.__args__  # to make sure
+            return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
+        else:
+            if ntype in type_.__args__:
+                return partial(
+                    FOR_TYPE["NONE_OPT"],
+                    partial(FOR_TYPE["MULTIPLE"], converter_fns),
+                )
+            return partial(FOR_TYPE["MULTIPLE"], converter_fns)
 
 
 # Tuple ?

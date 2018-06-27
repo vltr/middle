@@ -22,6 +22,9 @@ from .compat import GenericType
 from .dtutils import dt_to_iso_string
 from .schema import ModelMeta
 
+if IS_PY37:
+    from typing import Union
+
 
 def asdict(inst):
     return {
@@ -99,8 +102,13 @@ if IS_PY37:
         #     return _raw_tuple
         elif type_._name in ("Dict", "Mapping", "MutableMapping"):
             return _raw_dict
+        elif hasattr(type_, "__origin__") and type_.__origin__ == Union:
+            return raw_primitive
         else:
             print("utils.py")
+            from IPython import embed
+
+            embed()
             raise TypeError("This type is not supported")
 
 

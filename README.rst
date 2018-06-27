@@ -1,12 +1,3 @@
-.. code-block:: text
-
-              __    __      __
-    .--------|__.--|  .  __|  .-----.
-    |        |  |  _  |-|  |  |  -__|
-    |__|__|__|__|_____| _  |__|_____|
-                     |_____|
-
-
 ==========
 ``middle``
 ==========
@@ -108,7 +99,8 @@ TODO
 - Lots of documentation;
 - More benchmarks;
 - Some formatters;
-- Support more types (``typing.Union``, ``decimal.Decimal``), if possible (?);
+- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (?);
+- Create a better "type dispatcher" based on more complex rules (other than ``type(field.type)``) because the ``typing`` module has changed a bit between Python 3.6 and 3.7;
 
 Done
 ----

@@ -14,13 +14,17 @@ from typing import MutableSequence
 from typing import MutableSet
 from typing import Sequence
 from typing import Set
-from typing import _Union
 
 import attr
 
 from ..compat import IS_PY37
 from ..compat import GenericType
 from .common import FOR_TYPE
+
+if IS_PY37:
+    from typing import Union
+else:
+    from typing import _Union
 
 
 def _append_to(arr, dct, key, fn):
@@ -45,6 +49,11 @@ def apply_validators(type_, field):
         validators.append(attr.validators.instance_of(type_))
     elif attr.has(type_):
         validators.append(attr.validators.instance_of(type_))
+    else:
+        print(">> apply_validators @ rules.py")
+        from IPython import embed
+
+        embed()
 
     return validators
 
@@ -52,24 +61,6 @@ def apply_validators(type_, field):
 @apply_validators.register(EnumMeta)
 def _validate_enum(type_, field):
     return [attr.validators.instance_of(type_)]
-
-
-@apply_validators.register(_Union)
-def _validate_union(type_, field):
-    ntype = type(None)
-    validator_types = []
-    for arg in type_.__args__:
-        if arg == ntype:
-            validator_types.append(ntype)
-        else:
-            if arg in (str, int, float, bool, date, datetime, list, dict):
-                validator_types.append(arg)
-            elif attr.has(arg):
-                validator_types.append(arg)
-
-    if validator_types:
-        return [attr.validators.instance_of(tuple(validator_types))]
-    return []
 
 
 if IS_PY37:
@@ -95,12 +86,37 @@ if IS_PY37:
             for k, v in FOR_TYPE["dict"].items():
                 validators = appender(k, v)
             validators.append(attr.validators.instance_of(dict))
+        elif hasattr(type_, "__origin__") and type_.__origin__ == Union:
+            ntype = type(None)
+            validator_types = []
+            for arg in type_.__args__:
+                if arg == ntype:
+                    validator_types.append(ntype)
+                else:
+                    if arg in (
+                        str,
+                        int,
+                        float,
+                        bool,
+                        date,
+                        datetime,
+                        list,
+                        dict,
+                    ):
+                        validator_types.append(arg)
+                    elif attr.has(arg):
+                        validator_types.append(arg)
+
+            if validator_types:
+                return [attr.validators.instance_of(tuple(validator_types))]
+            return []
         else:
             print("validators.py")
             from IPython import embed
 
             embed()
             raise TypeError("This type is not supported")  # TODO
+        return validators
 
 
 else:
@@ -133,3 +149,20 @@ else:
             embed()
             raise TypeError("This type is not supported")  # TODO
         return validators
+
+    @apply_validators.register(_Union)
+    def _validate_union(type_, field):
+        ntype = type(None)
+        validator_types = []
+        for arg in type_.__args__:
+            if arg == ntype:
+                validator_types.append(ntype)
+            else:
+                if arg in (str, int, float, bool, date, datetime, list, dict):
+                    validator_types.append(arg)
+                elif attr.has(arg):
+                    validator_types.append(arg)
+
+        if validator_types:
+            return [attr.validators.instance_of(tuple(validator_types))]
+        return []
