@@ -113,6 +113,7 @@ def _translate_to_attrib(key, data, annotations, cls_name):
 def _value_of_model(type_):
     return asdict
 
+
 # --------------------------------------------------------------- #
 # Converters
 # --------------------------------------------------------------- #

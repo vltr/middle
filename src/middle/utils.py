@@ -47,8 +47,7 @@ def _raw_tuple(value):
 
 def _raw_dict(value):
     return {
-        value_of(type(k))(k): value_of(type(v))(v)
-        for k, v in value.items()
+        value_of(type(k))(k): value_of(type(v))(v) for k, v in value.items()
     }
 
 
