@@ -1,5 +1,5 @@
 exclude-paths:
-    - ci/**
-    - docs/**
-    - tests/**
-    - .vscode/**
+    - 'ci/**'
+    - 'docs/**'
+    - 'tests/**'
+    - '.vscode/**'
