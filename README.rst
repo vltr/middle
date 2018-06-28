@@ -4,6 +4,8 @@
 
 .. start-badges
 
+A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid of a lot of them in the near future.
+
 .. image:: https://readthedocs.org/projects/middle/badge/?style=flat
     :target: https://readthedocs.org/projects/middle
     :alt: Documentation Status
@@ -97,10 +99,10 @@ TODO
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
 - Lots of documentation;
-- More benchmarks;
-- Some formatters;
-- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (?);
-- Create a better "type dispatcher" based on more complex rules (other than ``type(field.type)``) because the ``typing`` module has changed a bit between Python 3.6 and 3.7;
+- Create a benchmark suite against other solutions;
+- Some formatters are still missing;
+- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (see below);
+- Implement a better "type dispatcher" based on more complex rules (other than ``type(field.type)`` delivered by ``functools.singledispatch``) because the ``typing`` module has changed **a bit** between Python 3.6 and 3.7;
 
 Done
 ----
@@ -109,6 +111,10 @@ Done
 - Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Implement more validators and a registerable for more metadata options;
 
+Future discussions
+------------------
+
+- In Python 3.7, a neat feature was added: ``dataclasses``. I know it sounds really awesome to not depend on a 3rd-party library - such as ``attrs``, but the latest provides a lot of functionalities that can't be found on Python 3.7 ``dataclasses`` (for now), so I'll leave this open for further discussion.
 
 Documentation
 =============
@@ -126,6 +132,7 @@ I really got inspired to create this library by observing a lot of other librari
 - `mashmallow <https://marshmallow.readthedocs.io/en/latest/>`_: it is one of the most feature rich modelling APIs I've seen;
 - `apistar <https://docs.apistar.com/>`_: it's almost magical!
 - `Sanic <http://sanic.readthedocs.io/en/latest/>`_: "*Gotta go fast!*"
+- `ionelmc/cookiecutter-pylibrary <https://github.com/ionelmc/cookiecutter-pylibrary>`_: The most complete (or interesting) ``cookiecutter`` template I found so far (make sure to `read this <https://blog.ionelmc.ro/2014/05/25/python-packaging/>`_ article too);
 
 License
 =======

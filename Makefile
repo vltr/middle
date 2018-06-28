@@ -7,6 +7,7 @@ BUILDDIR      = docs/build
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo "clean - let this project be near mint"
 	@echo "test - run tests with coverage"
 	@echo "release - package and upload a release"
 
@@ -26,8 +27,12 @@ cleanpycache:
 	find . -type d | grep "__pycache__" | xargs rm -rf
 
 clean: cleanpycache
-	rm -rf ./dist
+	rm -rf ./.coverage
+	rm -rf ./.pytest_cache
+	rm -rf ./.tox
 	rm -rf ./build
+	rm -rf ./dist
+	rm -rf ./htmlcov
 	rm -rf ./src/*.egg-info
 
 requirements-dev:
@@ -36,7 +41,7 @@ requirements-dev:
 	pip-compile
 	pip-sync requirements-dev.txt requirements.txt
 
-release: clean
+release:
 	tox -e check
 	python setup.py clean --all sdist bdist_wheel
 	twine register dist/*
