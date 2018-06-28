@@ -1,4 +1,5 @@
-exclude-paths:
-  - 'ci/*.py'
-  - 'docs/conf.py'
-  - 'tests/*.py'
+exclude_paths:
+  - 'ci/**'
+  - 'docs/**'
+  - 'tests/**'
+  - '.vscode/**'
