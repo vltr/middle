@@ -154,17 +154,17 @@ def _converter_number(type_):
 
 
 @converter.register(bool)
-def _converter_bool(type):
+def _converter_bool(type_):
     return _bool_converter
 
 
 @converter.register(datetime.date)
-def _converter_date(type):
+def _converter_date(type_):
     return _date_converter
 
 
 @converter.register(datetime.datetime)
-def _converter_datetime(type):
+def _converter_datetime(type_):
     return _datetime_converter
 
 
