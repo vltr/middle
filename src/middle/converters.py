@@ -1,36 +1,18 @@
+import datetime
 import re
-from datetime import date
-from datetime import datetime
+import typing
+from decimal import Decimal
 from enum import EnumMeta
 from functools import partial
-from functools import singledispatch
-from typing import Collection
-from typing import Dict
-from typing import FrozenSet
-from typing import Iterable
-from typing import List
-from typing import Mapping
-from typing import MutableMapping
-from typing import MutableSequence
-from typing import MutableSet
-from typing import Sequence
-from typing import Set
 
 import attr
 
-from .compat import IS_PY37
-from .compat import GenericType
 from .config import config
+from .dispatch import type_dispatch
 from .dtutils import convert_to_utc
 from .dtutils import dt_from_iso_string
 from .dtutils import dt_from_timestamp
 from .exceptions import InvalidType
-
-if IS_PY37:
-    from typing import Union
-else:
-    from typing import _Union
-
 
 _num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
@@ -78,26 +60,26 @@ def _number_converter(type_, value):
 
 
 def _date_converter(value):
-    if isinstance(value, date):
+    if isinstance(value, datetime.date):
         return value
     elif isinstance(value, str):
         return dt_from_iso_string(value).date()
     elif isinstance(value, (tuple, list)) and len(value) > 2:
-        return date(*value[:3])
+        return datetime.date(*value[:3])
     elif isinstance(value, (int, float)):
-        return date.fromtimestamp(value)
+        return datetime.date.fromtimestamp(value)
     raise TypeError(
         'the value "{}" given can\'t be converted to date'.format(value)
     )
 
 
 def _datetime_converter(value):
-    if isinstance(value, datetime):
+    if isinstance(value, datetime.datetime):
         return value
     elif isinstance(value, str):
         return dt_from_iso_string(value)
     elif isinstance(value, (tuple, list)) and len(value) > 2:
-        return convert_to_utc(datetime(*value))
+        return convert_to_utc(datetime.datetime(*value))
     elif isinstance(value, (int, float)):
         return dt_from_timestamp(value)
     raise TypeError(
@@ -150,30 +132,40 @@ def _none_or_converter(converter, value):
     return converter(value)
 
 
-FOR_TYPE = {
-    bool: _bool_converter,
-    date: _date_converter,
-    datetime: _datetime_converter,
-    int: partial(_number_converter, int),
-    float: partial(_number_converter, float),
-    str: _str_converter,
-    bytes: _str_converter,
-    "MULTIPLE": _multiple_types_converter,
-    "NONE_OPT": _none_or_converter,
-}
-
-
-@singledispatch
+@type_dispatch
 def converter(type_):
-    if type_ in FOR_TYPE:
-        return FOR_TYPE[type_]
-    elif attr.has(type_):
+    if attr.has(type_):
         return partial(model_converter, type_)
     else:
-        # print("singledispatch.converter on converters.py")
-        # from IPython import embed
-        # embed()
-        raise TypeError("SEE ME!")  # TODO
+        raise InvalidType()
+
+
+@converter.register(str)
+@converter.register(bytes)
+def _converter_str(type_):
+    return _str_converter
+
+
+@converter.register(int)
+@converter.register(float)
+@converter.register(Decimal)
+def _converter_number(type_):
+    return partial(_number_converter, type_)
+
+
+@converter.register(bool)
+def _converter_bool(type):
+    return _bool_converter
+
+
+@converter.register(datetime.date)
+def _converter_date(type):
+    return _date_converter
+
+
+@converter.register(datetime.datetime)
+def _converter_datetime(type):
+    return _datetime_converter
 
 
 @converter.register(EnumMeta)
@@ -181,119 +173,63 @@ def _converter_enum(type_):
     return type_
 
 
-if IS_PY37:
-
-    @converter.register(GenericType)
-    def _converter_generic_meta(type_):
-        if type_._name in (
-            "List",
-            "Set",
-            "MutableSet",
-            "Sequence",
-            "Collection",
-            "Iterable",
-            "MutableSequence",
-            "FrozenSet",
-        ):
-            if type_.__args__:
-                return partial(
-                    _iterable_converter,
-                    converter(type_.__args__[0]),
-                    type_._name in ("Set", "MutableSet", "FrozenSet"),
-                )
-        elif type_._name in ("Dict", "Mapping", "MutableMapping"):
-            if type_.__args__:
-                return partial(
-                    _dict_converter,
-                    converter(type_.__args__[0]),
-                    converter(type_.__args__[1]),
-                )
-        elif hasattr(type_, "__origin__") and type_.__origin__ == Union:
-            if type_.__args__ is None:
-                raise InvalidType(
-                    "Union must be set with at least two parameters, e.g. Union[int, str]"
-                )
-            ntype = type(None)
-            converter_fns = []
-            for arg in type_.__args__:
-                if arg == ntype:
-                    continue
-                converter_fns.append(converter(arg))
-
-            if len(converter_fns) == 1:  # only possible is NoneType present
-                assert ntype in type_.__args__  # to make sure
-                return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
-            else:
-                if ntype in type_.__args__:
-                    return partial(
-                        FOR_TYPE["NONE_OPT"],
-                        partial(FOR_TYPE["MULTIPLE"], converter_fns),
-                    )
-                return partial(FOR_TYPE["MULTIPLE"], converter_fns)
-        else:
-            # print("converters.py")
-            # from IPython import embed
-            # embed()
-            raise TypeError("This type is not supported")  # TODO
+@converter.register(typing.List)
+@converter.register(typing.Sequence)
+@converter.register(typing.Collection)
+@converter.register(typing.Iterable)
+@converter.register(typing.MutableSequence)
+def _converter_iterable_list(type_):
+    if type_.__args__:
+        return partial(
+            _iterable_converter, converter(type_.__args__[0]), False
+        )
 
 
-else:
+@converter.register(typing.Set)
+@converter.register(typing.MutableSet)
+@converter.register(typing.FrozenSet)
+def _converter_iterable_set(type_):
+    if type_.__args__:
+        return partial(_iterable_converter, converter(type_.__args__[0]), True)
 
-    @converter.register(GenericType)
-    def _converter_generic_meta(type_):
-        if type_.__base__ in (
-            List,
-            Set,
-            MutableSet,
-            Sequence,
-            Collection,
-            Iterable,
-            MutableSequence,
-            FrozenSet,
-        ):
-            if type_.__args__:
-                return partial(
-                    _iterable_converter,
-                    converter(type_.__args__[0]),
-                    type_.__base__ in (Set, MutableSet, FrozenSet),
-                )
-        elif type_.__base__ in (Dict, Mapping, MutableMapping):
-            if type_.__args__:
-                return partial(
-                    _dict_converter,
-                    converter(type_.__args__[0]),
-                    converter(type_.__args__[1]),
-                )
-        else:
-            # print("converters.py")
-            # from IPython import embed
-            # embed()
-            raise TypeError("This type is not supported")  # TODO
 
-    @converter.register(_Union)
-    def _converter_union(type_):
-        if type_.__args__ is None:
-            raise InvalidType(
-                "Union must be set with at least two parameters, e.g. Union[int, str]"
+@converter.register(typing.Dict)
+@converter.register(typing.Mapping)
+@converter.register(typing.MutableMapping)
+def _converter_dict(type_):
+    if type_.__args__:
+        return partial(
+            _dict_converter,
+            converter(type_.__args__[0]),
+            converter(type_.__args__[1]),
+        )
+
+
+@converter.register(typing.Union)
+def _converter_union(type_):
+    if type_.__args__ is None:
+        raise InvalidType(
+            "Union must be set with at least two parameters, e.g. Union[int, str]"
+        )
+    ntype = type(None)
+    converter_fns = []
+    for arg in type_.__args__:
+        if arg == ntype:
+            continue
+        converter_fns.append(converter(arg))
+
+    if len(converter_fns) == 1:  # only possible is NoneType present
+        assert ntype in type_.__args__  # to make sure
+        return partial(_none_or_converter, converter_fns[0])
+    else:
+        if ntype in type_.__args__:
+            return partial(
+                _none_or_converter,
+                partial(_multiple_types_converter, converter_fns),
             )
-        ntype = type(None)
-        converter_fns = []
-        for arg in type_.__args__:
-            if arg == ntype:
-                continue
-            converter_fns.append(converter(arg))
-
-        if len(converter_fns) == 1:  # only possible is NoneType present
-            assert ntype in type_.__args__  # to make sure
-            return partial(FOR_TYPE["NONE_OPT"], converter_fns[0])
-        else:
-            if ntype in type_.__args__:
-                return partial(
-                    FOR_TYPE["NONE_OPT"],
-                    partial(FOR_TYPE["MULTIPLE"], converter_fns),
-                )
-            return partial(FOR_TYPE["MULTIPLE"], converter_fns)
+        return partial(_multiple_types_converter, converter_fns)
 
 
-# Tuple ?
-# Decimal ?
+@converter.register(typing.Tuple)
+def _converter_tuple(type_):
+    raise InvalidType()  # TODO implement

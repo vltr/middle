@@ -105,8 +105,6 @@ TODO
 - Lots of documentation;
 - Create a benchmark suite against other solutions;
 - Some formatters are still missing;
-- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (see below);
-- Implement a better "type dispatcher" based on more complex rules (other than ``type(field.type)`` delivered by ``functools.singledispatch``) because the ``typing`` module has changed **a bit** between Python 3.6 and 3.7;
 
 Done
 ----
@@ -114,6 +112,8 @@ Done
 - If possible, fine grain the converters, so a ``str`` input value of ``{}`` doesn't end up as ``str({})``;
 - Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Implement more validators and a registerable for more metadata options;
+- Implement a better "type dispatcher" based on more complex rules (other than ``type(field.type)`` delivered by ``functools.singledispatch``) because the ``typing`` module has changed **a bit** between Python 3.6 and 3.7;
+- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (see below);
 
 Future discussions
 ------------------

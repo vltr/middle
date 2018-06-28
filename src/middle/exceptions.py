@@ -15,7 +15,7 @@ class InvalidType(MiddleException):
     def __init__(self, message=None, *args, **kwargs):
         if message is None:
             message = (
-                "The provided type is not supported by ``middle``. "
+                "The required type is not supported by ``middle``. "
                 "Please, see {} for more information on how to add "
                 "your own types.".format(_EXTENDING_URL)
             )

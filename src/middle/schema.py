@@ -4,9 +4,12 @@ from functools import partial
 import attr
 from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
+from .compat import TYPE_REGISTRY
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_options
+from .utils import asdict
+from .utils import value_of
 from .validators import apply_validators
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
@@ -79,6 +82,12 @@ class Model(metaclass=ModelMeta):
 
 
 # --------------------------------------------------------------- #
+# Add the Model class itself to TYPE_REGISTRY
+# --------------------------------------------------------------- #
+
+TYPE_REGISTRY[ModelMeta] = Model
+
+# --------------------------------------------------------------- #
 # Simple member definition to attr.ib
 # --------------------------------------------------------------- #
 
@@ -93,6 +102,16 @@ def _translate_to_attrib(key, data, annotations, cls_name):
         )
     return field(**data), type_
 
+
+# --------------------------------------------------------------- #
+# Util
+# --------------------------------------------------------------- #
+
+
+@value_of.register(Model)
+@value_of.register(ModelMeta)
+def _value_of_model(type_):
+    return asdict
 
 # --------------------------------------------------------------- #
 # Converters
@@ -119,6 +138,11 @@ def _implement_converters(field, key, annotations):
 # --------------------------------------------------------------- #
 # Validators
 # --------------------------------------------------------------- #
+
+
+@apply_validators.register(ModelMeta)  # to avoid circular dependency
+def _validate_model_meta(type_):
+    return [attr.validators.instance_of(Model)]
 
 
 def _implement_validators(field, key, annotations):
