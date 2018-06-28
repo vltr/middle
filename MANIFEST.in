@@ -4,9 +4,10 @@ graft ci
 graft tests
 
 include .bumpversion.cfg
-include .coveragerc
 include .cookiecutterrc
+include .coveragerc
 include .editorconfig
+include pyproject.toml
 
 include AUTHORS.rst
 include CHANGELOG.rst
@@ -20,10 +21,11 @@ include tox.ini .travis.yml appveyor.yml .codacy.yml
 exclude .python-version
 exclude .venv
 exclude .vscode
-recursive-exclude .vscode *
-exclude Makefile
 exclude benchmarks
-recursive-exclude benchmarks *
+exclude Makefile
 exclude requirements.txt
+
+recursive-exclude .vscode *
+recursive-exclude benchmarks *
 
 global-exclude *.py[cod] __pycache__ *.so *.dylib
