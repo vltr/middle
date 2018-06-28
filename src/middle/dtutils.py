@@ -49,8 +49,7 @@ def _dt_is_utc(dt):
         return int(dt.utcoffset().total_seconds()) != 0
     except AttributeError:
         return int(dt.tzinfo.utcoffset(pytz.utc).total_seconds()) != 0
-    finally:
-        return False
+    return False
 
 
 def _dt_has_tz(dt):

@@ -28,7 +28,7 @@ class ModelMeta(type):
     def __new__(mcls, name, bases, attrs):
         if bases:
             annotations = attrs.get("__annotations__", {})
-            for k, v in annotations.items():
+            for k in annotations.keys():
                 if _reserved_keys.match(k):
                     continue
                 if k not in attrs:

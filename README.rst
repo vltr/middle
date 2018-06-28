@@ -22,6 +22,10 @@ A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid 
     :alt: Coverage Status
     :target: https://codecov.io/github/vltr/middle
 
+.. image:: https://api.codacy.com/project/badge/Grade/10c6ef32dfbe497087d57c9d86c02c80
+    :alt: Codacy Grade
+    :target: https://www.codacy.com/app/vltr/middle?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vltr/middle&amp;utm_campaign=Badge_Grade
+
 .. image:: https://img.shields.io/pypi/v/middle.svg
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/middle/

@@ -54,7 +54,7 @@ def test_str_converter():
             TestModel(name=1)
 
     with middle.config.temp(str_method=False, force_str=True):
-        TestModel(name=1).name == "1"
+        assert TestModel(name=1).name == "1"
 
 
 # #############################################################################
