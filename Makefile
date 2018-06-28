@@ -16,13 +16,6 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-test:
-	pytest --cov --cov-report=term-missing -vv
-
-black:
-	black ./src/middle/ -l 79 --safe
-	black ./tests/ -l 79 --safe
-
 cleanpycache:
 	find . -type d | grep "__pycache__" | xargs rm -rf
 
@@ -44,5 +37,4 @@ requirements-dev:
 release:
 	tox -e check
 	python setup.py clean --all sdist bdist_wheel
-	twine register dist/*
 	twine upload --skip-existing dist/*.whl dist/*.gz dist/*.zip
