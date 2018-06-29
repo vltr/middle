@@ -248,6 +248,10 @@ def _converter_union(type_):
         converter_fns.append(converter(arg))
 
     if len(converter_fns) == 1:  # only possible is NoneType present
+        if NONETYPE not in type_.__args__:  # noqa
+            raise TypeError(
+                "There should be None inside with the usage of Optional"
+            )
         assert NONETYPE in type_.__args__  # to make sure
         return partial(_none_or_converter, converter_fns[0])
     else:
