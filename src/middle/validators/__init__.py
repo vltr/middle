@@ -10,10 +10,9 @@ from .common import min_num_value
 from .common import min_str_len
 from .common import num_multiple_of
 from .common import str_pattern
-from .rules import apply_validators
+from .rules import validate
 
 __all__ = (
-    "apply_validators",
     "dict_max_properties",
     "dict_min_properties",
     "FOR_TYPE",
@@ -26,4 +25,5 @@ __all__ = (
     "min_str_len",
     "num_multiple_of",
     "str_pattern",
+    "validate",
 )

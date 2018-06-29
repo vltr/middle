@@ -10,7 +10,7 @@ from .converters import model_converter
 from .options import metadata_options
 from .utils import asdict
 from .utils import value_of
-from .validators import apply_validators
+from .validators import validate
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
 _attr_s_kwargs = {"cmp": False}
@@ -52,6 +52,7 @@ class ModelMeta(type):
             else:
                 for k in annotations:
                     if k not in attrs["__annotations__"]:
+                        # XXX does it get here?
                         attrs["__annotations__"].update({k: annotations[k]})
         attr_kwargs = _attr_s_kwargs.copy()
         if attrs.get("__attr_s_kwargs__", None) is not None:
@@ -63,7 +64,9 @@ class ModelMeta(type):
     def __call__(cls, *args, **kwargs):
         if args:
             for arg in args:
-                if arg is None or isinstance(arg, (bool, int, float, list)):
+                if arg is None or isinstance(
+                    arg, (str, bool, int, float, list)
+                ):  # no str, ``middle`` won't parse a thing
                     raise TypeError("better error handling")  # TODO
                 elif isinstance(arg, dict):
                     kwargs.update(arg)
@@ -95,8 +98,9 @@ TYPE_REGISTRY[ModelMeta] = Model
 def _translate_to_attrib(key, data, annotations, cls_name):
     if not isinstance(data, dict):
         data = {}
-    type_ = data.pop("type", annotations.get(key, None))
-    if type_ is None:
+    anchor = object()
+    type_ = data.pop("type", annotations.get(key, anchor))
+    if type_ == anchor:
         raise TypeError(
             "type not specified for field {}.{}".format(cls_name, key)
         )
@@ -108,7 +112,7 @@ def _translate_to_attrib(key, data, annotations, cls_name):
 # --------------------------------------------------------------- #
 
 
-@value_of.register(Model)
+@value_of.register(Model)  # to avoid circular dependency
 @value_of.register(ModelMeta)
 def _value_of_model(type_):
     return asdict
@@ -119,6 +123,7 @@ def _value_of_model(type_):
 # --------------------------------------------------------------- #
 
 
+@converter.register(Model)  # to avoid circular dependency
 @converter.register(ModelMeta)  # to avoid circular dependency
 def _converter_model_meta(type_):
     return partial(model_converter, type_)
@@ -141,15 +146,16 @@ def _implement_converters(field, key, annotations):
 # --------------------------------------------------------------- #
 
 
-@apply_validators.register(ModelMeta)  # to avoid circular dependency
-def _validate_model_meta(type_):
+@validate.register(Model)  # to avoid circular dependency
+@validate.register(ModelMeta)  # to avoid circular dependency
+def _validate_model_meta(type_, field):
     return [attr.validators.instance_of(Model)]
 
 
 def _implement_validators(field, key, annotations):
     if hasattr(field, "type") and field.type:
-        for v in apply_validators(field.type, field):
+        for v in validate(field.type, field):
             field.validator(v)
     elif key in annotations:
-        for v in apply_validators(annotations.get(key), field):
+        for v in validate(annotations.get(key), field):
             field.validator(v)

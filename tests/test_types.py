@@ -1,6 +1,7 @@
 from datetime import date
 from datetime import datetime
 from datetime import timezone
+from decimal import Decimal
 from enum import Enum
 from enum import IntEnum
 from enum import unique
@@ -16,11 +17,14 @@ from typing import MutableSet
 from typing import Optional
 from typing import Sequence
 from typing import Set
+from typing import Tuple
 from typing import Union
 
+import attr
 import pytest
 
 import middle
+from middle.exceptions import InvalidType
 
 # #############################################################################
 # str
@@ -55,6 +59,8 @@ def test_str_converter():
 
     with middle.config.temp(str_method=False, force_str=True):
         assert TestModel(name=1).name == "1"
+
+    assert TestModel(name=b"ol\xc3\xa1 mundo").name == "olá mundo"
 
 
 # #############################################################################
@@ -142,6 +148,8 @@ def test_bool_working():
     assert isinstance(data, dict)
     assert data.get("broken", False) is True
 
+    assert TestModel({"broken": True}).broken is True
+
 
 def test_bool_converter():
     class TestModel(middle.Model):
@@ -160,6 +168,7 @@ def test_bool_converter():
     assert TestModel(broken=10).broken is True
     assert TestModel(broken=1.5).broken is True
     assert TestModel(broken=3.14).broken is True
+    assert TestModel(broken=True).broken is True
 
     # now, everything must be false
     assert TestModel(broken="foo").broken is False
@@ -173,6 +182,7 @@ def test_bool_converter():
     assert TestModel(broken=-1).broken is False
     assert TestModel(broken=-1.5).broken is False
     assert TestModel(broken=0.0).broken is False
+    assert TestModel(broken=False).broken is False
 
     with pytest.raises(TypeError):
         TestModel(broken={"hello": "world"})
@@ -437,6 +447,11 @@ def test_model_converter():
 # List, Sequence, Collection, Iterable, MutableSequence
 
 
+class SomeJunk:
+    def __str__(self):
+        return "hello"
+
+
 @pytest.mark.parametrize(
     "list_type",
     [
@@ -473,10 +488,6 @@ def test_list_working(list_type):
     ],
 )
 def test_list_converter(list_type):
-    class SomeJunk:
-        def __str__(self):
-            return "hello"
-
     class TestModel(middle.Model):
         names: list_type[str] = middle.field()
 
@@ -491,6 +502,29 @@ def test_list_converter(list_type):
     assert isinstance(inst, TestModel)
     assert inst.names[0] == "1"
     assert inst.names[1] == "hello"
+
+
+@pytest.mark.parametrize(
+    "list_type",
+    [
+        pytest.param(Collection, id="Collection"),
+        pytest.param(Iterable, id="Iterable"),
+        pytest.param(List, id="List"),
+        pytest.param(MutableSequence, id="MutableSequence"),
+        pytest.param(Sequence, id="Sequence"),
+    ],
+)
+def test_list_invalid(list_type):
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            names: list_type = middle.field()
+
+    with pytest.raises(TypeError):
+
+        class AnotherTestModel(middle.Model):
+            names: list_type[int, float] = middle.field()
 
 
 # #############################################################################
@@ -529,16 +563,33 @@ def test_set_working(set_type):
     ],
 )
 def test_set_converter(set_type):
-    class SomeJunk:
-        def __str__(self):
-            return "hello"
-
     class TestModel(middle.Model):
         names: set_type[str] = middle.field()
 
     inst = TestModel(names=[1, SomeJunk()])
     assert isinstance(inst, TestModel)
     assert inst.names == {"1", "hello"}
+
+
+@pytest.mark.parametrize(
+    "set_type",
+    [
+        pytest.param(Set, id="Set"),
+        pytest.param(FrozenSet, id="FrozenSet"),
+        pytest.param(MutableSet, id="MutableSet"),
+    ],
+)
+def test_set_invalid(set_type):
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            names: set_type = middle.field()
+
+    with pytest.raises(TypeError):
+
+        class AnotherTestModel(middle.Model):
+            names: set_type[int, float] = middle.field()
 
 
 # #############################################################################
@@ -588,16 +639,33 @@ def test_dict_working(dict_type):
     ],
 )
 def test_dict_converter(dict_type):
-    class SomeJunk:
-        def __str__(self):
-            return "hello"
-
     class TestModel(middle.Model):
         ratings: dict_type[str, float] = middle.field()
 
     inst = TestModel(ratings={SomeJunk(): 5.0})
     assert isinstance(inst, TestModel)
     assert inst.ratings == {"hello": 5.0}
+
+
+@pytest.mark.parametrize(
+    "dict_type",
+    [
+        pytest.param(Dict, id="Dict"),
+        pytest.param(Mapping, id="Mapping"),
+        pytest.param(MutableMapping, id="MutableMapping"),
+    ],
+)
+def test_dict_invalid(dict_type):
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            names: dict_type = middle.field()
+
+    with pytest.raises(TypeError):
+
+        class AnotherTestModel(middle.Model):
+            names: dict_type[float] = middle.field()
 
 
 # #############################################################################
@@ -623,7 +691,7 @@ def test_optional_working(value, expected):
     data = middle.asdict(inst)
 
     assert isinstance(data, dict)
-    assert data.get("name", None) == expected
+    assert data.get("name", {}) == expected
 
 
 # #############################################################################
@@ -650,3 +718,208 @@ def test_union_working(value, expected):
 
     assert isinstance(data, dict)
     assert data.get("value", None) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        # pytest.param("foo", "foo", id="value_str"),
+        # pytest.param(3.14, 3.14, id="value_float"),
+        # pytest.param(-1, -1, id="value_int"),
+        pytest.param(None, None, id="value_none")
+    ],
+)
+def test_union_working_with_none(value, expected):
+    class TestModel(middle.Model):
+        value: Union[str, int, float, None] = middle.field()
+
+    inst = TestModel(value=value)
+    assert isinstance(inst, TestModel)
+    assert inst.value == expected
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", {}) == expected
+
+
+def test_union_invalid():
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            names: Union = middle.field()
+
+
+@pytest.mark.parametrize(
+    "value,expected,type_",
+    [
+        pytest.param("foo", "foo", str, id="union_single_str"),
+        pytest.param(3.14, 3.14, float, id="union_single_float"),
+        pytest.param(-1, -1, int, id="union_single_int"),
+    ],
+)
+def test_union_one_parameter(value, expected, type_):
+    class TestModel(middle.Model):
+        value: Union[type_] = middle.field()
+
+    inst = TestModel(value=value)
+    assert isinstance(inst, TestModel)
+    assert inst.value == expected
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", None) == expected
+
+
+# #############################################################################
+# Tuple
+
+
+def test_tuple_working():
+    class TestModel(middle.Model):
+        value: Tuple[str, int, float] = middle.field()
+
+    inst = TestModel(value=["hello", 1, "-.4"])
+    assert isinstance(inst, TestModel)
+    assert inst.value == ("hello", 1, -0.4)
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", None) == ("hello", 1, -0.4)
+
+    with pytest.raises(ValueError):
+        TestModel(value=["hello", 1, "-.4", "world"])
+
+
+def test_tuple_invalid():
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            value: Tuple = middle.field()
+
+
+# #############################################################################
+# Decimal
+
+
+def test_decimal_working():
+    class TestModel(middle.Model):
+        value: Decimal = middle.field()
+
+    inst = TestModel(value="5")
+    assert isinstance(inst, TestModel)
+    assert inst.value == Decimal("5.0")
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", None) == 5.0
+
+
+# #############################################################################
+# Unknown type
+
+
+def test_unknown_type():
+
+    with pytest.raises(InvalidType):
+
+        class TestModel(middle.Model):
+            value: timezone = middle.field()
+
+
+# #############################################################################
+# Register new type
+
+
+class Foo:
+    def __init__(self, **kwargs):
+        self._foo = kwargs.get("foo", "bar")
+
+    @property
+    def foo(self):
+        return self._foo
+
+
+def test_register_new_type():
+    def _get_value_of_foo(value):
+        return value.foo
+
+    def _convert_to_foo(value):
+        if isinstance(value, Foo):
+            return value
+        return Foo(foo=value)
+
+    @middle.value_of.register(Foo)
+    def value_of_foo(type_):
+        return _get_value_of_foo
+
+    @middle.converter.register(Foo)
+    def convert_to_foo(type_):
+        return _convert_to_foo
+
+    @middle.validate.register(Foo)
+    def validate_foo(type_, field):
+        return [attr.validators.instance_of(Foo)]
+
+    assert middle.value_of(Foo) == _get_value_of_foo
+    assert middle.converter(Foo) == _convert_to_foo
+    assert middle.validate(Foo, {}) == [attr.validators.instance_of(Foo)]
+
+
+def test_converter_new_type():
+    assert middle.converter(Foo)("baz").foo == Foo(foo="baz").foo
+
+
+def test_value_of_new_type():
+    assert middle.value_of(Foo)(Foo()) == "bar"
+
+
+def test_work_with_new_type():
+    class TestModel(middle.Model):
+        value: Foo = middle.field()
+
+    inst = TestModel(value="hello")
+    assert isinstance(inst, TestModel)
+    assert isinstance(inst.value, Foo)
+    assert inst.value.foo == "hello"
+
+    data = middle.asdict(inst)
+
+    assert isinstance(data, dict)
+    assert data.get("value", None) == "hello"
+
+    assert TestModel(value="world").value.foo == "world"
+    assert TestModel(value=Foo(foo="shh")).value.foo == "shh"
+
+
+def test_unregister_new_type():
+    middle.value_of.unregister(Foo)
+    middle.value_of.cache_clear()
+    middle.converter.unregister(Foo)
+    middle.validate.unregister(Foo)
+
+    assert middle.value_of(Foo) == middle.value_of(object)
+
+    with pytest.raises(InvalidType):
+        middle.converter(Foo)
+
+    assert middle.validate(Foo, {}) == middle.validate(object, {})
+
+
+# #############################################################################
+# None
+
+
+def test_none_type():
+    class TestModel(middle.Model):
+        value: None = middle.field()
+
+    inst = TestModel(value="hello")
+    assert isinstance(inst, TestModel)
+    assert isinstance(inst.value, type(None))
+    assert inst.value is None

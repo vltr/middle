@@ -7,6 +7,7 @@ from functools import partial
 
 import attr
 
+from .compat import NONETYPE
 from .config import config
 from .dispatch import type_dispatch
 from .dtutils import convert_to_utc
@@ -88,12 +89,12 @@ def _datetime_converter(value):
 
 
 def _bool_converter(value):
-    if isinstance(value, str):
+    if isinstance(value, bool):
+        return value
+    elif isinstance(value, str):
         return value.lower().strip() in ("true", "yes", "on", "1")
     elif isinstance(value, (int, float)):
         return value > 0
-    elif isinstance(value, bool):
-        return value
     raise TypeError(
         'the value "{}" given can\'t be converted to bool'.format(value)
     )
@@ -117,13 +118,24 @@ def _multiple_types_converter(converters, value):
     if converted_values:
         if value in converted_values:  # there is a primitive in there
             return value
-        else:
+        else:  # will this part ever be used?
             value_type = type(value)
             for cv in converted_values:
                 if value_type == type(cv):  # it is the same type (at least)
                     return cv
 
     return value
+
+
+def _multiple_types_converter_ordered(converters, value):
+    converted_values = []
+    if len(converters) != len(value):
+        raise ValueError(
+            "the given value for Tuple doesn't match the size declared"
+        )
+    for c, v in zip(converters, value):
+        converted_values.append(c(v))
+    return tuple(converted_values)
 
 
 def _none_or_converter(converter, value):
@@ -138,6 +150,11 @@ def converter(type_):
         return partial(model_converter, type_)
     else:
         raise InvalidType()
+
+
+@converter.register(NONETYPE)
+def _converter_none(type_):
+    return partial(_none_or_converter, lambda _: None)
 
 
 @converter.register(str)
@@ -179,50 +196,62 @@ def _converter_enum(type_):
 @converter.register(typing.Iterable)
 @converter.register(typing.MutableSequence)
 def _converter_iterable_list(type_):
-    if type_.__args__:
-        return partial(
-            _iterable_converter, converter(type_.__args__[0]), False
+    if not type_.__args__:
+        raise InvalidType(
+            "{0!r} must be set with only one parameter, e.g. {0!r}[float]".format(
+                type_
+            )
         )
+    return partial(_iterable_converter, converter(type_.__args__[0]), False)
 
 
 @converter.register(typing.Set)
 @converter.register(typing.MutableSet)
 @converter.register(typing.FrozenSet)
 def _converter_iterable_set(type_):
-    if type_.__args__:
-        return partial(_iterable_converter, converter(type_.__args__[0]), True)
+    if not type_.__args__:
+        raise InvalidType(
+            "{0!r} must be set with only one parameter, e.g. {0!r}[float]".format(
+                type_
+            )
+        )
+    return partial(_iterable_converter, converter(type_.__args__[0]), True)
 
 
 @converter.register(typing.Dict)
 @converter.register(typing.Mapping)
 @converter.register(typing.MutableMapping)
 def _converter_dict(type_):
-    if type_.__args__:
-        return partial(
-            _dict_converter,
-            converter(type_.__args__[0]),
-            converter(type_.__args__[1]),
+    if not type_.__args__:
+        raise InvalidType(
+            "{0!r} must be set with parameters, e.g. {0!r}[str, str]".format(
+                type_
+            )
         )
+    return partial(
+        _dict_converter,
+        converter(type_.__args__[0]),
+        converter(type_.__args__[1]),
+    )
 
 
 @converter.register(typing.Union)
 def _converter_union(type_):
-    if type_.__args__ is None:
+    if not hasattr(type_, "__args__") or not type_.__args__:
         raise InvalidType(
             "Union must be set with at least two parameters, e.g. Union[int, str]"
         )
-    ntype = type(None)
     converter_fns = []
     for arg in type_.__args__:
-        if arg == ntype:
+        if arg == NONETYPE:
             continue
         converter_fns.append(converter(arg))
 
     if len(converter_fns) == 1:  # only possible is NoneType present
-        assert ntype in type_.__args__  # to make sure
+        assert NONETYPE in type_.__args__  # to make sure
         return partial(_none_or_converter, converter_fns[0])
     else:
-        if ntype in type_.__args__:
+        if NONETYPE in type_.__args__:
             return partial(
                 _none_or_converter,
                 partial(_multiple_types_converter, converter_fns),
@@ -232,4 +261,11 @@ def _converter_union(type_):
 
 @converter.register(typing.Tuple)
 def _converter_tuple(type_):
-    raise InvalidType()  # TODO implement
+    if not type_.__args__:
+        raise InvalidType(
+            "Tuple must be set with at least one parameters, e.g. Tuple[bool]"
+        )
+    return partial(
+        _multiple_types_converter_ordered,
+        [converter(arg) for arg in type_.__args__],
+    )

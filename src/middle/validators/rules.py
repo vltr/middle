@@ -1,10 +1,12 @@
 import datetime
 import typing
+from decimal import Decimal
 from enum import EnumMeta
 from functools import partial
 
 import attr
 
+from ..compat import NONETYPE
 from ..dispatch import type_dispatch
 from .common import FOR_TYPE
 
@@ -22,11 +24,11 @@ def _appender(field):
 
 
 @type_dispatch
-def apply_validators(type_, field):
+def validate(type_, field):
     return []
 
 
-@apply_validators.register(str)
+@validate.register(str)
 def _apply_str(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["string"].items():
@@ -35,8 +37,9 @@ def _apply_str(type_, field):
     return validators
 
 
-@apply_validators.register(int)
-@apply_validators.register(float)
+@validate.register(int)
+@validate.register(float)
+@validate.register(Decimal)
 def _apply_number(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["number"].items():
@@ -45,23 +48,23 @@ def _apply_number(type_, field):
     return validators
 
 
-@apply_validators.register(bool)
-@apply_validators.register(datetime.date)
-@apply_validators.register(datetime.datetime)
+@validate.register(bool)
+@validate.register(datetime.date)
+@validate.register(datetime.datetime)
 def _apply_bool_dt_dttime(type_, field):
     return [attr.validators.instance_of(type_)]
 
 
-@apply_validators.register(EnumMeta)
+@validate.register(EnumMeta)
 def _validate_enum(type_, field):
     return [attr.validators.instance_of(type_)]
 
 
-@apply_validators.register(typing.List)
-@apply_validators.register(typing.Sequence)
-@apply_validators.register(typing.Collection)
-@apply_validators.register(typing.Iterable)
-@apply_validators.register(typing.MutableSequence)
+@validate.register(typing.List)
+@validate.register(typing.Sequence)
+@validate.register(typing.Collection)
+@validate.register(typing.Iterable)
+@validate.register(typing.MutableSequence)
 def _validate_list(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
@@ -70,9 +73,9 @@ def _validate_list(type_, field):
     return validators
 
 
-@apply_validators.register(typing.Set)
-@apply_validators.register(typing.MutableSet)
-@apply_validators.register(typing.FrozenSet)
+@validate.register(typing.Set)
+@validate.register(typing.MutableSet)
+@validate.register(typing.FrozenSet)
 def _validate_set(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
@@ -81,9 +84,9 @@ def _validate_set(type_, field):
     return validators
 
 
-@apply_validators.register(typing.Dict)
-@apply_validators.register(typing.Mapping)
-@apply_validators.register(typing.MutableMapping)
+@validate.register(typing.Dict)
+@validate.register(typing.Mapping)
+@validate.register(typing.MutableMapping)
 def _validate_dict(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["dict"].items():
@@ -92,13 +95,12 @@ def _validate_dict(type_, field):
     return validators
 
 
-@apply_validators.register(typing.Union)
+@validate.register(typing.Union)
 def _validate_union(type_, field):
-    ntype = type(None)
     validator_types = []
     for arg in type_.__args__:
-        if arg == ntype:
-            validator_types.append(ntype)
+        if arg == NONETYPE:
+            validator_types.append(NONETYPE)
         else:
             if arg in (
                 str,

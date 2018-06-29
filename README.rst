@@ -98,7 +98,6 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 TODO
 ====
 
-- Get 100% (or closer) in code coverage;
 - Alias options to populate classes;
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
@@ -113,7 +112,8 @@ Done
 - Get ``date`` and ``datetime`` converters to be customizable, instead of an ``if isinstance`` statement;
 - Implement more validators and a registerable for more metadata options;
 - Implement a better "type dispatcher" based on more complex rules (other than ``type(field.type)`` delivered by ``functools.singledispatch``) because the ``typing`` module has changed **a bit** between Python 3.6 and 3.7;
-- Support more types (``typing.Tuple``, ``decimal.Decimal``), if possible (see below);
+- Support more types (``typing.Tuple``, ``decimal.Decimal``);
+- Get 100% (or closer) in code coverage;
 
 Future discussions
 ------------------

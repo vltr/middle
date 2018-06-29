@@ -12,11 +12,12 @@ else:
 
 
 TYPE_REGISTRY = {}
+NONETYPE = type(None)
 
 
 def get_type(type_):
     if type_ is None:
-        return type(None)
+        return NONETYPE
     if type_ in (
         str,
         int,
@@ -29,9 +30,24 @@ def get_type(type_):
         datetime,
         bytes,
         Decimal,
+        typing.Dict,
+        typing.List,
+        typing.Set,
+        typing.Tuple,
+        typing.Union,
+        typing.Collection,
+        typing.Iterable,
+        typing.Sequence,
+        typing.MutableSequence,
+        typing.FrozenSet,
+        typing.MutableSet,
+        typing.Mapping,
+        typing.MutableMapping,
     ):
         return type_
     tt = type(type_)
+    if tt == type:
+        tt = type_
     if hasattr(tt, "__module__") and tt.__module__ == "typing":
         if tt == GenericType:
             if hasattr(type_, "__base__"):  # py3.6
@@ -48,3 +64,4 @@ def get_type(type_):
         return tt
     elif tt in TYPE_REGISTRY:
         return TYPE_REGISTRY[tt]
+    return type_
