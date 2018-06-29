@@ -1,24 +1,18 @@
 dist: trusty
-group: travis_latest
+# group: travis_latest
 language: python
-sudo: false
+# sudo: false
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
 matrix:
   include:
-    - python: '3.6'
-      env:
-        - PYENV_VERSION='3.6.6' PYENV_VERSION_STRING='Python 3.6.6' TOXENV=py36,report,codecov
-    - python: '3.7'
-      env:
-        - PYENV_VERSION='3.7.0' PYENV_VERSION_STRING='Python 3.7.0' TOXENV=py37
+    - env: PYENV_VERSION='3.6.6' PYENV_VERSION_STRING='Python 3.6.6' TOXENV=py36,report,codecov
+    - env: PYENV_VERSION='3.7.0' PYENV_VERSION_STRING='Python 3.7.0' TOXENV=py37
     # NO GLOBALS
-    - python: '3.6'
-      env: TOXENV=check
-    - python: '3.6'
-      env: TOXENV=docs
+    - env: PYENV_VERSION='3.6.6' PYENV_VERSION_STRING='Python 3.6.6' TOXENV=check
+    - env: PYENV_VERSION='3.6.6' PYENV_VERSION_STRING='Python 3.6.6' TOXENV=docs
   # allow_failures:
   #   - python: "3.7-dev"
 cache:
