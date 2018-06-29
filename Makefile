@@ -16,6 +16,9 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+black:
+	black ./src/middle/ ./tests setup.py
+
 cleanpycache:
 	find . -type d | grep "__pycache__" | xargs rm -rf
 
