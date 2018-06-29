@@ -252,7 +252,6 @@ def _converter_union(type_):
             raise TypeError(
                 "There should be None inside with the usage of Optional"
             )
-        assert NONETYPE in type_.__args__  # to make sure
         return partial(_none_or_converter, converter_fns[0])
     else:
         if NONETYPE in type_.__args__:
