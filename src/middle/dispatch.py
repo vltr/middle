@@ -1,5 +1,4 @@
 from functools import update_wrapper
-from types import MappingProxyType
 
 from .compat import get_type
 
@@ -35,7 +34,6 @@ def type_dispatch(func):
     wrapper.register = register
     wrapper.unregister = unregister
     wrapper.dispatch = dispatch
-    wrapper.registry = MappingProxyType(registry)
     update_wrapper(wrapper, func)
     return wrapper
 

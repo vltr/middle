@@ -5,10 +5,13 @@ from datetime import datetime
 from decimal import Decimal
 from enum import EnumMeta
 
+IS_PY36 = False
 if sys.version_info >= (3, 7):  # noqa compat
     from typing import _GenericAlias as GenericType
 else:
     from typing import GenericMeta as GenericType
+
+    IS_PY36 = True
 
 
 TYPE_REGISTRY = {}
@@ -42,21 +45,17 @@ def get_type(type_):
         typing.MutableMapping,
     ):
         return type_
+
     tt = type(type_)
     if tt == type:
         tt = type_
-    if hasattr(tt, "__module__") and tt.__module__ == "typing":
-        if tt == GenericType:
-            if hasattr(type_, "__base__"):  # py3.6
-                return type_.__base__
-            if hasattr(type_, "__origin__"):  # py3.7
-                if hasattr(type_, "_name") and isinstance(type_._name, str):
-                    return getattr(typing, type_._name)
-                return type_.__origin__
-        elif hasattr(typing, "_Union") and tt == typing._Union:  # py36
-            return typing.Union
-        elif hasattr(typing, "TupleMeta") and tt == typing.TupleMeta:  # py36
-            return typing.Tuple
+    if hasattr(type_, "__origin__") and IS_PY36:  # py36
+        return type_.__origin__
+    elif tt == GenericType:
+        if hasattr(type_, "__origin__"):  # py37
+            if hasattr(type_, "_name") and isinstance(type_._name, str):
+                return getattr(typing, type_._name)
+            return type_.__origin__
     elif tt == EnumMeta:
         return tt
     elif tt in TYPE_REGISTRY:
