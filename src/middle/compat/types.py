@@ -5,7 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import EnumMeta
 
-if sys.version_info >= (3, 7):
+if sys.version_info >= (3, 7):  # noqa compat
     from typing import _GenericAlias as GenericType
 else:
     from typing import GenericMeta as GenericType
@@ -23,12 +23,9 @@ def get_type(type_):
         int,
         float,
         bool,
-        list,
-        dict,
-        set,
+        bytes,
         date,
         datetime,
-        bytes,
         Decimal,
         typing.Dict,
         typing.List,
@@ -52,9 +49,9 @@ def get_type(type_):
         if tt == GenericType:
             if hasattr(type_, "__base__"):  # py3.6
                 return type_.__base__
-            elif hasattr(type_, "__origin__"):
+            if hasattr(type_, "__origin__"):  # py3.7
                 if hasattr(type_, "_name") and isinstance(type_._name, str):
-                    return getattr(typing, type_._name)  # py3.7
+                    return getattr(typing, type_._name)
                 return type_.__origin__
         elif hasattr(typing, "_Union") and tt == typing._Union:  # py36
             return typing.Union

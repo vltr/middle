@@ -15,8 +15,10 @@ def dt_to_iso_string(dt: datetime) -> str:
 
 
 def dt_from_iso_string(dt_str: str) -> datetime:
-    if dt_str is None or (isinstance(dt_str, str) and not dt_str.strip()):
-        raise TypeError('"dt_str" argument must not be None or blank')
+    if dt_str is None:
+        raise TypeError('"dt_str" argument must not be None')
+    elif isinstance(dt_str, str) and dt_str.strip() == "":
+        raise TypeError('"dt_str" argument must not be blank')
     return _dt_from_iso_string(dt_str)
 
 
@@ -27,6 +29,8 @@ def dt_from_timestamp(dt_ts, tz=_MACHINE_TZ) -> datetime:
 
 
 def convert_to_utc(dt: datetime, tz=_MACHINE_TZ) -> datetime:
+    if not isinstance(dt, datetime):
+        raise TypeError('"dt" must be an instance of datetime')
     if not _dt_has_tz(dt):
         dt = dt.replace(tzinfo=timezone.utc)
     if not _dt_is_utc(dt):
@@ -43,13 +47,10 @@ def _dt_to_iso_string(dt):
 
 
 def _dt_is_utc(dt):
-    if not isinstance(dt, datetime):
-        raise TypeError('"dt" must be an instance of datetime')
     try:
         return int(dt.utcoffset().total_seconds()) != 0
     except AttributeError:
-        return int(dt.tzinfo.utcoffset(pytz.utc).total_seconds()) != 0
-    return False
+        return False
 
 
 def _dt_has_tz(dt):
