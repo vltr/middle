@@ -16,10 +16,13 @@ def test_datetime_with_tzinfo_to_iso_string():
 
 
 def test_datetime_no_tzinfo_to_iso_string():
+    tz = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    utc_offset = tz.tzinfo.utcoffset(tz).total_seconds() / 3600
     with freeze_time(
-        "2018-07-02 08:30:00", tz_offset=-datetime.timedelta(hours=3)
+        "2018-07-02 08:30:00", tz_offset=datetime.timedelta(hours=utc_offset)
     ):
         dt = datetime.datetime.now()
+        assert dt.tzinfo is None
         assert dt_to_iso_string(dt) == "2018-07-02T08:30:00+00:00"
 
 
