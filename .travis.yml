@@ -1,5 +1,5 @@
-dist: trusty
-group: travis_latest
+dist: xenial
+# group: travis_latest
 language: python
 sudo: false
 env:
@@ -10,7 +10,7 @@ matrix:
   include:
     - python: '3.6'
       env: TOXENV=py36,report,codecov
-    - python: '3.7-dev'
+    - python: '3.7'
       env: TOXENV=py37
     # NO GLOBALS
     - python: '3.6'
@@ -18,7 +18,7 @@ matrix:
     - python: '3.6'
       env: TOXENV=docs
   allow_failures:
-    - python: "3.7-dev"
+    - python: "3.7"
 cache:
   - pip
 before_install:
