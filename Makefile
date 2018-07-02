@@ -39,5 +39,5 @@ requirements-dev:
 
 release:
 	tox -e check
-	python setup.py clean --all sdist bdist_wheel
+	python setup.py clean --all sdist bdist
 	twine upload --skip-existing dist/*.whl dist/*.gz dist/*.zip

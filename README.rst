@@ -30,10 +30,6 @@ A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid 
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/middle/
 
-.. image:: https://img.shields.io/pypi/wheel/middle.svg
-    :alt: PyPI Wheel
-    :target: https://pypi.org/project/middle/
-
 .. image:: https://img.shields.io/pypi/pyversions/middle.svg
     :alt: Supported versions
     :target: https://pypi.org/project/middle/
