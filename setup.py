@@ -19,7 +19,7 @@ def read(*names, **kwargs):
 
 setup(
     name="middle",
-    version="version='0.1.1'",
+    version="0.1.1",
     license="MIT license",
     description="Flexible, extensible Python data structures for general usage",
     long_description="%s\n%s"
