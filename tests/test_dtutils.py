@@ -44,7 +44,7 @@ def test_dt_withouttz_from_iso_string():
         "2018-07-02 08:30:00", tz_offset=datetime.timedelta(hours=utc_offset)
     ):
         assert dt_from_iso_string("2018-07-02T08:30:00") == datetime.datetime(
-            2018, 7, 2, 11, 30, 0, 0, datetime.timezone.utc
+            2018, 7, 2, 8, 30, 0, 0, tz.tzinfo
         )
 
 

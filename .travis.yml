@@ -1,7 +1,7 @@
 dist: xenial
 # group: travis_latest
 language: python
-sudo: false
+sudo: true
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
