@@ -2,6 +2,13 @@
 Changelog
 =========
 
+v0.1.1 on 2018-07-02
+--------------------
+
+* Add proper unit testing and support for Python 3.6 and 3.7
+* Made the API a bit more flexible
+* Code format and check done with `black <https://github.com/ambv/black>`_
+
 v0.1.0 on 2018-06-21
 --------------------
 
