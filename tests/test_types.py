@@ -911,6 +911,30 @@ def test_unregister_new_type():
     assert middle.validate(Foo, {}) == middle.validate(object, {})
 
 
+def test_unregister_unknown_type():
+    class Bar:
+        pass
+
+    assert middle.value_of(Bar) == middle.value_of(object)
+
+    with pytest.raises(InvalidType):
+        middle.converter(Bar)
+
+    assert middle.validate(Bar, {}) == middle.validate(object, {})
+
+    middle.value_of.unregister(Bar)
+    middle.value_of.cache_clear()
+    middle.converter.unregister(Bar)
+    middle.validate.unregister(Bar)
+
+    assert middle.value_of(Bar) == middle.value_of(object)
+
+    with pytest.raises(InvalidType):
+        middle.converter(Bar)
+
+    assert middle.validate(Bar, {}) == middle.validate(object, {})
+
+
 # #############################################################################
 # None
 
@@ -923,3 +947,44 @@ def test_none_type():
     assert isinstance(inst, TestModel)
     assert isinstance(inst.value, type(None))
     assert inst.value is None
+
+
+# #############################################################################
+# attr class
+
+
+def test_attr_class():
+    @attr.s
+    class AttrModel:
+        name: str = attr.ib()
+        age: int = attr.ib()
+
+    class TestModel(middle.Model):
+        people: List[AttrModel]
+
+    inst = TestModel(
+        people=[AttrModel(name="Foo", age=21), AttrModel(name="Bar", age=42)]
+    )
+    assert isinstance(inst, TestModel)
+    assert isinstance(inst.people, list)
+    assert isinstance(inst.people[0], AttrModel)
+    assert isinstance(inst.people[1], AttrModel)
+
+    data = middle.asdict(inst)
+    assert isinstance(data, dict)
+    assert isinstance(data.get("people"), list)
+    assert isinstance(data.get("people")[0], dict)
+    assert isinstance(data.get("people")[1], dict)
+
+
+def test_attr_class_union():
+    @attr.s
+    class AttrModel:
+        name: str = attr.ib()
+        age: int = attr.ib()
+
+    class TestModel(middle.Model):
+        agent: Optional[AttrModel]
+
+    inst = TestModel(agent=AttrModel(name="Foo", age=21))
+    assert isinstance(inst, TestModel)

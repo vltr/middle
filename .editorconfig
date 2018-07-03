@@ -14,5 +14,5 @@ end_of_line = crlf
 
 [*.{ini,yml}]
 indent_style = space
-indent_size = 2
+indent_size = 4
 charset = utf-8

@@ -58,6 +58,8 @@ def _raw_dict(value):
 @lru_cache(maxsize=2048, typed=True)
 @type_dispatch
 def value_of(type_):
+    if attr.has(type_):
+        return asdict
     return _raw_primitive
 
 
