@@ -36,7 +36,6 @@ script:
 after_success:
     - tox -e covreport
     - codecov
-#     - tox -e codecov
 after_failure:
     - more .tox/log/* | cat
     - more .tox/*/log/* | cat
