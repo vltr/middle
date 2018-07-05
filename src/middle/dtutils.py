@@ -38,8 +38,11 @@ def convert_to_utc(dt: datetime, tz=_MACHINE_TZ) -> datetime:
     return dt
 
 
-def _dt_from_iso_string(dt):
-    return parser.parse(dt).astimezone(pytz.utc)
+def _dt_from_iso_string(dt_str):
+    dt = parser.parse(dt_str)
+    if not _dt_has_tz(dt):
+        dt = convert_to_utc(dt)
+    return dt
 
 
 def _dt_to_iso_string(dt):

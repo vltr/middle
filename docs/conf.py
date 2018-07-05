@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import os
 
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -28,7 +27,7 @@ author = 'Richard Kuesters'
 copyright = '{0}, {1}'.format(year, author)
 version = release = '0.1.1'
 
-pygments_style = 'trac'
+pygments_style = 'default'
 templates_path = ['.']
 extlinks = {
     'issue': ('https://github.com/vltr/middle/issues/%s', '#'),
@@ -44,7 +43,7 @@ html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
 html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
+    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
 }
 html_short_title = '%s-%s' % (project, version)
 

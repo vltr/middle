@@ -50,7 +50,10 @@ A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid 
 
 Flexible, extensible Python data structures for general usage. Get data in and out, reliably, without boilerplate and with speed!
 
-``middle`` stands on the shoulders of ``attrs`` and aims to be as simple as possible to get data from complex objects to Python primitives and vice-versa, with validators, converters and a lot of sugar! ``middle`` can be used with your preferred web framework, background job application, configuration parsing and many others!
+``middle`` stands on the shoulders of ``attrs`` and aims to be as simple as possible to get data from complex objects to Python primitives and vice-versa, with validators, converters, a lot of sugar and other utilities! ``middle`` can be used with your preferred web framework, background job application, configuration parser and more!
+
+Quick peak
+----------
 
 .. code-block:: pycon
 
@@ -85,7 +88,7 @@ Flexible, extensible Python data structures for general usage. Get data in and o
     {'name': 'Cities: Skylines', 'score': 9.0, 'resolution_tested': '1920x1200', 'genre': ['Simulators', 'City Building'], 'rating': {'IGN': 8.5, 'Gamespot': 8.0, 'Steam': 4.5}}
 
 
-``middle`` is flexible enough to understand ``Enum``, nested models and a large variety of types declared on the ``typing`` Python module out of the box. Also, you can extend it to your own classes!
+``middle`` is flexible enough to understand ``Enum``, nested models and a large variety of types declared on the ``typing`` module out of the box. Also, you can `extend it <https://middle.readthedocs.io/en/latest/extending.html>`_ to your own classes!
 
 .. warning::
 
@@ -94,12 +97,12 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 TODO
 ====
 
-- Alias options to populate classes;
+- Alias options (kes) to populate classes;
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
-- Lots of documentation;
 - Create a benchmark suite against other solutions;
 - Some formatters are still missing;
+- Python 3.5 support?
 
 Done
 ----
@@ -110,6 +113,7 @@ Done
 - Implement a better "type dispatcher" based on more complex rules (other than ``type(field.type)`` delivered by ``functools.singledispatch``) because the ``typing`` module has changed **a bit** between Python 3.6 and 3.7;
 - Support more types (``typing.Tuple``, ``decimal.Decimal``);
 - Get 100% (or closer) in code coverage;
+- Lots of documentation;
 
 Future discussions
 ------------------

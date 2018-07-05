@@ -11,10 +11,10 @@ from ..dispatch import type_dispatch
 from .common import FOR_TYPE
 
 
-def _append_to(arr, dct, key, fn):
-    if key in dct and dct.get(key) is not None:
-        arr.append(partial(fn, dct.get(key)))
-    return arr
+def _append_to(validators, metadata, key, fn):
+    if key in metadata and metadata.get(key) is not None:
+        validators.append(partial(fn, metadata.get(key)))
+    return validators
 
 
 def _appender(field):
@@ -23,7 +23,13 @@ def _appender(field):
     return validators, appender
 
 
-@type_dispatch
+def _get_instances_of(type_, field):
+    if field._default is None:
+        return (type_, NONETYPE)
+    return type_
+
+
+@type_dispatch()
 def validate(type_, field):
     return []
 
@@ -33,7 +39,9 @@ def _apply_str(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["string"].items():
         validators = appender(k, v)
-    validators.append(attr.validators.instance_of(type_))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(type_, field))
+    )
     return validators
 
 
@@ -44,7 +52,9 @@ def _apply_number(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["number"].items():
         validators = appender(k, v)
-    validators.append(attr.validators.instance_of(type_))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(type_, field))
+    )
     return validators
 
 
@@ -52,12 +62,12 @@ def _apply_number(type_, field):
 @validate.register(datetime.date)
 @validate.register(datetime.datetime)
 def _apply_bool_dt_dttime(type_, field):
-    return [attr.validators.instance_of(type_)]
+    return [attr.validators.instance_of(_get_instances_of(type_, field))]
 
 
 @validate.register(EnumMeta)
 def _validate_enum(type_, field):
-    return [attr.validators.instance_of(type_)]
+    return [attr.validators.instance_of(_get_instances_of(type_, field))]
 
 
 @validate.register(typing.List)
@@ -69,7 +79,9 @@ def _validate_list(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
         validators = appender(k, v)
-    validators.append(attr.validators.instance_of(list))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(list, field))
+    )
     return validators
 
 
@@ -80,7 +92,9 @@ def _validate_set(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
         validators = appender(k, v)
-    validators.append(attr.validators.instance_of(set))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(set, field))
+    )
     return validators
 
 
@@ -91,7 +105,9 @@ def _validate_dict(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["dict"].items():
         validators = appender(k, v)
-    validators.append(attr.validators.instance_of(dict))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(dict, field))
+    )
     return validators
 
 

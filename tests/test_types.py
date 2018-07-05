@@ -901,6 +901,7 @@ def test_unregister_new_type():
     middle.value_of.unregister(Foo)
     middle.value_of.cache_clear()
     middle.converter.unregister(Foo)
+    middle.converter.cache_clear()
     middle.validate.unregister(Foo)
 
     assert middle.value_of(Foo) == middle.value_of(object)
@@ -954,7 +955,7 @@ def test_none_type():
 
 
 def test_attr_class():
-    @attr.s
+    @attr.s(cmp=False)
     class AttrModel:
         name: str = attr.ib()
         age: int = attr.ib()

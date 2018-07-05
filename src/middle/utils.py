@@ -2,10 +2,10 @@ import datetime
 import typing
 from decimal import Decimal
 from enum import EnumMeta
-from functools import lru_cache
 
 import attr
 
+from .compat import get_type
 from .dispatch import type_dispatch
 from .dtutils import dt_to_iso_string
 
@@ -38,25 +38,26 @@ def _raw_enum(value):
 
 
 def _raw_list(value):
-    return [value_of(type(v))(v) for v in value]
+    return [value_of(get_type(v))(v) for v in value]
 
 
 def _raw_set(value):
-    return {value_of(type(v))(v) for v in value}
+    return {value_of(get_type(v))(v) for v in value}
 
 
 def _raw_tuple(value):
-    return tuple(value_of(type(v))(v) for v in value)
+    return tuple(value_of(get_type(v))(v) for v in value)
 
 
 def _raw_dict(value):
     return {
-        value_of(type(k))(k): value_of(type(v))(v) for k, v in value.items()
+        value_of(get_type(k))(k): value_of(type(v))(v)
+        for k, v in value.items()
     }
 
 
-@lru_cache(maxsize=2048, typed=True)
-@type_dispatch
+@type_dispatch(lru=True)
+# @lru_cache(maxsize=2048)
 def value_of(type_):
     if attr.has(type_):
         return asdict

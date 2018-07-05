@@ -144,7 +144,7 @@ def _none_or_converter(converter, value):
     return converter(value)
 
 
-@type_dispatch
+@type_dispatch(lru=True)
 def converter(type_):
     if attr.has(type_):
         return partial(model_converter, type_)

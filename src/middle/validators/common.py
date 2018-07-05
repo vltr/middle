@@ -4,6 +4,16 @@ from decimal import Decimal
 from ..exceptions import ValidationError
 
 
+def _in_case_of_none(func):
+    def wrapper(meta_value, instance, attribute, value):
+        if attribute.default is None and value is None:
+            return
+        return func(meta_value, instance, attribute, value)
+
+    return wrapper
+
+
+@_in_case_of_none
 def min_str_len(meta_value, instance, attribute, value):
     if len(value) < meta_value:
         raise ValidationError(
@@ -13,6 +23,7 @@ def min_str_len(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def max_str_len(meta_value, instance, attribute, value):
     if len(value) > meta_value:
         raise ValidationError(
@@ -22,6 +33,7 @@ def max_str_len(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def str_pattern(meta_value, instance, attribute, value):
     if re.match(meta_value, value) is None:
         raise ValidationError(
@@ -31,6 +43,7 @@ def str_pattern(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def min_num_value(meta_value, instance, attribute, value):
     exclusive_min = attribute.metadata.get("exclusive_minimum", False)
     if exclusive_min:
@@ -49,6 +62,7 @@ def min_num_value(meta_value, instance, attribute, value):
             )
 
 
+@_in_case_of_none
 def max_num_value(meta_value, instance, attribute, value):
     exclusive_max = attribute.metadata.get("exclusive_maximum", False)
     if exclusive_max:
@@ -67,6 +81,7 @@ def max_num_value(meta_value, instance, attribute, value):
             )
 
 
+@_in_case_of_none
 def num_multiple_of(meta_value, instance, attribute, value):
     is_multiple_of = True
     if (
@@ -82,6 +97,7 @@ def num_multiple_of(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def list_min_items(meta_value, instance, attribute, value):
     if len(value) < meta_value:
         raise ValidationError(
@@ -89,6 +105,7 @@ def list_min_items(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def list_max_items(meta_value, instance, attribute, value):
     if len(value) > meta_value:
         raise ValidationError(
@@ -98,6 +115,7 @@ def list_max_items(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def list_unique_items(meta_value, instance, attribute, value):
     if meta_value:
         if isinstance(value, set):
@@ -109,6 +127,7 @@ def list_unique_items(meta_value, instance, attribute, value):
                 )
 
 
+@_in_case_of_none
 def dict_min_properties(meta_value, instance, attribute, value):
     if len(value.keys()) < meta_value:
         raise ValidationError(
@@ -118,6 +137,7 @@ def dict_min_properties(meta_value, instance, attribute, value):
         )
 
 
+@_in_case_of_none
 def dict_max_properties(meta_value, instance, attribute, value):
     if len(value.keys()) > meta_value:
         raise ValidationError(

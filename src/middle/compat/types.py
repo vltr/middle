@@ -4,6 +4,7 @@ from datetime import date
 from datetime import datetime
 from decimal import Decimal
 from enum import EnumMeta
+from functools import lru_cache
 
 IS_PY36 = False
 if sys.version_info >= (3, 7):
@@ -18,6 +19,7 @@ TYPE_REGISTRY = {}
 NONETYPE = type(None)
 
 
+@lru_cache(maxsize=None)
 def get_type(type_):
     if type_ is None:
         return NONETYPE

@@ -2,6 +2,12 @@
 Changelog
 =========
 
+v0.2.0 on 2018-07-??
+--------------------
+
+* Released documentation
+* Got 98% coverage (finally combined)
+
 v0.1.1 on 2018-07-02
 --------------------
 
