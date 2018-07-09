@@ -10,9 +10,10 @@ import attr
 from .compat import NONETYPE
 from .config import config
 from .dispatch import type_dispatch
-from .dtutils import convert_to_utc
+from .dtutils import dt_convert_to_utc
 from .dtutils import dt_from_iso_string
 from .dtutils import dt_from_timestamp
+from .dtutils import dt_normalize
 from .exceptions import InvalidType
 
 _num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
@@ -76,11 +77,23 @@ def _date_converter(value):
 
 def _datetime_converter(value):
     if isinstance(value, datetime.datetime):
-        return value
+        if config.force_datetime_utc:
+            return dt_convert_to_utc(value)
+        return dt_normalize(value)
     elif isinstance(value, str):
-        return dt_from_iso_string(value)
-    elif isinstance(value, (tuple, list)) and len(value) > 2:
-        return convert_to_utc(datetime.datetime(*value))
+        dt = dt_from_iso_string(value)
+        if config.force_datetime_utc:
+            return dt_convert_to_utc(dt)
+        return dt
+    elif isinstance(value, (tuple, list)) and 2 <= len(value) < 9:
+        if len(value) == 8:  # we have a tz offset (TODO document, hours only)
+            tz = datetime.timezone(datetime.timedelta(hours=value[7]))
+            dt = datetime.datetime(*value[:7], tzinfo=tz)
+            if config.force_datetime_utc:
+                return dt_convert_to_utc(dt)
+            return dt
+        else:
+            return dt_normalize(datetime.datetime(*value))
     elif isinstance(value, (int, float)):
         return dt_from_timestamp(value)
     raise TypeError(

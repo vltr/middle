@@ -5,12 +5,13 @@ import pytz
 from dateutil import parser
 
 # the current machine Time Zone
-_MACHINE_TZ = datetime.now(timezone.utc).astimezone().tzinfo
+_current_tz = datetime.now(timezone.utc).astimezone().tzinfo
 
 
-def dt_to_iso_string(dt: datetime) -> str:
-    if not _dt_is_utc(dt):
-        dt = pytz.utc.normalize(dt.astimezone(pytz.utc))
+def dt_to_iso_string(dt: datetime, tz=_current_tz) -> str:
+    _check_dt_instance(dt)
+    if not _dt_has_tz(dt):
+        dt = dt.replace(tzinfo=tz)
     return _dt_to_iso_string(dt)
 
 
@@ -22,26 +23,33 @@ def dt_from_iso_string(dt_str: str) -> datetime:
     return _dt_from_iso_string(dt_str)
 
 
-def dt_from_timestamp(dt_ts, tz=_MACHINE_TZ) -> datetime:
+def dt_from_timestamp(dt_ts, tz=_current_tz) -> datetime:
     if dt_ts is None or not isinstance(dt_ts, (int, float)):
         raise TypeError('"dt_ts" argument must not be None or blank')
-    return convert_to_utc(datetime.fromtimestamp(dt_ts, tz=tz))
+    # return convert_to_utc(datetime.fromtimestamp(dt_ts, tz=tz))
+    return datetime.fromtimestamp(dt_ts, tz=tz)
 
 
-def convert_to_utc(dt: datetime, tz=_MACHINE_TZ) -> datetime:
-    if not isinstance(dt, datetime):
-        raise TypeError('"dt" must be an instance of datetime')
+def dt_convert_to_utc(dt: datetime, tz=timezone.utc) -> datetime:
+    _check_dt_instance(dt)
     if not _dt_has_tz(dt):
         dt = dt.replace(tzinfo=timezone.utc)
-    if not _dt_is_utc(dt):
+    elif not _dt_is_utc(dt):
         return pytz.utc.normalize(dt)
+    return dt
+
+
+def dt_normalize(dt: datetime, tz=_current_tz) -> datetime:
+    _check_dt_instance(dt)
+    if not _dt_has_tz(dt):
+        dt = dt.replace(tzinfo=tz)
     return dt
 
 
 def _dt_from_iso_string(dt_str):
     dt = parser.parse(dt_str)
     if not _dt_has_tz(dt):
-        dt = convert_to_utc(dt)
+        dt = dt_convert_to_utc(dt)
     return dt
 
 
@@ -49,20 +57,32 @@ def _dt_to_iso_string(dt):
     return dt.isoformat()
 
 
-def _dt_is_utc(dt):
-    try:
-        return int(dt.utcoffset().total_seconds()) != 0
-    except AttributeError:
-        return False
+def _dt_is_utc(dt: datetime):
+    return timezone.utc.utcoffset(dt) == 0
 
 
-def _dt_has_tz(dt):
-    return dt.tzinfo is not None
+def _dt_has_tz(dt: datetime):
+    """From the Python docs: https://docs.python.org/3/library/datetime.html
+
+    An object of type time or datetime may be naive or aware. A datetime object
+    d is aware if d.tzinfo is not None and d.tzinfo.utcoffset(d) does not
+    return None. If d.tzinfo is None, or if d.tzinfo is not None but
+    d.tzinfo.utcoffset(d) returns None, d is naive. A time object t is aware if
+    t.tzinfo is not None and t.tzinfo.utcoffset(None) does not return None.
+    Otherwise, t is naive.
+    """
+    return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None
+
+
+def _check_dt_instance(dt):
+    if not isinstance(dt, datetime):
+        raise TypeError('"dt" must be an instance of datetime')
 
 
 __all__ = (
-    "dt_to_iso_string",
+    "dt_convert_to_utc",
     "dt_from_iso_string",
     "dt_from_timestamp",
-    "convert_to_utc",
+    "dt_normalize",
+    "dt_to_iso_string",
 )

@@ -6,7 +6,9 @@ from enum import EnumMeta
 import attr
 
 from .compat import get_type
+from .config import config
 from .dispatch import type_dispatch
+from .dtutils import dt_convert_to_utc
 from .dtutils import dt_to_iso_string
 
 
@@ -30,6 +32,8 @@ def _raw_date(value):
 
 
 def _raw_datetime(value):
+    if config.force_datetime_utc:
+        value = dt_convert_to_utc(value)
     return dt_to_iso_string(value)
 
 
@@ -57,7 +61,6 @@ def _raw_dict(value):
 
 
 @type_dispatch(lru=True)
-# @lru_cache(maxsize=2048)
 def value_of(type_):
     if attr.has(type_):
         return asdict

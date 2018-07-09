@@ -4,7 +4,7 @@ import pytest
 import pytz
 from freezegun import freeze_time
 
-from middle.dtutils import convert_to_utc
+from middle.dtutils import dt_convert_to_utc
 from middle.dtutils import dt_from_iso_string
 from middle.dtutils import dt_from_timestamp
 from middle.dtutils import dt_to_iso_string
@@ -16,14 +16,13 @@ def test_datetime_with_tzinfo_to_iso_string():
 
 
 def test_datetime_no_tzinfo_to_iso_string():
-    tz = datetime.datetime.now(datetime.timezone.utc).astimezone()
-    utc_offset = tz.tzinfo.utcoffset(tz).total_seconds() / 3600
-    with freeze_time(
-        "2018-07-02 08:30:00", tz_offset=datetime.timedelta(hours=utc_offset)
-    ):
+    tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    with freeze_time(datetime.datetime(2018, 7, 2, 8, 30, tzinfo=tz)):
         dt = datetime.datetime.now()
         assert dt.tzinfo is None
-        assert dt_to_iso_string(dt) == "2018-07-02T08:30:00+00:00"
+        assert dt_to_iso_string(dt) == dt_to_iso_string(
+            datetime.datetime.utcnow()
+        )
 
 
 def test_datetime_with_tzinfo_nonutc_to_iso_string():
@@ -84,12 +83,12 @@ def test_dt_from_timestamp_error(value):
         dt_from_timestamp(value)
 
 
-def test_convert_to_utc():
-    assert convert_to_utc(
+def test_dt_convert_to_utc():
+    assert dt_convert_to_utc(
         datetime.datetime(2018, 7, 2, 8, 30, 0, 0, pytz.timezone("CET"))
     ) == datetime.datetime(2018, 7, 2, 7, 30, 0, 0, datetime.timezone.utc)
 
-    assert convert_to_utc(
+    assert dt_convert_to_utc(
         datetime.datetime(2018, 7, 2, 8, 30, 0, 0)
     ) == datetime.datetime(2018, 7, 2, 9, 30, 0, 0, pytz.timezone("CET"))
 
@@ -103,6 +102,6 @@ def test_convert_to_utc():
         pytest.param(datetime.datetime.now().date, id="invalid_dt_input_2"),
     ],
 )
-def test_convert_to_utc_error(value):
+def test_dt_convert_to_utc_error(value):
     with pytest.raises(TypeError):
-        convert_to_utc(value)
+        dt_convert_to_utc(value)

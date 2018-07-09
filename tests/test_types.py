@@ -256,8 +256,8 @@ def test_datetime_converter():
         TestModel(ts=datetime(2018, 6, 18, 13, 30, 0, 0, timezone.utc)).ts
         == test_datetime
     )
-    assert TestModel(ts=[2018, 6, 18, 13, 30, 0, 0]).ts == test_datetime
-    assert TestModel(ts=(2018, 6, 18, 13, 30, 0, 0)).ts == test_datetime
+    assert TestModel(ts=[2018, 6, 18, 13, 30, 0, 0, 0]).ts == test_datetime
+    assert TestModel(ts=(2018, 6, 18, 13, 30, 0, 0, 0)).ts == test_datetime
     assert TestModel(ts=1529328600).ts == test_datetime
     assert TestModel(ts=1529328600.0).ts == test_datetime
 

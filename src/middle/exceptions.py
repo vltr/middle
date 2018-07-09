@@ -1,6 +1,4 @@
-_EXTENDING_URL = (
-    "https://middle.readthedocs.io/en/latest/reference/extending.html"
-)
+_EXTENDING_URL = "https://middle.readthedocs.io/en/latest/extending.html"
 
 
 class MiddleException(Exception):  # personal note: weird name ...

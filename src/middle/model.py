@@ -8,9 +8,9 @@ from .compat import TYPE_REGISTRY
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_options
-from .utils import asdict
-from .utils import value_of
 from .validators import validate
+from .values import asdict
+from .values import value_of
 
 _reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
 _attr_s_kwargs = {"cmp": False}

@@ -1,13 +1,17 @@
+import logging
 from contextlib import contextmanager
 from functools import partial
 
 import attr
+
+logger = logging.getLogger(__name__)
 
 
 @attr.s(repr=False, slots=True, hash=True)
 class _Config:
     _force_str: bool = attr.ib(default=False)
     _str_method: bool = attr.ib(default=True)
+    _force_datetime_utc: bool = attr.ib(default=False)
     __changed_params: dict = attr.ib(default={})
 
     def __getcfg(self, cfgkey=None):
@@ -31,14 +35,27 @@ class _Config:
         partial(__getcfg, cfgkey="str_method"),
         partial(__setcfg, cfgkey="str_method", type_=bool),
     )
+    force_datetime_utc = property(
+        partial(__getcfg, cfgkey="force_datetime_utc"),
+        partial(__setcfg, cfgkey="force_datetime_utc", type_=bool),
+    )
 
     @contextmanager
     def temp(self, **kwargs):
         if kwargs:
-            keys = [f.name.lstrip("_") for f in attr.fields(self.__class__)]
-            self.__changed_params.update(
-                {k: kwargs[k] for k in keys if k in kwargs}
-            )
+            for field in attr.fields(self.__class__):
+                field_name = field.name.lstrip("_")
+                if field_name in kwargs:
+                    if isinstance(kwargs.get(field_name), field.type):
+                        self.__changed_params.update(
+                            {field_name: kwargs.get(field_name)}
+                        )
+                    else:
+                        logger.warn(
+                            'The config value provided for "{}" doesn\'t match type {!r}'.format(
+                                field_name, field.type
+                            )
+                        )
         yield
         self.__changed_params.clear()
 
