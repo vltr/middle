@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class _Config:
     _force_str: bool = attr.ib(default=False)
     _str_method: bool = attr.ib(default=True)
-    _force_datetime_utc: bool = attr.ib(default=False)
+    _no_transit_local_dtime: bool = attr.ib(default=False)
     __changed_params: dict = attr.ib(default={})
 
     def __getcfg(self, cfgkey=None):
@@ -35,9 +35,9 @@ class _Config:
         partial(__getcfg, cfgkey="str_method"),
         partial(__setcfg, cfgkey="str_method", type_=bool),
     )
-    force_datetime_utc = property(
-        partial(__getcfg, cfgkey="force_datetime_utc"),
-        partial(__setcfg, cfgkey="force_datetime_utc", type_=bool),
+    no_transit_local_dtime = property(
+        partial(__getcfg, cfgkey="no_transit_local_dtime"),
+        partial(__setcfg, cfgkey="no_transit_local_dtime", type_=bool),
     )
 
     @contextmanager

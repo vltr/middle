@@ -42,15 +42,15 @@ Since ``dict``, ``list`` and ``set`` can't have a distinguished type, they will 
 ``datetime.date`` and ``datetime.datetime``
 -------------------------------------------
 
-For now, ``middle`` depends on two extra requirements to properly handle ``date`` and ``datetime`` objects, which are ``pytz`` and ``python-dateutil``, that are currently found on most Python projects already (that deals with this kind of value).
+For now, ``middle`` depends on one extra requirements to properly handle ``date`` and ``datetime`` objects, which is ``python-dateutil`` (to properly format ``datetime`` string representations into ``datetime`` instances), and it is generally found on most Python projects / libraries already (that handles ``datetime`` string parsing).
 
 .. important::
 
-    All naive ``datetime`` string or timestamp representations will be considered as UTC by ``middle``, thus any of this objects or representations that are not naive will remain untouched, but can be automatically converted to UTC for uniformity (see :ref:`configuration <configuration>`). Naive ``datetime`` objects will use the current machine timezone and can be converted to UTC for uniformity (also in :ref:`configuration <configuration>`).
+    All naive ``datetime`` string or timestamp representations will be considered as UTC (and converted accordingly) by ``middle``, thus any of this objects or representations that are not naive will be automatically converted to UTC for uniformity. Naive ``datetime`` objects will transit with the current machine timezone and converted to UTC for uniformity (this transition can be modified to be considered as UTC, see more on :ref:`configuration <configuration>`).
 
 .. warning::
 
-    Even though the ``datetime`` API provides us two methods for getting the current date and time, ``now`` and ``utcnow``, both objects will be created **without** ``tzinfo``, making both instances **naive**. Basically, it means that no one can determine if a datetime object is not naive if the timezone is not explicitly provided:
+    Even though the ``datetime`` API provides us two methods for getting the current date and time, ``now`` and ``utcnow``, both instances will be created **without** ``tzinfo``, thus making them **naive**. Basically, it means that no one can determine if a datetime object is not naive if the timezone is not explicitly provided:
 
     .. code-block:: pycon
 
@@ -96,56 +96,56 @@ Considering a machine configured to GMT-0300 timezone at 10:30 AM local time:
     ... from middle.dtutils import dt_to_iso_string
 
     >>> dt_to_iso_string(datetime.datetime.now())
-    '2018-07-09T10:30:00-03:00'
+    '2018-07-10T13:30:00+00:00'
 
     >>> dt_to_iso_string(datetime.datetime.utcnow())
-    '2018-07-09T13:30:00-03:00'
+    '2018-07-10T16:30:00+00:00'
 
     >>> dt_from_iso_string("2018-07-02T08:30:00+01:00")
-    datetime.datetime(2018, 7, 2, 8, 30, tzinfo=tzoffset(None, 3600))
+    datetime.datetime(2018, 7, 2, 7, 30, tzinfo=datetime.timezone.utc)
 
     >>> dt_from_iso_string("2018-07-02T08:30:00")
     datetime.datetime(2018, 7, 2, 8, 30, tzinfo=datetime.timezone.utc)
 
     >>> dt_from_timestamp(1530520200)
-    datetime.datetime(2018, 7, 2, 5, 30, tzinfo=datetime.timezone(datetime.timedelta(-1, 75600), '-03'))
+    datetime.datetime(2018, 7, 2, 8, 30, tzinfo=datetime.timezone.utc)
 
     >>> dt_from_timestamp(1530520200.000123)
-    datetime.datetime(2018, 7, 2, 5, 30, 0, 123, tzinfo=datetime.timezone(datetime.timedelta(-1, 75600), '-03'))
+    datetime.datetime(2018, 7, 2, 8, 30, 0, 123, tzinfo=datetime.timezone.utc)
 
     >>> dt_convert_to_utc(datetime.datetime(2018, 7, 2, 8, 30, 0, 0, pytz.timezone("CET")))
-    datetime.datetime(2018, 7, 2, 7, 30, tzinfo=<UTC>)
+    datetime.datetime(2018, 7, 2, 7, 30, tzinfo=datetime.timezone.utc)
 
     >>> dt_convert_to_utc(dt_from_iso_string("2018-07-02T08:30:00+01:00"))
-    datetime.datetime(2018, 7, 2, 7, 30, tzinfo=<UTC>)
+    datetime.datetime(2018, 7, 2, 7, 30, tzinfo=datetime.timezone.utc)
 
 One plus of using ``datetime`` in ``middle`` is that it accepts a wide range of inputs, having in mind that we're talking about Python here (see the ``datetime`` `constructor <https://docs.python.org/3/library/datetime.html#datetime.datetime>`_ to understand why):
 
 .. code-block:: pycon
 
-    >>> from datetime import datetime
+    >>> from datetime import datetime, timezone
     >>> import middle
 
     >>> class TestModel(middle.Model):
     ...     created_on: datetime = middle.field()
 
     >>> TestModel(created_on=datetime.now())
-    TestModel(created_on=datetime.datetime(2018, 7, 9, 14, 36, 7, 679625, tzinfo=datetime.timezone(datetime.timedelta(-1, 75600), '-03')))
+    TestModel(created_on=datetime.datetime(2018, 7, 10, 15, 1, 6, 121325, tzinfo=datetime.timezone.utc))
 
     >>> TestModel(created_on=datetime.now(timezone.utc))
-    TestModel(created_on=datetime.datetime(2018, 7, 9, 17, 37, 35, 333771, tzinfo=datetime.timezone.utc))
+    TestModel(created_on=datetime.datetime(2018, 7, 10, 15, 1, 40, 769369, tzinfo=datetime.timezone.utc))
 
     >>> TestModel(created_on="2018-7-7 4:42pm")
     TestModel(created_on=datetime.datetime(2018, 7, 7, 16, 42, tzinfo=datetime.timezone.utc))
 
     >>> TestModel(created_on=1530520200)
-    TestModel(created_on=datetime.datetime(2018, 7, 2, 5, 30, tzinfo=datetime.timezone(datetime.timedelta(-1, 75600), '-03')))
+    TestModel(created_on=datetime.datetime(2018, 7, 2, 8, 30, tzinfo=datetime.timezone.utc))
 
     >>> TestModel(created_on=(2018, 7, 9, 10))
-    TestModel(created_on=datetime.datetime(2018, 7, 9, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(-1, 75600), '-03')))
+    TestModel(created_on=datetime.datetime(2018, 7, 9, 13, 0, tzinfo=datetime.timezone.utc))
 
     >>> TestModel(created_on=(2018, 7, 9, 10, 30, 0, 0, 1))
-    TestModel(created_on=datetime.datetime(2018, 7, 9, 10, 30, tzinfo=datetime.timezone(datetime.timedelta(0, 3600))))
+    TestModel(created_on=datetime.datetime(2018, 7, 9, 9, 30, tzinfo=datetime.timezone.utc))
 
 .. important::
 
@@ -203,6 +203,6 @@ Future plans on types
 
 There are some types in the Python stdlib that are planned to be part of ``middle`` in the near future:
 
-- uuid.uuid
+- uuid.uuid[1,3-5]
 
 If there's a type you would like to see on ``middle``, feel free to `open an issue <https://github.com/vltr/middle/issues>`_ or submit a PR.

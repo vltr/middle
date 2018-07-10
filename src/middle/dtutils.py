@@ -1,8 +1,9 @@
 from datetime import datetime
 from datetime import timezone
 
-import pytz
 from dateutil import parser
+
+from .config import config
 
 # the current machine Time Zone
 _current_tz = datetime.now(timezone.utc).astimezone().tzinfo
@@ -11,7 +12,9 @@ _current_tz = datetime.now(timezone.utc).astimezone().tzinfo
 def dt_to_iso_string(dt: datetime, tz=_current_tz) -> str:
     _check_dt_instance(dt)
     if not _dt_has_tz(dt):
-        dt = dt.replace(tzinfo=tz)
+        dt = dt_convert_to_utc(dt)
+    elif not _dt_is_utc(dt):
+        dt = dt.astimezone(timezone.utc)
     return _dt_to_iso_string(dt)
 
 
@@ -26,31 +29,24 @@ def dt_from_iso_string(dt_str: str) -> datetime:
 def dt_from_timestamp(dt_ts, tz=_current_tz) -> datetime:
     if dt_ts is None or not isinstance(dt_ts, (int, float)):
         raise TypeError('"dt_ts" argument must not be None or blank')
-    # return convert_to_utc(datetime.fromtimestamp(dt_ts, tz=tz))
-    return datetime.fromtimestamp(dt_ts, tz=tz)
+    return dt_convert_to_utc(datetime.fromtimestamp(dt_ts, tz=tz))
 
 
-def dt_convert_to_utc(dt: datetime, tz=timezone.utc) -> datetime:
+def dt_convert_to_utc(dt: datetime, tz=_current_tz) -> datetime:
     _check_dt_instance(dt)
     if not _dt_has_tz(dt):
-        dt = dt.replace(tzinfo=timezone.utc)
-    elif not _dt_is_utc(dt):
-        return pytz.utc.normalize(dt)
-    return dt
-
-
-def dt_normalize(dt: datetime, tz=_current_tz) -> datetime:
-    _check_dt_instance(dt)
-    if not _dt_has_tz(dt):
-        dt = dt.replace(tzinfo=tz)
+        if not config.no_transit_local_dtime:
+            dt = dt.replace(tzinfo=tz)
+        else:
+            dt = dt.replace(tzinfo=timezone.utc)
+    if not _dt_is_utc(dt):
+        return dt.astimezone(timezone.utc)
     return dt
 
 
 def _dt_from_iso_string(dt_str):
     dt = parser.parse(dt_str)
-    if not _dt_has_tz(dt):
-        dt = dt_convert_to_utc(dt)
-    return dt
+    return dt_convert_to_utc(dt, tz=timezone.utc)
 
 
 def _dt_to_iso_string(dt):
@@ -83,6 +79,5 @@ __all__ = (
     "dt_convert_to_utc",
     "dt_from_iso_string",
     "dt_from_timestamp",
-    "dt_normalize",
     "dt_to_iso_string",
 )
