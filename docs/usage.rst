@@ -10,7 +10,7 @@ After installing ``middle``, it is easy to use it in your project. Most of its f
 
     import middle
 
-``middle`` consists basically in three components:
+``middle`` consists basically in three parts:
 
 - ``middle.Model``: the base class that needs to be inherited to declare all your models (except submodels);
 - ``middle.field``: a function that is used to declare your field models; and
@@ -26,7 +26,7 @@ The ``middle.Model`` class is the heart of ``middle``. To have all middle functi
     class MyModel(middle.Model):
         name: str = middle.field()
 
-In essence, ``middle.Model`` started as a syntatic sugar for the ``attr.s`` decorator but soon evolved to a more complex design, implementing its own ``metaclass`` to handle some aspects of your models and fields.
+In essence, ``middle.Model`` started as a syntactic sugar for the ``attr.s`` decorator but soon evolved to a more complex design, implementing its own ``metaclass`` to handle some aspects of its models and fields.
 
 .. note::
 
@@ -65,7 +65,7 @@ To create an instance of your model, you can:
 ``middle.field``
 ----------------
 
-The ``middle.field`` function is used to declare your model's fields, with support to the type definition and other options that can be used later to define your model behavior regarding converting input values, :ref:`validating <validators>` values and format values for Python primitives. ``middle.field`` makes heavy usage of ``attr.ib`` calls, specially to store information into the ``metadata`` dict.
+The ``middle.field`` function is used to declare your model's fields, with support to the type definition and other options that can be used later to define your model behavior regarding converting input values, :ref:`validating <validating>` values and format values for Python primitives. ``middle.field`` makes heavy usage of ``attr.ib`` calls, specially to store information into the ``metadata`` dict.
 
 There are three ways to declare your fields inside ``middle.Model``, you don't have to necessarily use ``middle.field``, though it will be called under the hood to have a uniform model.
 
@@ -122,7 +122,7 @@ Declaring models, without ``middle.field``, using only ``typing`` hints (inspire
 
 .. warning::
 
-    Declaring models using only ``typing`` hints will not enable support for keyword embed validators.
+    Declaring models using only ``typing`` hints will not enable support for keyword embed :ref:`validators <validating>`.
 
 Declaring models, the chaotic way:
 

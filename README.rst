@@ -92,12 +92,12 @@ Quick peak
 
 .. warning::
 
-    **IMPORTANT**: ``middle`` is in **very early stages** of development. There are some requirements (like ``python-dateutil`` and ``pytz``) that would not be required in future releases; as there's a lot of functionalities that needs to be implemented and some known misbehaviors to be addressed, not to mention it needs a lot of testing before moving to any other status rather than **pre-alpha** or **alpha**.
+    **IMPORTANT**: ``middle`` is in **very early stages** of development. There are some requirements (like ``python-dateutil``) that would not be required in future releases; as there's a lot of functionalities that needs to be implemented and some known misbehaviors to be addressed, not to mention it needs a lot of testing before moving to any other status rather than **alpha**.
 
 TODO
 ====
 
-- Alias options (kes) to populate classes;
+- Alias options (keys) to populate classes;
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
 - Create a benchmark suite against other solutions;
@@ -125,10 +125,10 @@ Documentation
 
 https://middle.readthedocs.io/en/latest/
 
-Inspiration and Thanks
-======================
+Inspirations and thanks
+=======================
 
-I really got inspired to create this library by observing a lot of other libraries and tools, specially:
+Some libs that inspired the creation of ``middle``:
 
 - `attrs <http://www.attrs.org/en/stable/>`_: how such a simple library can be such flexible, extendable and fast?
 - `cattrs <https://github.com/Tinche/cattrs>`_: for its speed on creating ``attrs`` instances from ``dict`` and to instances again;

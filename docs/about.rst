@@ -24,7 +24,7 @@ Another feature you can expect from ``middle`` is it speed. ``middle`` can conve
 Benchmarks
 ~~~~~~~~~~
 
-(Sneaky) me took a copy of `pydantic benchmark suite <https://github.com/samuelcolvin/pydantic/tree/master/benchmarks>`_ and created a benchmark file for ``middle`` (mostly illustrative):
+(Sneaky) author took a copy of `pydantic benchmark suite <https://github.com/samuelcolvin/pydantic/tree/master/benchmarks>`_ and created a benchmark file for ``middle`` (mostly illustrative):
 
 .. code-block:: python
 
@@ -74,7 +74,7 @@ Benchmarks
             except Exception as e:
                 return False, str(e)
 
-I must say that the results were really impressive considering this is pure Python code (on an old AMD machine), no Cython, no Jit:
+I must say that the results were really encouraging considering this is pure Python code (on an old AMD machine), no Cython, no Jit:
 
 +--------------------------+--------------+----------+------------+
 | Framework                | Comparison   | avg/iter | stdev/iter |

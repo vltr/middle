@@ -1,7 +1,0 @@
-.. _validators:
-
-==========
-Validators
-==========
-
-Todo.

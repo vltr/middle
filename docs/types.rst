@@ -46,7 +46,7 @@ For now, ``middle`` depends on one extra requirements to properly handle ``date`
 
 .. important::
 
-    All naive ``datetime`` string or timestamp representations will be considered as UTC (and converted accordingly) by ``middle``, thus any of this objects or representations that are not naive will be automatically converted to UTC for uniformity. Naive ``datetime`` objects will transit with the current machine timezone and converted to UTC for uniformity (this transition can be modified to be considered as UTC, see more on :ref:`configuration <configuration>`).
+    All naive ``datetime`` string or timestamp representations will be considered as UTC (and converted accordingly) by ``middle``, thus any of this objects or representations that are not naive will be automatically converted to UTC for uniformity. Naive ``datetime`` objects will transit with the current machine timezone and converted to UTC for uniformity (this transition can be modified to be considered as UTC, see more about :ref:`configuring middle <configuring>`).
 
 .. warning::
 
@@ -150,6 +150,11 @@ One plus of using ``datetime`` in ``middle`` is that it accepts a wide range of 
 .. important::
 
     In the last input (in the example above), where a tuple of 8 integers were given for the ``created_on`` parameter, the last value corresponds to the **UTC offset in hours**.
+
+"But I only trust on [arrow|momentum|maya]"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Well, I don't blame you. These operations regarding ``date`` and ``datetime`` were created for ``middle`` to provide an out-of-the-box solution for the most used types in Python, but, don't worry, you can override these operations with your own. Just head out to :ref:`extending <extending>` and catch up some examples.
 
 Enum
 ----
