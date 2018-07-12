@@ -1,6 +1,4 @@
 import re
-
-# from collections import OrderedDict
 from functools import partial
 
 import attr
@@ -31,10 +29,6 @@ def field(*args, **kwargs):
 
 
 class ModelMeta(type):
-
-    # @classmethod
-    # def __prepare__(mcs, name, bases, **kwargs):
-    #     return OrderedDict()
 
     def __new__(mcls, name, bases, attrs):
         if bases:
