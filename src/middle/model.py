@@ -1,7 +1,10 @@
 import re
+
+# from collections import OrderedDict
 from functools import partial
 
 import attr
+from attr._make import NOTHING  # NOTE: this is internal to attrs
 from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
 from .compat import TYPE_REGISTRY
@@ -28,6 +31,11 @@ def field(*args, **kwargs):
 
 
 class ModelMeta(type):
+
+    # @classmethod
+    # def __prepare__(mcs, name, bases, **kwargs):
+    #     return OrderedDict()
+
     def __new__(mcls, name, bases, attrs):
         if bases:
             annotations = attrs.get("__annotations__", {})
@@ -54,6 +62,22 @@ class ModelMeta(type):
                     if k not in attrs["__annotations__"]:
                         # XXX does it get here?
                         attrs["__annotations__"].update({k: annotations[k]})
+        # "unscramble" fields with default values to the end of the line
+        _keys = list(attrs.keys())
+        _max_counter = max(
+            [
+                f.counter if isinstance(f, _CountingAttr) else -1
+                for f in attrs.values()
+            ]
+        )
+        for k in _keys:
+            if (
+                isinstance(attrs[k], _CountingAttr)
+                and attrs[k]._default != NOTHING
+            ):
+                # send it to the back of the line
+                _max_counter += 1
+                attrs[k].counter = _max_counter
         attr_kwargs = _attr_s_kwargs.copy()
         if attrs.get("__attr_s_kwargs__", None) is not None:
             attr_kwargs = attrs.get("__attr_s_kwargs__")

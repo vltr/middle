@@ -10,7 +10,7 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 Quick peak
 ----------
 
-The most simple example of ``middle`` and some of its features:
+The most simple example of ``middle`` and some of its features (using Python 3.6+ syntax):
 
 .. code-block:: pycon
 
@@ -52,7 +52,7 @@ The most simple example of ``middle`` and some of its features:
     >>> middle.asdict(person)
     {'name': 'John Doe', 'age': 42, 'address': {'home': {'street_name': 'Foo St', 'number': None, 'city': 'Python Park'}, 'work': {'street_name': 'Bar Blvd', 'number': 1337, 'city': 'Park City'}}}
 
-Wanted a more complex example? For sure!
+Wanted a more complex example, with Python 3.5 compatible syntax? For sure!
 
 .. code-block:: pycon
 
@@ -60,11 +60,11 @@ Wanted a more complex example? For sure!
     >>> import middle
 
     >>> class Game(middle.Model):
-    ...     name: str = middle.field()
-    ...     score: float = middle.field(minimum=0, maximum=10)
-    ...     resolution_tested: str = middle.field(pattern="^\d+x\d+$")
-    ...     genre: List[str] = middle.field(unique_items=True)
-    ...     rating: Dict[str, float] = middle.field(max_properties=5)
+    ...     name = middle.field(type=str)
+    ...     score = middle.field(type=float, minimum=0, maximum=10)
+    ...     resolution_tested = middle.field(type=str, pattern="^\d+x\d+$")
+    ...     genre = middle.field(type=List[str], unique_items=True)
+    ...     rating = middle.field(type=Dict[str, float], max_properties=5)
 
     >>> data = {
     ...     "name": "Cities: Skylines",

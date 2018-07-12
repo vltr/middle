@@ -44,62 +44,6 @@ import middle
         pytest.param(
             typing.Optional[str], typing.Union, id="typing.Union[str,None]"
         ),
-        pytest.param(
-            typing.Collection, typing.Collection, id="typing.Collection"
-        ),
-        pytest.param(
-            typing.Collection[bool],
-            typing.Collection,
-            id="typing.Collection[bool]",
-        ),
-        pytest.param(typing.Iterable, typing.Iterable, id="typing.Iterable"),
-        pytest.param(
-            typing.Iterable[int], typing.Iterable, id="typing.Iterable[int]"
-        ),
-        pytest.param(typing.Sequence, typing.Sequence, id="typing.Sequence"),
-        pytest.param(
-            typing.Sequence[str], typing.Sequence, id="typing.Sequence[str]"
-        ),
-        pytest.param(
-            typing.MutableSequence,
-            typing.MutableSequence,
-            id="typing.MutableSequence",
-        ),
-        pytest.param(
-            typing.MutableSequence[datetime.datetime],
-            typing.MutableSequence,
-            id="typing.MutableSequence[datetime_datetime]",
-        ),
-        pytest.param(
-            typing.FrozenSet, typing.FrozenSet, id="typing.FrozenSet"
-        ),
-        pytest.param(
-            typing.FrozenSet[int], typing.FrozenSet, id="typing.FrozenSet[int]"
-        ),
-        pytest.param(
-            typing.MutableSet, typing.MutableSet, id="typing.MutableSet"
-        ),
-        pytest.param(
-            typing.MutableSet[float],
-            typing.MutableSet,
-            id="typing.MutableSet[float]",
-        ),
-        pytest.param(typing.Mapping, typing.Mapping, id="typing.Mapping"),
-        pytest.param(
-            typing.Mapping[str, bytes],
-            typing.Mapping,
-            id="typing.Mapping[str,bytes]",
-        ),
-        pytest.param(
-            typing.MutableMapping,
-            typing.MutableMapping,
-            id="typing.MutableMapping",
-        ),
-        pytest.param(
-            typing.MutableMapping[str, str],
-            typing.MutableMapping,
-            id="typing.MutableMapping[str,str]",
-        ),
     ],
 )
 def test_get_type(type_, expected):

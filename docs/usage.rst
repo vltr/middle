@@ -24,7 +24,8 @@ The ``middle.Model`` class is the heart of ``middle``. To have all middle functi
 .. code-block:: python
 
     class MyModel(middle.Model):
-        name: str = middle.field()
+        name: str = middle.field()  # Python 3.6+ syntax
+        name = middle.field(type=str)  # Python 3.5 syntax
 
 In essence, ``middle.Model`` started as a syntactic sugar for the ``attr.s`` decorator but soon evolved to a more complex design, implementing its own ``metaclass`` to handle some aspects of its models and fields.
 
@@ -69,7 +70,7 @@ The ``middle.field`` function is used to declare your model's fields, with suppo
 
 There are three ways to declare your fields inside ``middle.Model``, you don't have to necessarily use ``middle.field``, though it will be called under the hood to have a uniform model.
 
-Declaring models, using ``middle.field`` and ``typing`` hints:
+Declaring models, using ``middle.field`` and ``typing`` hints and annotations (`PEP-526 <https://www.python.org/dev/peps/pep-0526/>`_, for Python 3.6+):
 
 .. code-block:: python
 
@@ -79,7 +80,7 @@ Declaring models, using ``middle.field`` and ``typing`` hints:
         active: bool = middle.field(default=False)
         created_on: datetime = middle.field(default=None)
 
-Declaring models, using ``middle.field`` and ``type`` keyword:
+Declaring models, using ``middle.field`` and ``type`` keyword (Python 3.5 compatible):
 
 .. code-block:: python
 
@@ -89,7 +90,7 @@ Declaring models, using ``middle.field`` and ``type`` keyword:
         active = middle.field(type=bool, default=False)
         created_on = middle.field(type=datetime, default=None)
 
-Declaring models, without ``middle.field``, using ``typing`` hints and a ``dict``:
+Declaring models, without ``middle.field``, using ``typing`` hints, annotations (Python 3.6+ only) and a ``dict``:
 
 .. code-block:: python
 
@@ -100,7 +101,7 @@ Declaring models, without ``middle.field``, using ``typing`` hints and a ``dict`
         active: bool = {"default": False}
         created_on: datetime = {"default": None}
 
-Declaring models, without ``middle.field``, using only a ``dict``:
+Declaring models, without ``middle.field``, using only a ``dict`` (Python 3.5 compatible):
 
 .. code-block:: python
 
@@ -110,7 +111,7 @@ Declaring models, without ``middle.field``, using only a ``dict``:
         active = {"type": str, "default": False}
         created_on = {"type": datetime, "default": None}
 
-Declaring models, without ``middle.field``, using only ``typing`` hints (inspired by `pydantic <https://pydantic-docs.helpmanual.io/>`_):
+Declaring models, without ``middle.field``, using only ``typing`` hints and annotations (inspired by `pydantic <https://pydantic-docs.helpmanual.io/>`_, works only with Python 3.6+):
 
 .. code-block:: python
 
@@ -122,9 +123,9 @@ Declaring models, without ``middle.field``, using only ``typing`` hints (inspire
 
 .. warning::
 
-    Declaring models using only ``typing`` hints will not enable support for keyword embed :ref:`validators <validating>`.
+    Declaring models using only ``typing`` hints annotations will not enable support for keyword embed :ref:`validators <validating>`.
 
-Declaring models, the chaotic way:
+Declaring models, the chaotic way (won't work on Python 3.5):
 
 .. code-block:: python
 
@@ -136,7 +137,7 @@ Declaring models, the chaotic way:
 
 .. tip::
 
-    Developers are free to choose their preferred style, but stick to one can help readabilty.
+    Developers are free to choose their preferred style (matching the Python version), although sticking to one can help readabilty.
 
 ``middle.asdict``
 -----------------

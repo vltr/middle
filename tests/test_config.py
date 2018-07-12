@@ -7,8 +7,8 @@ import middle
 
 def test_config_keys():
     class TestModel(middle.Model):
-        name: str = middle.field()
-        when: datetime.datetime = middle.field()
+        name = middle.field(type=str)
+        when = middle.field(type=datetime.datetime)
 
     # ------------------------- #
     # defaults
@@ -79,8 +79,8 @@ def test_invalid_config_keys():
 
 def test_contextmanager_config_keys():
     class TestModel(middle.Model):
-        name: str = middle.field()
-        when: datetime.datetime = middle.field()
+        name = middle.field(type=str)
+        when = middle.field(type=datetime.datetime)
 
     class Foo:
         def __init__(self, *args, **kwargs):

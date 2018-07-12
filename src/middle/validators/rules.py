@@ -71,10 +71,10 @@ def _validate_enum(type_, field):
 
 
 @validate.register(typing.List)
-@validate.register(typing.Sequence)
-@validate.register(typing.Collection)
-@validate.register(typing.Iterable)
-@validate.register(typing.MutableSequence)
+# @validate.register(typing.Sequence)
+# @validate.register(typing.Collection)
+# @validate.register(typing.Iterable)
+# @validate.register(typing.MutableSequence)
 def _validate_list(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
@@ -86,8 +86,8 @@ def _validate_list(type_, field):
 
 
 @validate.register(typing.Set)
-@validate.register(typing.MutableSet)
-@validate.register(typing.FrozenSet)
+# @validate.register(typing.MutableSet)
+# @validate.register(typing.FrozenSet)
 def _validate_set(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["list"].items():
@@ -99,8 +99,8 @@ def _validate_set(type_, field):
 
 
 @validate.register(typing.Dict)
-@validate.register(typing.Mapping)
-@validate.register(typing.MutableMapping)
+# @validate.register(typing.Mapping)
+# @validate.register(typing.MutableMapping)
 def _validate_dict(type_, field):
     validators, appender = _appender(field)
     for k, v in FOR_TYPE["dict"].items():

@@ -4,25 +4,22 @@ from enum import unique
 import middle
 
 
-@unique
-class CityRegionEnum(str, Enum):
-    TROPICAL = "TROPICAL"
-    TEMPERATE = "TEMPERATE"
-    BOREAL = "BOREAL"
-
-
-class BaseCity(middle.Model):
-    name: str = middle.field()
-    region: CityRegionEnum = middle.field()
-
-
-class City(BaseCity):
-    population: int = middle.field()
-    latitude: float = middle.field()
-    longitude: float = middle.field()
-
-
 def test_inheritance():
+    @unique
+    class CityRegionEnum(str, Enum):
+        TROPICAL = "TROPICAL"
+        TEMPERATE = "TEMPERATE"
+        BOREAL = "BOREAL"
+
+    class BaseCity(middle.Model):
+        name = middle.field(type=str)
+        region = middle.field(type=CityRegionEnum)
+
+    class City(BaseCity):
+        population = middle.field(type=int)
+        latitude = middle.field(type=float)
+        longitude = middle.field(type=float)
+
     base_city = BaseCity(name="London", region="TEMPERATE")
 
     city = City(

@@ -39,28 +39,34 @@ class City(middle.Model):
 
 
 class Game(middle.Model):
-    name: str = middle.field(description="The name of the game")
-    platform: PlatformEnum = middle.field(
-        description="Which platform it runs on"
+    name = middle.field(type=str, description="The name of the game")
+    platform = middle.field(
+        type=PlatformEnum, description="Which platform it runs on"
     )
-    score: float = middle.field(description="The average score of the game")
-    resolution_tested: str = middle.field(
+    score = middle.field(
+        type=float, description="The average score of the game"
+    )
+    resolution_tested = middle.field(
+        type=str,
         description="The resolution which the game was tested",
         pattern="^\d+x\d+$",
     )
-    genre: List[str] = middle.field(
-        description="One or more genres this game is part of"
+    genre = middle.field(
+        type=List[str], description="One or more genres this game is part of"
     )
-    rating: Dict[str, float] = middle.field(
-        description="Ratings given on specialized websites"
+    rating = middle.field(
+        type=Dict[str, float],
+        description="Ratings given on specialized websites",
     )
-    players: Set[str] = middle.field(
-        description="Some of the notorious players of this game"
+    players = middle.field(
+        type=Set[str], description="Some of the notorious players of this game"
     )
-    language: LanguageEnum = middle.field(
-        description="The main language of the game"
+    language = middle.field(
+        type=LanguageEnum, description="The main language of the game"
     )
-    awesome_city: City = middle.field(description="One awesome city built")
+    awesome_city = middle.field(
+        type=City, description="One awesome city built"
+    )
 
 
 def test_instance():

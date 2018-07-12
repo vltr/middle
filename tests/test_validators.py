@@ -1,13 +1,13 @@
-from typing import Collection
+# from typing import Collection
+# from typing import Mapping
+# from typing import MutableMapping
+# from typing import MutableSequence
+# from typing import MutableSet
+# from typing import Sequence
+# from typing import FrozenSet
+# from typing import Iterable
 from typing import Dict
-from typing import FrozenSet
-from typing import Iterable
 from typing import List
-from typing import Mapping
-from typing import MutableMapping
-from typing import MutableSequence
-from typing import MutableSet
-from typing import Sequence
 from typing import Set
 
 import pytest
@@ -48,7 +48,7 @@ from middle.exceptions import ValidationError
 )
 def test_str(test_value, error_values, kwargs):
     class TestModel(middle.Model):
-        name: str = middle.field(**kwargs)
+        name = middle.field(type=str, **kwargs)
 
     inst = TestModel(name=test_value)
 
@@ -112,7 +112,7 @@ def test_str(test_value, error_values, kwargs):
 )
 def test_int(test_value, error_values, kwargs):
     class TestModel(middle.Model):
-        age: int = middle.field(**kwargs)
+        age = middle.field(type=int, **kwargs)
 
     inst = TestModel(age=test_value)
 
@@ -181,7 +181,7 @@ def test_int(test_value, error_values, kwargs):
 )
 def test_float(test_value, error_values, kwargs):
     class TestModel(middle.Model):
-        age: float = middle.field(**kwargs)
+        age = middle.field(type=float, **kwargs)
 
     inst = TestModel(age=test_value)
 
@@ -202,11 +202,11 @@ def test_float(test_value, error_values, kwargs):
     [
         pytest.param(
             [
-                Collection[int],
-                Iterable[int],
+                # Collection[int],
+                # Iterable[int],
                 List[int],
-                MutableSequence[int],
-                Sequence[int],
+                # MutableSequence[int],
+                # Sequence[int],
             ],
             [0, 1, 2, 3],
             [[0, 1], []],
@@ -215,11 +215,11 @@ def test_float(test_value, error_values, kwargs):
         ),
         pytest.param(
             [
-                Collection[str],
-                Iterable[str],
+                # Collection[str],
+                # Iterable[str],
                 List[str],
-                MutableSequence[str],
-                Sequence[str],
+                # MutableSequence[str],
+                # Sequence[str],
             ],
             ["foo", "bar"],
             [["foo", "bar", "baz", "wee"]],
@@ -228,11 +228,11 @@ def test_float(test_value, error_values, kwargs):
         ),
         pytest.param(
             [
-                Collection[float],
-                Iterable[float],
+                # Collection[float],
+                # Iterable[float],
                 List[float],
-                MutableSequence[float],
-                Sequence[float],
+                # MutableSequence[float],
+                # Sequence[float],
             ],
             [1.0, 1.5, 2.0],
             [[1.0, 1.2, 1.4, 1.2, 1.5]],
@@ -241,11 +241,11 @@ def test_float(test_value, error_values, kwargs):
         ),
         pytest.param(
             [
-                Collection[float],
-                Iterable[float],
+                # Collection[float],
+                # Iterable[float],
                 List[float],
-                MutableSequence[float],
-                Sequence[float],
+                # MutableSequence[float],
+                # Sequence[float],
             ],
             [1.0, 1.5, 2.0],
             [],
@@ -254,11 +254,11 @@ def test_float(test_value, error_values, kwargs):
         ),
         pytest.param(
             [
-                Collection[str],
-                Iterable[str],
+                # Collection[str],
+                # Iterable[str],
                 List[str],
-                MutableSequence[str],
-                Sequence[str],
+                # MutableSequence[str],
+                # Sequence[str],
             ],
             ["foo", "bar", "baz"],
             [["foo", "bar"], ["foo", "bar", "baz", "FOO", "BAR"]],
@@ -271,7 +271,7 @@ def test_list(list_types, test_values, error_values, kwargs):
     for list_type in list_types:
 
         class TestModel(middle.Model):
-            values: list_type = middle.field(**kwargs)
+            values = middle.field(type=list_type, **kwargs)
 
         inst = TestModel(values=test_values)
 
@@ -291,28 +291,28 @@ def test_list(list_types, test_values, error_values, kwargs):
     "set_types,test_values,error_values,kwargs",
     [
         pytest.param(
-            [Set[int], MutableSet[int], FrozenSet[int]],
+            [Set[int]],  # MutableSet[int], FrozenSet[int]],
             {0, 1, 2, 3},
             [{0, 1}, {}],
             {"min_items": 3},
             id="set_min_items",
         ),
         pytest.param(
-            [Set[str], MutableSet[str], FrozenSet[str]],
+            [Set[str]],  # MutableSet[str], FrozenSet[str]],
             {"foo", "bar"},
             [{"foo", "bar", "baz", "wee"}],
             {"max_items": 3},
             id="set_max_items",
         ),
         pytest.param(
-            [Set[float], MutableSet[float], FrozenSet[float]],
+            [Set[float]],  # MutableSet[float], FrozenSet[float]],
             {1.0, 1.5, 2.0},
             [],
             {"unique_items": True},
             id="set_unique_items",
         ),
         pytest.param(
-            [Set[str], MutableSet[str], FrozenSet[str]],
+            [Set[str]],  # MutableSet[str], FrozenSet[str]],
             {"foo", "bar", "baz"},
             [{"foo", "bar"}, {"foo", "bar", "baz", "FOO", "BAR"}],
             {"min_items": 3, "max_items": 4},
@@ -324,7 +324,7 @@ def test_set(set_types, test_values, error_values, kwargs):
     for set_type in set_types:
 
         class TestModel(middle.Model):
-            values: set_type = middle.field(**kwargs)
+            values = middle.field(type=set_type, **kwargs)
 
         inst = TestModel(values=test_values)
 
@@ -344,14 +344,14 @@ def test_set(set_types, test_values, error_values, kwargs):
     "dict_types,test_values,error_values,kwargs",
     [
         pytest.param(
-            [Dict[int, str], Mapping[int, str], MutableMapping[int, str]],
+            [Dict[int, str]],  # Mapping[int, str], MutableMapping[int, str]],
             {0: "hello", 1: "world", 2: "foo", 3: "bar"},
             [{0: "hello", 1: "world"}, {}],
             {"min_properties": 3},
             id="dict_min_properties",
         ),
         pytest.param(
-            [Dict[str, int], Mapping[str, int], MutableMapping[str, int]],
+            [Dict[str, int]],  # Mapping[str, int], MutableMapping[str, int]],
             {"foo": 1, "bar": 2},
             [{"foo": 1, "bar": 2, "baz": 3, "wee": 4}],
             {"max_properties": 3},
@@ -360,8 +360,8 @@ def test_set(set_types, test_values, error_values, kwargs):
         pytest.param(
             [
                 Dict[str, float],
-                Mapping[str, float],
-                MutableMapping[str, float],
+                # Mapping[str, float],
+                # MutableMapping[str, float],
             ],
             {"foo": 1.0, "bar": 1.1, "baz": 1.2},
             [
@@ -377,7 +377,7 @@ def test_dict(dict_types, test_values, error_values, kwargs):
     for dict_type in dict_types:
 
         class TestModel(middle.Model):
-            values: dict_type = middle.field(**kwargs)
+            values = middle.field(type=dict_type, **kwargs)
 
         inst = TestModel(values=test_values)
 

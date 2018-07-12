@@ -37,15 +37,15 @@ class City(middle.Model):
 
 
 class Game(middle.Model):
-    name = {"type": str}
-    platform = {"type": PlatformEnum}
-    score = {"type": float}
-    resolution_tested = {"pattern": "^\d+x\d+$", "type": str}
-    genre = {"type": List[str]}
-    rating = {"type": Dict[str, float]}
-    players = {"type": Set[str]}
-    language = {"type": LanguageEnum}
-    awesome_city = {"type": City}
+    name: str
+    platform: PlatformEnum
+    score: float
+    resolution_tested: str = {"pattern": "^\d+x\d+$"}
+    genre: List[str]
+    rating: Dict[str, float]
+    players: Set[str]
+    language: LanguageEnum
+    awesome_city: City
 
 
 def test_instance():

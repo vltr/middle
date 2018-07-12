@@ -7,10 +7,10 @@ import middle
 
 def test_mixed_schema():
     class TestModel(middle.Model):
-        __looks_reserved__ = {"type": str}
+        __looks_reserved__: str
         name = {"type": str}
-        surname = middle.field(type=str)
-        age = {"type": int}
+        surname: str = middle.field()
+        age: int
         hobby = middle.field(type=typing.List[str])
 
     inst = TestModel(name="my", surname="model", age=1, hobby=["coding"])
@@ -20,7 +20,7 @@ def test_mixed_schema():
 def test_init_not_available():
     class TestModel(middle.Model):
         __attr_s_kwargs__ = {"init": False, "cmp": True}
-        name = {"type": str}
+        name: str
 
     inst = TestModel(name="foo")
     inst2 = TestModel(name="foo")
@@ -29,7 +29,7 @@ def test_init_not_available():
     assert inst == inst2
 
     class AnotherModel(middle.Model):
-        name = {"type": str}
+        name: str
 
     another_inst = AnotherModel(name="foo")
     another_inst2 = AnotherModel(name="foo")
@@ -45,8 +45,8 @@ def test_constructor():
             self.result = 3.14
 
     class TestModel(middle.Model):
-        name = {"type": str}
-        age = {"type": int}
+        name: str
+        age: int
 
     with pytest.raises(TypeError):
         TestModel(None)
@@ -95,10 +95,10 @@ def test_invalid_models():
     # the following tests should not raise exceptions
 
     class AnotherModel(middle.Model):
-        age = {"type": type(None)}
+        age: None
 
     class AndAnotherModel(middle.Model):
         age = {"type": None}
 
     class SomeAnotherModel(middle.Model):
-        age = middle.field(type=None)
+        age: None = middle.field()

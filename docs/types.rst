@@ -25,14 +25,6 @@ Supported types
 - ``typing.Set``
 - ``typing.Tuple``
 - ``typing.Union``
-- ``typing.Collection``
-- ``typing.Iterable``
-- ``typing.Sequence``
-- ``typing.MutableSequence``
-- ``typing.FrozenSet``
-- ``typing.MutableSet``
-- ``typing.Mapping``
-- ``typing.MutableMapping``
 
 ``dict``, ``list``, ``set``
 ---------------------------
@@ -127,7 +119,8 @@ One plus of using ``datetime`` in ``middle`` is that it accepts a wide range of 
     >>> import middle
 
     >>> class TestModel(middle.Model):
-    ...     created_on: datetime = middle.field()
+    ...     created_on: datetime = middle.field()  # for Python 3.6+
+    ...     created_on = middle.field(type=datetime)  # for Python 3.5
 
     >>> TestModel(created_on=datetime.now())
     TestModel(created_on=datetime.datetime(2018, 7, 10, 15, 1, 6, 121325, tzinfo=datetime.timezone.utc))

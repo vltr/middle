@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 @attr.s(repr=False, slots=True, hash=True)
 class _Config:
-    _force_str: bool = attr.ib(default=False)
-    _str_method: bool = attr.ib(default=True)
-    _no_transit_local_dtime: bool = attr.ib(default=False)
-    __changed_params: dict = attr.ib(default={})
+    _force_str = attr.ib(type=bool, default=False)
+    _str_method = attr.ib(type=bool, default=True)
+    _no_transit_local_dtime = attr.ib(type=bool, default=False)
+    __changed_params = attr.ib(type=dict, factory=dict)
 
     def __getcfg(self, cfgkey=None):
         if cfgkey is None:  # noqa

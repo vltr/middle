@@ -23,7 +23,7 @@ Only available for ``str``, it would require that the input value should have at
     >>> import middle
 
     >>> class TestModel(middle.Model):
-    ...     name: str = middle.field(min_length=3)
+    ...     name = middle.field(type=str, min_length=3)
 
     >>> TestModel(name="hello")
     TestModel(name='hello')
@@ -81,7 +81,7 @@ Only available for ``str``, it would require that the input value should match t
     >>> import middle
 
     >>> class TestModel(middle.Model):
-    ...     serial: str = middle.field(pattern="^[0-9]+$")
+    ...     serial = {"type": str, "pattern": "^[0-9]+$"}
 
     >>> TestModel(serial="123456")
     TestModel(serial='123456')

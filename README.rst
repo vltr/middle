@@ -102,7 +102,7 @@ TODO
 - Better error handling (almost everywhere);
 - Create a benchmark suite against other solutions;
 - Some formatters are still missing;
-- Python 3.5 support?
+- Possibility to "cast" an instance to another instance where the original object is a subclass of it;
 
 Done
 ----
@@ -114,6 +114,7 @@ Done
 - Support more types (``typing.Tuple``, ``decimal.Decimal``);
 - Get 100% (or closer) in code coverage;
 - Lots of documentation;
+- Python 3.5 support;
 
 Future discussions
 ------------------

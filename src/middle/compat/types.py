@@ -7,7 +7,7 @@ from enum import EnumMeta
 from functools import lru_cache
 
 IS_PY36 = False
-if sys.version_info >= (3, 7):
+if sys.version_info[:2] >= (3, 7):
     from typing import _GenericAlias as GenericType
 else:
     from typing import GenericMeta as GenericType
@@ -37,14 +37,6 @@ def get_type(type_):
         typing.Set,
         typing.Tuple,
         typing.Union,
-        typing.Collection,
-        typing.Iterable,
-        typing.Sequence,
-        typing.MutableSequence,
-        typing.FrozenSet,
-        typing.MutableSet,
-        typing.Mapping,
-        typing.MutableMapping,
     ):
         return type_
 

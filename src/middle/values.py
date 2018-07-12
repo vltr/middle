@@ -84,24 +84,24 @@ def _value_of_enum(type_):
 
 
 @value_of.register(typing.List)
-@value_of.register(typing.Sequence)
-@value_of.register(typing.Collection)
-@value_of.register(typing.Iterable)
-@value_of.register(typing.MutableSequence)
+# @value_of.register(typing.Sequence)
+# @value_of.register(typing.Collection)
+# @value_of.register(typing.Iterable)
+# @value_of.register(typing.MutableSequence)
 def _value_of_list(type_):
     return _raw_list
 
 
 @value_of.register(typing.Set)
-@value_of.register(typing.MutableSet)
-@value_of.register(typing.FrozenSet)
+# @value_of.register(typing.MutableSet)
+# @value_of.register(typing.FrozenSet)
 def _value_of_set(type_):
     return _raw_set
 
 
 @value_of.register(typing.Dict)
-@value_of.register(typing.Mapping)
-@value_of.register(typing.MutableMapping)
+# @value_of.register(typing.Mapping)
+# @value_of.register(typing.MutableMapping)
 def _value_of_dict(type_):
     return _raw_dict
 

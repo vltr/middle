@@ -12,4 +12,4 @@ And you're ready to the next step. Hooray!
 
 .. warning::
 
-    At this time, ``middle`` is only available for Python 3.6 and 3.7.
+    At this time, ``middle`` is only available for Python 3.5+.

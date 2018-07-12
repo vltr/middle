@@ -5,17 +5,9 @@ from decimal import Decimal
 from enum import Enum
 from enum import IntEnum
 from enum import unique
-from typing import Collection
 from typing import Dict
-from typing import FrozenSet
-from typing import Iterable
 from typing import List
-from typing import Mapping
-from typing import MutableMapping
-from typing import MutableSequence
-from typing import MutableSet
 from typing import Optional
-from typing import Sequence
 from typing import Set
 from typing import Tuple
 from typing import Union
@@ -32,7 +24,7 @@ from middle.exceptions import InvalidType
 
 def test_str_working():
     class TestModel(middle.Model):
-        name: str = middle.field()
+        name = middle.field(type=str)
 
     inst = TestModel(name="some str")
 
@@ -47,7 +39,7 @@ def test_str_working():
 
 def test_str_converter():
     class TestModel(middle.Model):
-        name: str = middle.field()
+        name = middle.field(type=str)
 
     inst = TestModel(name=1)
     assert isinstance(inst, TestModel)
@@ -63,13 +55,20 @@ def test_str_converter():
     assert TestModel(name=b"ol\xc3\xa1 mundo").name == "olá mundo"
 
 
+def test_str_default():
+    class TestModel(middle.Model):
+        name = middle.field(type=str, default="foo")
+
+    assert TestModel().name == "foo"
+
+
 # #############################################################################
 # int
 
 
 def test_int_working():
     class TestModel(middle.Model):
-        const: int = middle.field()
+        const = middle.field(type=int)
 
     inst = TestModel(const=42)
 
@@ -84,7 +83,7 @@ def test_int_working():
 
 def test_int_converter():
     class TestModel(middle.Model):
-        const: int = middle.field()
+        const = middle.field(type=int)
 
     inst = TestModel(const="42")
     assert isinstance(inst, TestModel)
@@ -96,13 +95,20 @@ def test_int_converter():
     assert TestModel(const="-42").const == -42
 
 
+def test_int_default():
+    class TestModel(middle.Model):
+        const = middle.field(type=int, default=50)
+
+    assert TestModel().const == 50
+
+
 # #############################################################################
 # float
 
 
 def test_float_working():
     class TestModel(middle.Model):
-        const: float = middle.field()
+        const = middle.field(type=float)
 
     inst = TestModel(const=3.14)
 
@@ -117,7 +123,7 @@ def test_float_working():
 
 def test_float_converter():
     class TestModel(middle.Model):
-        const: float = middle.field()
+        const = middle.field(type=float)
 
     inst = TestModel(const="3.14")
     assert isinstance(inst, TestModel)
@@ -130,13 +136,20 @@ def test_float_converter():
     assert TestModel(const="-.3").const == -0.3
 
 
+def test_float_default():
+    class TestModel(middle.Model):
+        const = middle.field(type=float, default=1.99)
+
+    assert TestModel().const == 1.99
+
+
 # #############################################################################
 # bool
 
 
 def test_bool_working():
     class TestModel(middle.Model):
-        broken: bool = middle.field()
+        broken = middle.field(type=bool)
 
     inst = TestModel(broken=True)
 
@@ -153,7 +166,7 @@ def test_bool_working():
 
 def test_bool_converter():
     class TestModel(middle.Model):
-        broken: bool = middle.field()
+        broken = middle.field(type=bool)
 
     # everything must be true
     assert TestModel(broken="True").broken is True
@@ -188,13 +201,20 @@ def test_bool_converter():
         TestModel(broken={"hello": "world"})
 
 
+def test_bool_default():
+    class TestModel(middle.Model):
+        broken = middle.field(type=bool, default=False)
+
+    assert TestModel().broken is False
+
+
 # #############################################################################
 # date
 
 
 def test_date_working():
     class TestModel(middle.Model):
-        created_on: date = middle.field()
+        created_on = middle.field(type=date)
 
     inst = TestModel(created_on="2018-06-18")
 
@@ -209,7 +229,7 @@ def test_date_working():
 
 def test_date_converter():
     class TestModel(middle.Model):
-        created_on: date = middle.field()
+        created_on = middle.field(type=date)
 
     test_date = date(2018, 6, 18)
 
@@ -226,13 +246,20 @@ def test_date_converter():
         TestModel(created_on={"date": "2018-06-18", "format": "iso"})
 
 
+def test_date_default():
+    class TestModel(middle.Model):
+        created_on = middle.field(type=date, default="2018-07-12")
+
+    assert TestModel().created_on == date(2018, 7, 12)
+
+
 # #############################################################################
 # datetime
 
 
 def test_datetime_working():
     class TestModel(middle.Model):
-        ts: datetime = middle.field()
+        ts = middle.field(type=datetime)
 
     inst = TestModel(ts="2018-06-18T13:30:00.123456+00:00")
 
@@ -247,7 +274,7 @@ def test_datetime_working():
 
 def test_datetime_converter():
     class TestModel(middle.Model):
-        ts: datetime = middle.field()
+        ts = middle.field(type=datetime)
 
     test_datetime = datetime(2018, 6, 18, 13, 30, 0, 0, timezone.utc)
 
@@ -268,6 +295,13 @@ def test_datetime_converter():
         )
 
 
+def test_datetime_default():
+    class TestModel(middle.Model):
+        ts = middle.field(type=datetime, default="2018-07-12T12:00:00-0300")
+
+    assert TestModel().ts == datetime(2018, 7, 12, 15, tzinfo=timezone.utc)
+
+
 # #############################################################################
 # enum
 
@@ -286,8 +320,8 @@ def test_enum_working():
         TEST_3 = 3
 
     class TestModel(middle.Model):
-        str_enum: TestStrEnum = middle.field()
-        int_enum: TestIntEnum = middle.field()
+        str_enum = middle.field(type=TestStrEnum)
+        int_enum = middle.field(type=TestIntEnum)
 
     inst = TestModel(str_enum="TEST2", int_enum=3)
 
@@ -316,10 +350,10 @@ def test_enum_converter():
         TEST_3 = 3
 
     class TestStrModel(middle.Model):
-        str_enum: TestStrEnum = middle.field()
+        str_enum = middle.field(type=TestStrEnum)
 
     class TestIntModel(middle.Model):
-        int_enum: TestIntEnum = middle.field()
+        int_enum = middle.field(type=TestIntEnum)
 
     test_str_enum = TestStrEnum.TEST_1
     test_int_enum = TestIntEnum.TEST_2
@@ -336,6 +370,29 @@ def test_enum_converter():
         TestIntModel(int_enum=99)
 
 
+def test_enum_default():
+    @unique
+    class TestStrEnum(str, Enum):
+        TEST_1 = "TEST1"
+        TEST_2 = "TEST2"
+        TEST_3 = "TEST3"
+
+    @unique
+    class TestIntEnum(IntEnum):
+        TEST_1 = 1
+        TEST_2 = 2
+        TEST_3 = 3
+
+    class TestStrModel(middle.Model):
+        str_enum = middle.field(type=TestStrEnum, default=TestStrEnum.TEST_2)
+
+    class TestIntModel(middle.Model):
+        int_enum = middle.field(type=TestIntEnum, default=3)
+
+    assert TestStrModel().str_enum == TestStrEnum.TEST_2
+    assert TestIntModel().int_enum == TestIntEnum.TEST_3
+
+
 # #############################################################################
 # Model
 
@@ -350,19 +407,19 @@ def test_model_working():
         BLACK = 6
 
     class ChildModel(middle.Model):
-        name: str = middle.field()
-        age: int = middle.field()
-        favourite_color: ColorEnum = middle.field()
+        name = middle.field(type=str)
+        age = middle.field(type=int)
+        favourite_color = middle.field(type=ColorEnum)
 
     class PersonModel(middle.Model):
-        name: str = middle.field()
-        age: int = middle.field()
-        children: List[ChildModel] = middle.field()
+        name = middle.field(type=str)
+        age = middle.field(type=int)
+        children = middle.field(type=List[ChildModel])
 
     class CompanyModel(middle.Model):
-        name: str = middle.field()
-        manager: PersonModel = middle.field()
-        employees: List[PersonModel] = middle.field()
+        name = middle.field(type=str)
+        manager = middle.field(type=PersonModel)
+        employees = middle.field(type=List[PersonModel])
 
     inst = CompanyModel(
         {
@@ -416,13 +473,13 @@ def test_model_working():
 def test_model_converter():
     class ChildModel(middle.Model):
         __attr_s_kwargs__ = {"cmp": True}
-        name: str = middle.field()
-        age: int = middle.field()
+        name = middle.field(type=str)
+        age = middle.field(type=int)
 
     class PersonModel(middle.Model):
-        name: str = middle.field()
-        age: int = middle.field()
-        children: List[ChildModel] = middle.field()
+        name = middle.field(type=str)
+        age = middle.field(type=int)
+        children = middle.field(type=List[ChildModel])
 
     test_child = ChildModel(name="Robert", age=10)
 
@@ -444,8 +501,29 @@ def test_model_converter():
         PersonModel(name="foo", age="!", children=[])
 
 
+def test_model_default():
+    class ChildModel(middle.Model):
+        __attr_s_kwargs__ = {"cmp": True}
+        name = middle.field(type=str)
+        age = middle.field(type=int)
+
+    class PersonModel(middle.Model):
+        name = middle.field(type=str, default="Paul")
+        age = middle.field(type=int, default=42)
+        children = middle.field(
+            type=List[ChildModel], default=[{"name": "James", "age": 12}]
+        )
+
+    instance = PersonModel()
+    assert instance.name == "Paul"
+    assert instance.age == 42
+    assert len(instance.children) == 1
+    assert instance.children[0].name == "James"
+    assert instance.children[0].age == 12
+
+
 # #############################################################################
-# List, Sequence, Collection, Iterable, MutableSequence
+# List
 
 
 class SomeJunk:
@@ -456,16 +534,16 @@ class SomeJunk:
 @pytest.mark.parametrize(
     "list_type",
     [
-        pytest.param(Collection, id="Collection"),
-        pytest.param(Iterable, id="Iterable"),
+        # pytest.param(Collection, id="Collection"),
+        # pytest.param(Iterable, id="Iterable"),
         pytest.param(List, id="List"),
-        pytest.param(MutableSequence, id="MutableSequence"),
-        pytest.param(Sequence, id="Sequence"),
+        # pytest.param(MutableSequence, id="MutableSequence"),
+        # pytest.param(Sequence, id="Sequence"),
     ],
 )
 def test_list_working(list_type):
     class TestModel(middle.Model):
-        names: list_type[str] = middle.field()
+        names = middle.field(type=list_type[str])
 
     inst = TestModel(names=["foo", "bar"])
 
@@ -481,16 +559,16 @@ def test_list_working(list_type):
 @pytest.mark.parametrize(
     "list_type",
     [
-        pytest.param(Collection, id="Collection"),
-        pytest.param(Iterable, id="Iterable"),
+        # pytest.param(Collection, id="Collection"),
+        # pytest.param(Iterable, id="Iterable"),
         pytest.param(List, id="List"),
-        pytest.param(MutableSequence, id="MutableSequence"),
-        pytest.param(Sequence, id="Sequence"),
+        # pytest.param(MutableSequence, id="MutableSequence"),
+        # pytest.param(Sequence, id="Sequence"),
     ],
 )
 def test_list_converter(list_type):
     class TestModel(middle.Model):
-        names: list_type[str] = middle.field()
+        names = middle.field(type=list_type[str])
 
     with middle.config.temp(str_method=False):
         with pytest.raises(TypeError):
@@ -508,11 +586,11 @@ def test_list_converter(list_type):
 @pytest.mark.parametrize(
     "list_type",
     [
-        pytest.param(Collection, id="Collection"),
-        pytest.param(Iterable, id="Iterable"),
+        # pytest.param(Collection, id="Collection"),
+        # pytest.param(Iterable, id="Iterable"),
         pytest.param(List, id="List"),
-        pytest.param(MutableSequence, id="MutableSequence"),
-        pytest.param(Sequence, id="Sequence"),
+        # pytest.param(MutableSequence, id="MutableSequence"),
+        # pytest.param(Sequence, id="Sequence"),
     ],
 )
 def test_list_invalid(list_type):
@@ -520,12 +598,29 @@ def test_list_invalid(list_type):
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            names: list_type = middle.field()
+            names = middle.field(type=list_type)
 
     with pytest.raises(TypeError):
 
         class AnotherTestModel(middle.Model):
-            names: list_type[int, float] = middle.field()
+            names = middle.field(type=list_type[int, float])
+
+
+@pytest.mark.parametrize(
+    "list_type",
+    [
+        # pytest.param(Collection[str], id="Collection"),
+        # pytest.param(Iterable[str], id="Iterable"),
+        pytest.param(List[str], id="List"),
+        # pytest.param(MutableSequence[str], id="MutableSequence"),
+        # pytest.param(Sequence[str], id="Sequence"),
+    ],
+)
+def test_list_default(list_type):
+    class TestModel(middle.Model):
+        names = middle.field(type=list_type, default=["foo", "bar", "baz"])
+
+    assert TestModel().names == ["foo", "bar", "baz"]
 
 
 # #############################################################################
@@ -536,13 +631,13 @@ def test_list_invalid(list_type):
     "set_type",
     [
         pytest.param(Set, id="Set"),
-        pytest.param(FrozenSet, id="FrozenSet"),
-        pytest.param(MutableSet, id="MutableSet"),
+        # pytest.param(FrozenSet, id="FrozenSet"),
+        # pytest.param(MutableSet, id="MutableSet"),
     ],
 )
 def test_set_working(set_type):
     class TestModel(middle.Model):
-        names: set_type[str] = middle.field()
+        names = middle.field(type=set_type[str])
 
     inst = TestModel(names=["foo", "bar"])
 
@@ -559,13 +654,13 @@ def test_set_working(set_type):
     "set_type",
     [
         pytest.param(Set, id="Set"),
-        pytest.param(FrozenSet, id="FrozenSet"),
-        pytest.param(MutableSet, id="MutableSet"),
+        # pytest.param(FrozenSet, id="FrozenSet"),
+        # pytest.param(MutableSet, id="MutableSet"),
     ],
 )
 def test_set_converter(set_type):
     class TestModel(middle.Model):
-        names: set_type[str] = middle.field()
+        names = middle.field(type=set_type[str])
 
     inst = TestModel(names=[1, SomeJunk()])
     assert isinstance(inst, TestModel)
@@ -576,8 +671,8 @@ def test_set_converter(set_type):
     "set_type",
     [
         pytest.param(Set, id="Set"),
-        pytest.param(FrozenSet, id="FrozenSet"),
-        pytest.param(MutableSet, id="MutableSet"),
+        # pytest.param(FrozenSet, id="FrozenSet"),
+        # pytest.param(MutableSet, id="MutableSet"),
     ],
 )
 def test_set_invalid(set_type):
@@ -585,12 +680,29 @@ def test_set_invalid(set_type):
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            names: set_type = middle.field()
+            names = middle.field(type=set_type)
 
     with pytest.raises(TypeError):
 
         class AnotherTestModel(middle.Model):
-            names: set_type[int, float] = middle.field()
+            names = middle.field(type=set_type[int, float])
+
+
+@pytest.mark.parametrize(
+    "set_type",
+    [
+        pytest.param(Set[str], id="Set"),
+        # pytest.param(FrozenSet, id="FrozenSet"),
+        # pytest.param(MutableSet, id="MutableSet"),
+    ],
+)
+def test_set_default(set_type):
+    class TestModel(middle.Model):
+        names = middle.field(
+            type=set_type, default=["foo", "bar", "baz", "foo"]
+        )
+
+    assert TestModel().names == {"bar", "baz", "foo"}
 
 
 # #############################################################################
@@ -601,25 +713,29 @@ def test_set_invalid(set_type):
     "dict_type",
     [
         pytest.param(Dict, id="Dict"),
-        pytest.param(Mapping, id="Mapping"),
-        pytest.param(MutableMapping, id="MutableMapping"),
+        # pytest.param(Mapping, id="Mapping"),
+        # pytest.param(MutableMapping, id="MutableMapping"),
     ],
 )
 def test_dict_working(dict_type):
     class TestModel(middle.Model):
-        ratings: dict_type[str, float] = middle.field()
+        ratings = middle.field(type=dict_type[str, float])
 
     inst = TestModel(
         ratings={"contender1": 4.2, "contender2": 3.9, "contender3": 3.4}
     )
 
     assert isinstance(inst, TestModel)
-    assert list(inst.ratings.keys()) == [
-        "contender1",
-        "contender2",
-        "contender3",
-    ]
-    assert list(inst.ratings.values()) == [4.2, 3.9, 3.4]
+    assert len(inst.ratings.keys()) == 3
+    assert "contender1" in inst.ratings.keys()
+    assert "contender2" in inst.ratings.keys()
+    assert "contender3" in inst.ratings.keys()
+    assert 4.2 in inst.ratings.values()
+    assert 3.9 in inst.ratings.values()
+    assert 3.4 in inst.ratings.values()
+    assert inst.ratings.get("contender1") == 4.2
+    assert inst.ratings.get("contender2") == 3.9
+    assert inst.ratings.get("contender3") == 3.4
 
     data = middle.asdict(inst)
 
@@ -635,13 +751,13 @@ def test_dict_working(dict_type):
     "dict_type",
     [
         pytest.param(Dict, id="Dict"),
-        pytest.param(Mapping, id="Mapping"),
-        pytest.param(MutableMapping, id="MutableMapping"),
+        # pytest.param(Mapping, id="Mapping"),
+        # pytest.param(MutableMapping, id="MutableMapping"),
     ],
 )
 def test_dict_converter(dict_type):
     class TestModel(middle.Model):
-        ratings: dict_type[str, float] = middle.field()
+        ratings = middle.field(type=dict_type[str, float])
 
     inst = TestModel(ratings={SomeJunk(): 5.0})
     assert isinstance(inst, TestModel)
@@ -652,8 +768,8 @@ def test_dict_converter(dict_type):
     "dict_type",
     [
         pytest.param(Dict, id="Dict"),
-        pytest.param(Mapping, id="Mapping"),
-        pytest.param(MutableMapping, id="MutableMapping"),
+        # pytest.param(Mapping, id="Mapping"),
+        # pytest.param(MutableMapping, id="MutableMapping"),
     ],
 )
 def test_dict_invalid(dict_type):
@@ -661,12 +777,27 @@ def test_dict_invalid(dict_type):
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            names: dict_type = middle.field()
+            names = middle.field(type=dict_type)
 
     with pytest.raises(TypeError):
 
         class AnotherTestModel(middle.Model):
-            names: dict_type[float] = middle.field()
+            names = middle.field(type=dict_type[float])
+
+
+@pytest.mark.parametrize(
+    "dict_type",
+    [
+        pytest.param(Dict[str, int], id="Dict"),
+        # pytest.param(Mapping, id="Mapping"),
+        # pytest.param(MutableMapping, id="MutableMapping"),
+    ],
+)
+def test_dict_default(dict_type):
+    class TestModel(middle.Model):
+        names = middle.field(type=dict_type, default={"foo": 42})
+
+    assert TestModel().names.get("foo") == 42
 
 
 # #############################################################################
@@ -683,7 +814,7 @@ def test_dict_invalid(dict_type):
 )
 def test_optional_working(value, expected):
     class TestModel(middle.Model):
-        name: Optional[str] = middle.field()
+        name = middle.field(type=Optional[str])
 
     inst = TestModel(name=value)
     assert isinstance(inst, TestModel)
@@ -693,6 +824,21 @@ def test_optional_working(value, expected):
 
     assert isinstance(data, dict)
     assert data.get("name", {}) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        pytest.param("foo", "foo", id="value_str"),
+        pytest.param(None, None, id="value_none"),
+        pytest.param(1, "1", id="value_str_from_int"),
+    ],
+)
+def test_optional_default(value, expected):
+    class TestModel(middle.Model):
+        name = middle.field(type=Optional[str], default=value)
+
+    assert TestModel().name == expected
 
 
 # #############################################################################
@@ -709,7 +855,7 @@ def test_optional_working(value, expected):
 )
 def test_union_working(value, expected):
     class TestModel(middle.Model):
-        value: Union[str, int, float] = middle.field()
+        value = middle.field(type=Union[str, int, float])
 
     inst = TestModel(value=value)
     assert isinstance(inst, TestModel)
@@ -722,7 +868,7 @@ def test_union_working(value, expected):
 
 
 @pytest.mark.parametrize(
-    "value,expected",
+    "val,expected",
     [
         # pytest.param("foo", "foo", id="value_str"),
         # pytest.param(3.14, 3.14, id="value_float"),
@@ -730,11 +876,11 @@ def test_union_working(value, expected):
         pytest.param(None, None, id="value_none")
     ],
 )
-def test_union_working_with_none(value, expected):
+def test_union_working_with_none(val, expected):
     class TestModel(middle.Model):
-        value: Union[str, int, float, None] = middle.field()
+        value = middle.field(type=Union[str, int, float, None])
 
-    inst = TestModel(value=value)
+    inst = TestModel(value=val)
     assert isinstance(inst, TestModel)
     assert inst.value == expected
 
@@ -749,22 +895,22 @@ def test_union_invalid():
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            names: Union = middle.field()
+            names = middle.field(type=Union)
 
 
 @pytest.mark.parametrize(
-    "value,expected,type_",
+    "val,expected,type_",
     [
         pytest.param("foo", "foo", str, id="union_single_str"),
         pytest.param(3.14, 3.14, float, id="union_single_float"),
         pytest.param(-1, -1, int, id="union_single_int"),
     ],
 )
-def test_union_one_parameter(value, expected, type_):
+def test_union_one_parameter(val, expected, type_):
     class TestModel(middle.Model):
-        value: Union[type_] = middle.field()
+        value = middle.field(type=Union[type_])
 
-    inst = TestModel(value=value)
+    inst = TestModel(value=val)
     assert isinstance(inst, TestModel)
     assert inst.value == expected
 
@@ -774,13 +920,28 @@ def test_union_one_parameter(value, expected, type_):
     assert data.get("value", None) == expected
 
 
+@pytest.mark.parametrize(
+    "val,expected,type_",
+    [
+        pytest.param("foo", "foo", str, id="union_single_str"),
+        pytest.param(3.14, 3.14, float, id="union_single_float"),
+        pytest.param(-1, -1, int, id="union_single_int"),
+    ],
+)
+def test_union_default(val, expected, type_):
+    class TestModel(middle.Model):
+        value = middle.field(type=Union[type_], default=val)
+
+    assert TestModel().value == expected
+
+
 # #############################################################################
 # Tuple
 
 
 def test_tuple_working():
     class TestModel(middle.Model):
-        value: Tuple[str, int, float] = middle.field()
+        value = middle.field(type=Tuple[str, int, float])
 
     inst = TestModel(value=["hello", 1, "-.4"])
     assert isinstance(inst, TestModel)
@@ -800,7 +961,16 @@ def test_tuple_invalid():
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            value: Tuple = middle.field()
+            value = middle.field(type=Tuple)
+
+
+def test_tuple_default():
+    class TestModel(middle.Model):
+        value = middle.field(
+            type=Tuple[str, int, float], default=["foo", 42, 3.14]
+        )
+
+    assert TestModel().value == ("foo", 42, 3.14)
 
 
 # #############################################################################
@@ -809,7 +979,7 @@ def test_tuple_invalid():
 
 def test_decimal_working():
     class TestModel(middle.Model):
-        value: Decimal = middle.field()
+        value = middle.field(type=Decimal)
 
     inst = TestModel(value="5")
     assert isinstance(inst, TestModel)
@@ -821,6 +991,13 @@ def test_decimal_working():
     assert data.get("value", None) == 5.0
 
 
+def test_decimal_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=Decimal, default="3.14")
+
+    assert TestModel().value == Decimal("3.14")
+
+
 # #############################################################################
 # Unknown type
 
@@ -830,7 +1007,7 @@ def test_unknown_type():
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            value: timezone = middle.field()
+            value = middle.field(type=timezone)
 
 
 # #############################################################################
@@ -882,7 +1059,7 @@ def test_value_of_new_type():
 
 def test_work_with_new_type():
     class TestModel(middle.Model):
-        value: Foo = middle.field()
+        value = middle.field(type=Foo)
 
     inst = TestModel(value="hello")
     assert isinstance(inst, TestModel)
@@ -896,6 +1073,13 @@ def test_work_with_new_type():
 
     assert TestModel(value="world").value.foo == "world"
     assert TestModel(value=Foo(foo="shh")).value.foo == "shh"
+
+
+def test_work_with_new_type_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=Foo, default=Foo())
+
+    assert TestModel().value.foo == "bar"
 
 
 def test_unregister_new_type():
@@ -943,7 +1127,7 @@ def test_unregister_unknown_type():
 
 def test_none_type():
     class TestModel(middle.Model):
-        value: None = middle.field()
+        value = middle.field(type=type(None))
 
     inst = TestModel(value="hello")
     assert isinstance(inst, TestModel)
@@ -958,11 +1142,11 @@ def test_none_type():
 def test_attr_class():
     @attr.s(cmp=False)
     class AttrModel:
-        name: str = attr.ib()
-        age: int = attr.ib()
+        name = attr.ib(type=str)
+        age = attr.ib(type=int)
 
     class TestModel(middle.Model):
-        people: List[AttrModel]
+        people = middle.field(type=List[AttrModel])
 
     inst = TestModel(
         people=[AttrModel(name="Foo", age=21), AttrModel(name="Bar", age=42)]
@@ -982,11 +1166,26 @@ def test_attr_class():
 def test_attr_class_union():
     @attr.s
     class AttrModel:
-        name: str = attr.ib()
-        age: int = attr.ib()
+        name = attr.ib(type=str)
+        age = attr.ib(type=int)
 
     class TestModel(middle.Model):
-        agent: Optional[AttrModel]
+        agent = middle.field(type=Optional[AttrModel])
 
     inst = TestModel(agent=AttrModel(name="Foo", age=21))
     assert isinstance(inst, TestModel)
+
+
+# #############################################################################
+# default values unordered
+
+
+def test_default_values_unordered():
+    class TestModel(middle.Model):
+        birthday = middle.field(type=datetime)
+        name = middle.field(type=str, default="Joe")
+        children = middle.field(type=bool)
+
+    assert (
+        TestModel(birthday=datetime(1980, 1, 5), children=False).name == "Joe"
+    )
