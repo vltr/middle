@@ -29,7 +29,6 @@ def field(*args, **kwargs):
 
 
 class ModelMeta(type):
-
     def __new__(mcls, name, bases, attrs):
         if bases:
             annotations = attrs.get("__annotations__", {})

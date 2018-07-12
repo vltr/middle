@@ -19,6 +19,8 @@ BASE_URL = "https://www.python.org/ftp/python/"
 GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
 GET_PIP_PATH = "C:\get-pip.py"
 URLS = {
+    ("3.5", "64"): BASE_URL + "3.5.5/python-3.5.5-amd64.exe",
+    ("3.5", "32"): BASE_URL + "3.5.5/python-3.5.5.exe",
     ("3.6", "64"): BASE_URL + "3.6.6/python-3.6.6-amd64.exe",
     ("3.6", "32"): BASE_URL + "3.6.6/python-3.6.6.exe",
     ("3.7", "64"): BASE_URL + "3.7.0/python-3.7.0-amd64.exe",
@@ -26,6 +28,7 @@ URLS = {
 }
 INSTALL_CMD = {
     # Commands are allowed to fail only if they are not the last command.  Eg: uninstall (/x) allowed to fail.
+    "3.5": [["{path}", "/quiet", "TargetDir={home}"]],
     "3.6": [["{path}", "/quiet", "TargetDir={home}"]],
     "3.7": [["{path}", "/quiet", "TargetDir={home}"]],
 }
