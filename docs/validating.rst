@@ -10,13 +10,23 @@ Some types on ``middle`` can be validated based on single or multiple keywords t
 
     Validation on ``middle`` is based on rules declared in the `OpenAPI specification <https://swagger.io/docs/specification/data-models/data-types/>`_, so most of them should not be strange to those familiar with web development.
 
-Available validators
---------------------
+.. important::
+
+    All types have at least one validator: asserting if the type of the value is the one defined in the class (or None, if ``typing.Optional`` or have the keyword ``default`` set to ``None``).
+
+.. warning::
+
+    All validators that corresponds to a certain type will be called. This behavior may change in the future because I simply don't know if, in the OpenAPI specification, one (certain validator) may exclude another.
+
+String validators
+-----------------
+
+There are some vlidators for the ``str`` type,
 
 ``min_length``
 ~~~~~~~~~~~~~~
 
-Only available for ``str``, it would require that the input value should have at least the given value of length:
+Setting the ``min_length`` keyword to an integer would require that the input value should have at least the given value of length:
 
 .. code-block:: pycon
 
@@ -29,6 +39,11 @@ Only available for ``str``, it would require that the input value should have at
     TestModel(name='hello')
 
     >>> TestModel(name="hi")
+
+Given the input value above, here's the resulting ``Traceback``:
+
+.. code-block:: pytb
+
     Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
     File "/home/dev/middle/src/middle/model.py", line 80, in __call__
@@ -45,7 +60,7 @@ Only available for ``str``, it would require that the input value should have at
 ``max_length``
 ~~~~~~~~~~~~~~
 
-Only available for ``str``, it would require that the input value should have no more than the given value of length:
+Setting the ``max_length`` keyword to an integer would require that the input value should have no more than the given value of length:
 
 .. code-block:: pycon
 
@@ -58,6 +73,9 @@ Only available for ``str``, it would require that the input value should have no
     TestModel(name='hello')
 
     >>> TestModel(name="hello, world")
+
+.. code-block:: pytb
+
     Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
     File "/home/dev/middle/src/middle/model.py", line 80, in __call__
@@ -74,7 +92,7 @@ Only available for ``str``, it would require that the input value should have no
 ``pattern``
 ~~~~~~~~~~~
 
-Only available for ``str``, it would require that the input value should match the Regex value given:
+Setting the ``pattern`` keyword to a string representing a regular expression (or a regular expression object) would require that the input value should match the value given:
 
 .. code-block:: pycon
 
@@ -87,6 +105,9 @@ Only available for ``str``, it would require that the input value should match t
     TestModel(serial='123456')
 
     >>> TestModel(serial="hello")
+
+.. code-block:: pytb
+
     Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
     File "/home/dev/middle/src/middle/model.py", line 80, in __call__
@@ -104,3 +125,12 @@ Only available for ``str``, it would require that the input value should match t
 ~~~~~~~~~~
 
 To be developed.
+
+
+Number validators
+-----------------
+
+``minimum``
+~~~~~~~~~~~~~~
+
+TODO.

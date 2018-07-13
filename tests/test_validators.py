@@ -1,11 +1,4 @@
-# from typing import Collection
-# from typing import Mapping
-# from typing import MutableMapping
-# from typing import MutableSequence
-# from typing import MutableSet
-# from typing import Sequence
-# from typing import FrozenSet
-# from typing import Iterable
+import re
 from typing import Dict
 from typing import List
 from typing import Set
@@ -44,6 +37,12 @@ from middle.exceptions import ValidationError
             "foo", ["fo1", " foo "], {"pattern": "^[a-z]+$"}, id="str_pattern"
         ),
         pytest.param("foo", [], {"pattern": None}, id="str_pattern_none"),
+        pytest.param(
+            "foo",
+            ["fo1", " foo "],
+            {"pattern": re.compile("^[a-z]+$")},
+            id="str_re_object",
+        ),
     ],
 )
 def test_str(test_value, error_values, kwargs):
@@ -58,6 +57,40 @@ def test_str(test_value, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(name=ev)
+
+
+@pytest.mark.parametrize(
+    "test_value,raised_exc,kwargs",
+    [
+        pytest.param(
+            "foo", TypeError, {"min_length": "foo"}, id="str_min_wrong_type"
+        ),
+        pytest.param(
+            "foo", TypeError, {"max_length": "foo"}, id="str_max_wrong_type"
+        ),
+        pytest.param(
+            "foo", ValueError, {"min_length": -3}, id="str_min_negative"
+        ),
+        pytest.param(
+            "foo", ValueError, {"max_length": -3}, id="str_max_negative"
+        ),
+        pytest.param(
+            "foo",
+            ValueError,
+            {"min_length": 5, "max_length": 3},
+            id="str_max_lt_min",
+        ),
+        pytest.param(
+            "foo", TypeError, {"pattern": object()}, id="str_pattern_none"
+        ),
+    ],
+)
+def test_str_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        name = middle.field(type=str, **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(name=test_value)
 
 
 # #############################################################################
@@ -122,6 +155,52 @@ def test_int(test_value, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(age=ev)
+
+
+@pytest.mark.parametrize(
+    "test_value,raised_exc,kwargs",
+    [
+        pytest.param(
+            5, TypeError, {"minimum": "foo"}, id="int_min_wrong_type"
+        ),
+        pytest.param(
+            5, TypeError, {"maximum": "foo"}, id="int_max_wrong_type"
+        ),
+        pytest.param(
+            4, ValueError, {"minimum": 5, "maximum": 3}, id="int_max_lt_min"
+        ),
+        pytest.param(
+            5,
+            TypeError,
+            {"minimum": 3, "exclusive_minimum": "foo"},
+            id="int_min_exclusive_wrong_type",
+        ),
+        pytest.param(
+            5,
+            TypeError,
+            {"maximum": 6, "exclusive_maximum": "foo"},
+            id="int_max_exclusive_wrong_type",
+        ),
+        pytest.param(
+            5,
+            TypeError,
+            {"maximum": 6, "multiple_of": "foo"},
+            id="int_multiple_of_wrong_type",
+        ),
+        pytest.param(
+            5,
+            ValueError,
+            {"maximum": 6, "multiple_of": -2},
+            id="int_multiple_of_negative",
+        ),
+    ],
+)
+def test_int_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        value = middle.field(type=int, **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(value=test_value)
 
 
 # #############################################################################
@@ -193,73 +272,92 @@ def test_float(test_value, error_values, kwargs):
             TestModel(age=ev)
 
 
+@pytest.mark.parametrize(
+    "test_value,raised_exc,kwargs",
+    [
+        pytest.param(
+            5.4, TypeError, {"minimum": "foo"}, id="float_min_wrong_type"
+        ),
+        pytest.param(
+            5.4, TypeError, {"maximum": "foo"}, id="float_max_wrong_type"
+        ),
+        pytest.param(
+            4.5,
+            ValueError,
+            {"minimum": 5.5, "maximum": 3.2},
+            id="float_max_lt_min",
+        ),
+        pytest.param(
+            5.0,
+            TypeError,
+            {"minimum": 3.2, "exclusive_minimum": "foo"},
+            id="float_min_exclusive_wrong_type",
+        ),
+        pytest.param(
+            5.1,
+            TypeError,
+            {"maximum": 6.7, "exclusive_maximum": "foo"},
+            id="float_max_exclusive_wrong_type",
+        ),
+        pytest.param(
+            5.5,
+            TypeError,
+            {"maximum": 6.8, "multiple_of": "foo"},
+            id="float_multiple_of_wrong_type",
+        ),
+        pytest.param(
+            5.5,
+            ValueError,
+            {"maximum": 6.9, "multiple_of": -0.5},
+            id="float_multiple_of_negative",
+        ),
+    ],
+)
+def test_float_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        value = middle.field(type=float, **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(value=test_value)
+
+
 # #############################################################################
-# List, Sequence, Collection, Iterable, MutableSequence
+# List
 
 
 @pytest.mark.parametrize(
-    "list_types,test_values,error_values,kwargs",
+    "list_type,test_values,error_values,kwargs",
     [
         pytest.param(
-            [
-                # Collection[int],
-                # Iterable[int],
-                List[int],
-                # MutableSequence[int],
-                # Sequence[int],
-            ],
+            List[int],
             [0, 1, 2, 3],
             [[0, 1], []],
             {"min_items": 3},
             id="list_min_items",
         ),
         pytest.param(
-            [
-                # Collection[str],
-                # Iterable[str],
-                List[str],
-                # MutableSequence[str],
-                # Sequence[str],
-            ],
+            List[str],
             ["foo", "bar"],
             [["foo", "bar", "baz", "wee"]],
             {"max_items": 3},
             id="list_max_items",
         ),
         pytest.param(
-            [
-                # Collection[float],
-                # Iterable[float],
-                List[float],
-                # MutableSequence[float],
-                # Sequence[float],
-            ],
+            List[float],
             [1.0, 1.5, 2.0],
             [[1.0, 1.2, 1.4, 1.2, 1.5]],
             {"unique_items": True},
             id="list_unique_items",
         ),
         pytest.param(
-            [
-                # Collection[float],
-                # Iterable[float],
-                List[float],
-                # MutableSequence[float],
-                # Sequence[float],
-            ],
+            List[float],
             [1.0, 1.5, 2.0],
             [],
             {"unique_items": False},
             id="list_unique_items_false",
         ),
         pytest.param(
-            [
-                # Collection[str],
-                # Iterable[str],
-                List[str],
-                # MutableSequence[str],
-                # Sequence[str],
-            ],
+            List[str],
             ["foo", "bar", "baz"],
             [["foo", "bar"], ["foo", "bar", "baz", "FOO", "BAR"]],
             {"min_items": 3, "max_items": 4},
@@ -267,52 +365,105 @@ def test_float(test_value, error_values, kwargs):
         ),
     ],
 )
-def test_list(list_types, test_values, error_values, kwargs):
-    for list_type in list_types:
+def test_list(list_type, test_values, error_values, kwargs):
+    class TestModel(middle.Model):
+        values = middle.field(type=list_type, **kwargs)
 
-        class TestModel(middle.Model):
-            values = middle.field(type=list_type, **kwargs)
+    inst = TestModel(values=test_values)
 
-        inst = TestModel(values=test_values)
+    assert isinstance(inst, TestModel)
+    assert inst.values == test_values
 
-        assert isinstance(inst, TestModel)
-        assert inst.values == test_values
-
-        for ev in error_values:
-            with pytest.raises(ValidationError):
-                TestModel(values=ev)
-
-
-# #############################################################################
-# Set, MutableSet, FrozenSet
+    for ev in error_values:
+        with pytest.raises(ValidationError):
+            TestModel(values=ev)
 
 
 @pytest.mark.parametrize(
-    "set_types,test_values,error_values,kwargs",
+    "test_value,raised_exc,kwargs",
     [
         pytest.param(
-            [Set[int]],  # MutableSet[int], FrozenSet[int]],
+            ["foo", "bar"],
+            TypeError,
+            {"min_items": "foo"},
+            id="list_min_wrong_type",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            TypeError,
+            {"max_items": "foo"},
+            id="list_max_wrong_type",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            ValueError,
+            {"min_items": 5, "max_items": 3},
+            id="list_max_lt_min",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            TypeError,
+            {"min_items": 1, "unique_items": "foo"},
+            id="list_min_unique_wrong_type",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            TypeError,
+            {"max_items": 6, "unique_items": "foo"},
+            id="list_max_unique_wrong_type",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            ValueError,
+            {"min_items": -6},
+            id="list_min_negative",
+        ),
+        pytest.param(
+            ["foo", "bar"],
+            ValueError,
+            {"max_items": -6},
+            id="list_max_negative",
+        ),
+    ],
+)
+def test_list_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        value = middle.field(type=List[str], **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(value=test_value)
+
+
+# #############################################################################
+# Set
+
+
+@pytest.mark.parametrize(
+    "set_type,test_values,error_values,kwargs",
+    [
+        pytest.param(
+            Set[int],
             {0, 1, 2, 3},
             [{0, 1}, {}],
             {"min_items": 3},
             id="set_min_items",
         ),
         pytest.param(
-            [Set[str]],  # MutableSet[str], FrozenSet[str]],
+            Set[str],
             {"foo", "bar"},
             [{"foo", "bar", "baz", "wee"}],
             {"max_items": 3},
             id="set_max_items",
         ),
         pytest.param(
-            [Set[float]],  # MutableSet[float], FrozenSet[float]],
+            Set[float],
             {1.0, 1.5, 2.0},
             [],
             {"unique_items": True},
             id="set_unique_items",
         ),
         pytest.param(
-            [Set[str]],  # MutableSet[str], FrozenSet[str]],
+            Set[str],
             {"foo", "bar", "baz"},
             [{"foo", "bar"}, {"foo", "bar", "baz", "FOO", "BAR"}],
             {"min_items": 3, "max_items": 4},
@@ -320,49 +471,98 @@ def test_list(list_types, test_values, error_values, kwargs):
         ),
     ],
 )
-def test_set(set_types, test_values, error_values, kwargs):
-    for set_type in set_types:
+def test_set(set_type, test_values, error_values, kwargs):
+    class TestModel(middle.Model):
+        values = middle.field(type=set_type, **kwargs)
 
-        class TestModel(middle.Model):
-            values = middle.field(type=set_type, **kwargs)
+    inst = TestModel(values=test_values)
 
-        inst = TestModel(values=test_values)
+    assert isinstance(inst, TestModel)
+    assert inst.values == test_values
 
-        assert isinstance(inst, TestModel)
-        assert inst.values == test_values
-
-        for ev in error_values:
-            with pytest.raises(ValidationError):
-                TestModel(values=ev)
-
-
-# #############################################################################
-# Dict, Mapping, MutableMapping
+    for ev in error_values:
+        with pytest.raises(ValidationError):
+            TestModel(values=ev)
 
 
 @pytest.mark.parametrize(
-    "dict_types,test_values,error_values,kwargs",
+    "test_value,raised_exc,kwargs",
     [
         pytest.param(
-            [Dict[int, str]],  # Mapping[int, str], MutableMapping[int, str]],
+            {"bar", "foo"},
+            TypeError,
+            {"min_items": "foo"},
+            id="set_min_wrong_type",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            TypeError,
+            {"max_items": "foo"},
+            id="set_max_wrong_type",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            ValueError,
+            {"min_items": 5, "max_items": 3},
+            id="set_max_lt_min",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            TypeError,
+            {"min_items": 1, "unique_items": "foo"},
+            id="set_min_unique_wrong_type",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            TypeError,
+            {"max_items": 6, "unique_items": "foo"},
+            id="set_max_unique_wrong_type",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            ValueError,
+            {"min_items": -6},
+            id="set_min_negative",
+        ),
+        pytest.param(
+            {"bar", "foo"},
+            ValueError,
+            {"max_items": -6},
+            id="set_max_negative",
+        ),
+    ],
+)
+def test_set_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        value = middle.field(type=Set[str], **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(value=test_value)
+
+
+# #############################################################################
+# Dict
+
+
+@pytest.mark.parametrize(
+    "dict_type,test_values,error_values,kwargs",
+    [
+        pytest.param(
+            Dict[int, str],
             {0: "hello", 1: "world", 2: "foo", 3: "bar"},
             [{0: "hello", 1: "world"}, {}],
             {"min_properties": 3},
             id="dict_min_properties",
         ),
         pytest.param(
-            [Dict[str, int]],  # Mapping[str, int], MutableMapping[str, int]],
+            Dict[str, int],
             {"foo": 1, "bar": 2},
             [{"foo": 1, "bar": 2, "baz": 3, "wee": 4}],
             {"max_properties": 3},
             id="dict_max_properties",
         ),
         pytest.param(
-            [
-                Dict[str, float],
-                # Mapping[str, float],
-                # MutableMapping[str, float],
-            ],
+            Dict[str, float],
             {"foo": 1.0, "bar": 1.1, "baz": 1.2},
             [
                 {"foo": 0.0, "bar": 0.2},
@@ -373,17 +573,58 @@ def test_set(set_types, test_values, error_values, kwargs):
         ),
     ],
 )
-def test_dict(dict_types, test_values, error_values, kwargs):
-    for dict_type in dict_types:
+def test_dict(dict_type, test_values, error_values, kwargs):
+    class TestModel(middle.Model):
+        values = middle.field(type=dict_type, **kwargs)
 
-        class TestModel(middle.Model):
-            values = middle.field(type=dict_type, **kwargs)
+    inst = TestModel(values=test_values)
 
-        inst = TestModel(values=test_values)
+    assert isinstance(inst, TestModel)
+    assert inst.values == test_values
 
-        assert isinstance(inst, TestModel)
-        assert inst.values == test_values
+    for ev in error_values:
+        with pytest.raises(ValidationError):
+            TestModel(values=ev)
 
-        for ev in error_values:
-            with pytest.raises(ValidationError):
-                TestModel(values=ev)
+
+@pytest.mark.parametrize(
+    "test_value,raised_exc,kwargs",
+    [
+        pytest.param(
+            {"bar": "foo"},
+            TypeError,
+            {"min_properties": "foo"},
+            id="dict_min_wrong_type",
+        ),
+        pytest.param(
+            {"bar": "foo"},
+            TypeError,
+            {"max_properties": "foo"},
+            id="dict_max_wrong_type",
+        ),
+        pytest.param(
+            {"bar": "foo"},
+            ValueError,
+            {"min_properties": 5, "max_properties": 3},
+            id="dict_max_lt_min",
+        ),
+        pytest.param(
+            {"bar": "foo"},
+            ValueError,
+            {"min_properties": -6},
+            id="dict_min_negative",
+        ),
+        pytest.param(
+            {"bar": "foo"},
+            ValueError,
+            {"max_properties": -6},
+            id="dict_max_negative",
+        ),
+    ],
+)
+def test_dict_errors(test_value, raised_exc, kwargs):
+    class TestModel(middle.Model):
+        value = middle.field(type=Dict[str, str], **kwargs)
+
+    with pytest.raises(raised_exc):
+        TestModel(value=test_value)

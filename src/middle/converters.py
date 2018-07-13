@@ -198,10 +198,6 @@ def _converter_enum(type_):
 
 
 @converter.register(typing.List)
-# @converter.register(typing.Sequence)
-# @converter.register(typing.Collection)
-# @converter.register(typing.Iterable)
-# @converter.register(typing.MutableSequence)
 def _converter_iterable_list(type_):
     if not type_.__args__:
         raise InvalidType(
@@ -213,8 +209,6 @@ def _converter_iterable_list(type_):
 
 
 @converter.register(typing.Set)
-# @converter.register(typing.MutableSet)
-# @converter.register(typing.FrozenSet)
 def _converter_iterable_set(type_):
     if not type_.__args__:
         raise InvalidType(
@@ -226,8 +220,6 @@ def _converter_iterable_set(type_):
 
 
 @converter.register(typing.Dict)
-# @converter.register(typing.Mapping)
-# @converter.register(typing.MutableMapping)
 def _converter_dict(type_):
     if not type_.__args__:
         raise InvalidType(
