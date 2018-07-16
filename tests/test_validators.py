@@ -86,11 +86,32 @@ def test_str(test_value, error_values, kwargs):
     ],
 )
 def test_str_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        name = middle.field(type=str, **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(name=test_value)
+
+        class TestModel(middle.Model):
+            name = middle.field(type=str, **kwargs)
+
+
+def test_str_with_default():
+    class TestModel(middle.Model):
+        name = middle.field(type=str, max_length=5, default="Hello")
+
+    class TestNoneModel(middle.Model):
+        name = middle.field(type=str, max_length=5, default=None)
+
+    assert TestModel().name == "Hello"
+    assert TestModel(name="foo").name == "foo"
+    assert TestNoneModel().name is None
+    assert TestNoneModel(name="foo").name == "foo"
+
+    with pytest.raises(ValidationError):
+        TestModel(name="foobar")
+
+    with pytest.raises(TypeError):
+        TestModel(name=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(name="foobar")
 
 
 # #############################################################################
@@ -196,11 +217,32 @@ def test_int(test_value, error_values, kwargs):
     ],
 )
 def test_int_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        value = middle.field(type=int, **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(value=test_value)
+
+        class TestModel(middle.Model):
+            value = middle.field(type=int, **kwargs)
+
+
+def test_int_with_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=int, maximum=5, default=3)
+
+    class TestNoneModel(middle.Model):
+        value = middle.field(type=int, maximum=5, default=None)
+
+    assert TestModel().value == 3
+    assert TestModel(value=2).value == 2
+    assert TestNoneModel().value is None
+    assert TestNoneModel(value=2).value == 2
+
+    with pytest.raises(ValidationError):
+        TestModel(value=6)
+
+    with pytest.raises(TypeError):
+        TestModel(value=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(value=6)
 
 
 # #############################################################################
@@ -314,11 +356,32 @@ def test_float(test_value, error_values, kwargs):
     ],
 )
 def test_float_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        value = middle.field(type=float, **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(value=test_value)
+
+        class TestModel(middle.Model):
+            value = middle.field(type=float, **kwargs)
+
+
+def test_float_with_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=float, maximum=5.8, default=4.9)
+
+    class TestNoneModel(middle.Model):
+        value = middle.field(type=float, maximum=5.8, default=None)
+
+    assert TestModel().value == 4.9
+    assert TestModel(value=2.5).value == 2.5
+    assert TestNoneModel().value is None
+    assert TestNoneModel(value=2.5).value == 2.5
+
+    with pytest.raises(ValidationError):
+        TestModel(value=5.9)
+
+    with pytest.raises(TypeError):
+        TestModel(value=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(value=5.9)
 
 
 # #############################################################################
@@ -427,11 +490,32 @@ def test_list(list_type, test_values, error_values, kwargs):
     ],
 )
 def test_list_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        value = middle.field(type=List[str], **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(value=test_value)
+
+        class TestModel(middle.Model):
+            value = middle.field(type=List[str], **kwargs)
+
+
+def test_list_with_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=List[int], max_items=3, default=[2, 3])
+
+    class TestNoneModel(middle.Model):
+        value = middle.field(type=List[int], max_items=3, default=None)
+
+    assert TestModel().value == [2, 3]
+    assert TestModel(value=[3, 4]).value == [3, 4]
+    assert TestNoneModel().value is None
+    assert TestNoneModel(value=[3, 4]).value == [3, 4]
+
+    with pytest.raises(ValidationError):
+        TestModel(value=[2, 3, 4, 5, 6])
+
+    with pytest.raises(TypeError):
+        TestModel(value=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(value=[2, 3, 4, 5, 6])
 
 
 # #############################################################################
@@ -533,11 +617,32 @@ def test_set(set_type, test_values, error_values, kwargs):
     ],
 )
 def test_set_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        value = middle.field(type=Set[str], **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(value=test_value)
+
+        class TestModel(middle.Model):
+            value = middle.field(type=Set[str], **kwargs)
+
+
+def test_set_with_default():
+    class TestModel(middle.Model):
+        value = middle.field(type=Set[int], max_items=3, default={2, 3})
+
+    class TestNoneModel(middle.Model):
+        value = middle.field(type=Set[int], max_items=3, default=None)
+
+    assert TestModel().value == {2, 3}
+    assert TestModel(value=[3, 4]).value == {3, 4}
+    assert TestNoneModel().value is None
+    assert TestNoneModel(value=[3, 4]).value == {3, 4}
+
+    with pytest.raises(ValidationError):
+        TestModel(value=[2, 3, 4, 5, 6])
+
+    with pytest.raises(TypeError):
+        TestModel(value=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(value=[2, 3, 4, 5, 6])
 
 
 # #############################################################################
@@ -623,8 +728,42 @@ def test_dict(dict_type, test_values, error_values, kwargs):
     ],
 )
 def test_dict_errors(test_value, raised_exc, kwargs):
-    class TestModel(middle.Model):
-        value = middle.field(type=Dict[str, str], **kwargs)
-
     with pytest.raises(raised_exc):
-        TestModel(value=test_value)
+
+        class TestModel(middle.Model):
+            value = middle.field(type=Dict[str, str], **kwargs)
+
+
+def test_dict_with_default():
+    class TestModel(middle.Model):
+        value = middle.field(
+            type=Dict[str, int],
+            min_properties=1,
+            max_properties=2,
+            default={"hello": 1},
+        )
+
+    class TestNoneModel(middle.Model):
+        value = middle.field(
+            type=Dict[str, int],
+            min_properties=1,
+            max_properties=2,
+            default=None,
+        )
+
+    assert TestModel().value == {"hello": 1}
+    assert TestModel(value={"bar": 2, "baz": 3}).value == {"bar": 2, "baz": 3}
+    assert TestNoneModel().value is None
+    assert TestNoneModel(value={"bar": 2, "baz": 3}).value == {
+        "bar": 2,
+        "baz": 3,
+    }
+
+    with pytest.raises(ValidationError):
+        TestModel(value={"bar": 2, "baz": 3, "foo": 4})
+
+    with pytest.raises(TypeError):
+        TestModel(value=None)
+
+    with pytest.raises(ValidationError):
+        TestNoneModel(value={"bar": 2, "baz": 3, "foo": 4})

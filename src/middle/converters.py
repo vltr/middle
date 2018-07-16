@@ -80,7 +80,6 @@ def _datetime_converter(value):
     elif isinstance(value, str):
         dt = dt_from_iso_string(value)
         return dt_convert_to_utc(dt)
-        return dt
     elif isinstance(value, (tuple, list)) and 2 <= len(value) < 9:
         if len(value) == 8:  # we have a tz offset (TODO document, hours only)
             tz = datetime.timezone(datetime.timedelta(hours=value[7]))
@@ -146,8 +145,6 @@ def _multiple_types_converter_ordered(converters, value):
 
 
 def _none_or_converter(converter, value):
-    if value is None:
-        return None
     return converter(value)
 
 

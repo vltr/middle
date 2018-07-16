@@ -18,13 +18,21 @@ _attr_s_kwargs = {"cmp": False}
 
 
 def field(*args, **kwargs):
-    for alias in metadata_options:
-        value = kwargs.pop(alias, None)
+    for meta in metadata_options:
+        normalized = {}
+        value = kwargs.pop(meta.name, None)
         if value is not None:
-            if kwargs.get("metadata", None) is None:
-                kwargs.update({"metadata": {alias: value}})
-            else:
-                kwargs["metadata"].update({alias: value})
+            normalized[meta.name] = meta(value)
+        if meta.upper_range is not None:
+            upper_value = kwargs.pop(meta.upper_range, None)
+            if upper_value is not None:
+                normalized[meta.upper_range] = meta.check_upper_range(
+                    upper_value, normalized.get(meta.name, None)
+                )
+        if kwargs.get("metadata", None) is None:
+            kwargs.update({"metadata": normalized})
+        else:
+            kwargs["metadata"].update(normalized)
     return attr.ib(*args, **kwargs)
 
 
