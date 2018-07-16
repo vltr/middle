@@ -25,7 +25,7 @@ The most simple example of ``middle`` and some of its features (using Python 3.6
     >>> class Person(middle.Model):
     ...     name: str
     ...     age: int
-    ...     city: typing.Dict[str, Address]
+    ...     address: typing.Dict[str, Address]
 
     >>> data = {
     ...     "name": "John Doe",
