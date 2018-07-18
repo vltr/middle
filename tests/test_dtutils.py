@@ -43,9 +43,9 @@ def test_dt_withtz_from_iso_string():
     ) == datetime.datetime(2018, 7, 2, 7, 30, 0, 0, datetime.timezone.utc)
 
 
-def test_dt_withouttz_from_iso_string():
+def test_dt_withouttz_from_iso_string(local_tz):
     assert dt_from_iso_string("2018-07-02T08:30:00") == datetime.datetime(
-        2018, 7, 2, 8, 30, 0, 0, datetime.timezone.utc
+        2018, 7, 2, 8, 30, 0, 0, tzinfo=local_tz
     )
 
 

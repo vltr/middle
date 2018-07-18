@@ -46,7 +46,7 @@ def dt_convert_to_utc(dt: datetime, tz=_current_tz) -> datetime:
 
 def _dt_from_iso_string(dt_str):
     dt = parser.parse(dt_str)
-    return dt_convert_to_utc(dt, tz=timezone.utc)
+    return dt_convert_to_utc(dt)
 
 
 def _dt_to_iso_string(dt):

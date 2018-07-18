@@ -69,10 +69,16 @@ class MetadataOption:
             )
         return upper_value
 
+    @property
+    def keys(self):
+        res = [self.name]
+        if self.upper_range is not None:
+            res.append(self.upper_range)
+        return res
+
 
 metadata_options = [
     MetadataOption(name="description", type_=str),
-    MetadataOption(name="nullable", type_=bool),
     MetadataOption(name="minimum", upper_range="maximum", type_=(int, float)),
     MetadataOption(name="exclusive_minimum", type_=bool),
     MetadataOption(name="exclusive_maximum", type_=bool),
