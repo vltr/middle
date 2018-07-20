@@ -63,12 +63,8 @@ def _apply_number(type_, field):
 @validate.register(bool)
 @validate.register(datetime.date)
 @validate.register(datetime.datetime)
-def _apply_bool_dt_dttime(type_, field):
-    return _generic_fn(type_, type_, field)
-
-
 @validate.register(EnumMeta)
-def _validate_enum(type_, field):
+def _apply_bool_dt_dttime_enum(type_, field):
     return _generic_fn(type_, type_, field)
 
 
