@@ -1,51 +1,48 @@
-import re
 from functools import partial
 
 import attr
 
-_sentinel = object()
+from .compat import RegexPatternType
+
+SENTINEL = object()
+
 _type_messages = {
     int: "an integer",
     str: "a string",
     (int, float): "a number",
     bool: "a bool",
-    "regex": "either a string representing a regular expression or a regular "
-    "expression object",
+    (str, RegexPatternType): "either a string representing a regular "
+    "expression or a regular expression object",
 }
 
 
 def _is_of_type(value, type_=int):
     if isinstance(value, type_):
         return value
-    return _sentinel
+    return SENTINEL
 
 
-def _is_regex(value):
-    if isinstance(value, str):
-        return re.compile(value)
-    elif hasattr(value, "match"):
-        return value
-    return _sentinel
-
-
-@attr.s
+@attr.s(slots=True)
 class MetadataOption:
     name = attr.ib()
     type_ = attr.ib(default=int)
-    metadata_chk = attr.ib(default=None)
+    option_check = attr.ib(default=None)
     accept_lt_zero = attr.ib(default=True)
     upper_range = attr.ib(default=None)
 
     def __attrs_post_init__(self):
-        if self.metadata_chk is None:
-            self.metadata_chk = partial(_is_of_type, type_=self.type_)
+        if self.option_check is None:
+            self.option_check = partial(_is_of_type, type_=self.type_)
 
     def __call__(self, value, alias=None):
-        value = self.metadata_chk(value)
-        if value == _sentinel:
+        value = self.option_check(value)
+        if value == SENTINEL:
+            message = _type_messages.get(self.type_)
+            if message is None:
+                message = "an instance of type {!s}".format(self.type_)
             raise TypeError(
                 "The '{}' keyword must be {}".format(
-                    alias or self.name, _type_messages.get(self.type_)
+                    alias or self.name, message
                 )
             )
         if (
@@ -78,7 +75,6 @@ class MetadataOption:
 
 
 metadata_options = [
-    MetadataOption(name="description", type_=str),
     MetadataOption(name="minimum", upper_range="maximum", type_=(int, float)),
     MetadataOption(name="exclusive_minimum", type_=bool),
     MetadataOption(name="exclusive_maximum", type_=bool),
@@ -89,7 +85,7 @@ metadata_options = [
         name="min_length", upper_range="max_length", accept_lt_zero=False
     ),
     MetadataOption(name="format", type_=str),
-    MetadataOption(name="pattern", type_="regex", metadata_chk=_is_regex),
+    MetadataOption(name="pattern", type_=(str, RegexPatternType)),
     MetadataOption(
         name="min_items", upper_range="max_items", accept_lt_zero=False
     ),
@@ -101,4 +97,4 @@ metadata_options = [
     ),
 ]
 
-__all__ = ("metadata_options", "MetadataOption")
+__all__ = ("metadata_options", "MetadataOption", "SENTINEL")

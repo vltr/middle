@@ -1,5 +1,6 @@
 import typing
 
+import attr
 import pytest
 
 import middle
@@ -102,3 +103,50 @@ def test_invalid_models():
 
     class SomeAnotherModel(middle.Model):
         age = middle.field(type=None)
+
+
+def _fake_converter(v):  # noqa
+    return "cadavra {}".format(v)
+
+
+def _fake_factory():  # noqa
+    return "hello"
+
+
+@pytest.mark.parametrize(
+    "kwarg,value",
+    [
+        pytest.param("convert", int, id="convert_kwarg"),
+        pytest.param("converter", _fake_converter, id="converter_kwarg"),
+        pytest.param("factory", _fake_factory, id="factory_kwarg"),
+        pytest.param("init", False, id="init_kwarg"),
+        pytest.param(
+            "validator", attr.validators.instance_of(str), id="validator_kwarg"
+        ),
+    ],
+)
+def test_attr_blacklist_kwargs(kwarg, value):
+    class TestModel(middle.Model):
+        name = {"type": str, "default": "foo", kwarg: value}
+
+    assert TestModel(name="bar").name == "bar"
+    assert TestModel().name == "foo"
+
+
+@pytest.mark.parametrize(
+    "kwarg,value",
+    [
+        pytest.param("cmp", True, id="cmp_true_kwarg"),
+        pytest.param("cmp", False, id="cmp_false_kwarg"),
+        pytest.param("hash", True, id="hash_true_kwarg"),
+        pytest.param("hash", False, id="hash_false_kwarg"),
+        pytest.param("repr", True, id="repr_true_kwarg"),
+        pytest.param("repr", False, id="repr_false_kwarg"),
+    ],
+)
+def test_attr_whitelist_kwargs(kwarg, value):
+    class TestModel(middle.Model):
+        name = {"type": str, "default": "foo", kwarg: value}
+
+    assert TestModel(name="bar").name == "bar"
+    assert TestModel().name == "foo"

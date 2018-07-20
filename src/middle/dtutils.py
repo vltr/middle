@@ -13,7 +13,7 @@ def dt_to_iso_string(dt: datetime, tz=_current_tz) -> str:
     _check_dt_instance(dt)
     if not _dt_has_tz(dt):
         dt = dt_convert_to_utc(dt)
-    elif not _dt_is_utc(dt):
+    if not _dt_is_utc(dt):
         dt = dt.astimezone(timezone.utc)
     return _dt_to_iso_string(dt)
 
@@ -54,7 +54,7 @@ def _dt_to_iso_string(dt):
 
 
 def _dt_is_utc(dt: datetime):
-    return timezone.utc.utcoffset(dt) == 0
+    return dt.utcoffset().total_seconds() == 0
 
 
 def _dt_has_tz(dt: datetime):

@@ -5,7 +5,7 @@ import attr
 from attr._make import NOTHING  # NOTE: this is internal to attrs
 from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
-from .compat import TYPE_REGISTRY
+from .compat import TypeRegistry
 from .converters import converter
 from .converters import model_converter
 from .options import metadata_options
@@ -13,8 +13,25 @@ from .validators import validate
 from .values import asdict
 from .values import value_of
 
-_reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
+_attr_ib_whitelist_kwargs = [
+    "cmp",
+    "default",
+    "hash",
+    "metadata",
+    "repr",
+    "type",
+]
+
+_attr_ib_blacklist_kwargs = [
+    "convert",
+    "converter",
+    "factory",
+    "init",
+    "validator",
+]
 _attr_s_kwargs = {"cmp": False}
+_reserved_keys = re.compile("^__[a-z0-9_]+__$", re.I)
+_sentinel = object()
 
 
 def field(*args, **kwargs):
@@ -33,6 +50,16 @@ def field(*args, **kwargs):
             kwargs.update({"metadata": normalized})
         else:
             kwargs["metadata"].update(normalized)
+    for kw in _attr_ib_blacklist_kwargs:
+        if kw in kwargs:
+            kwargs.pop(kw)
+    pop_out = []
+    for kw in kwargs:
+        if kw not in _attr_ib_whitelist_kwargs:
+            kwargs["metadata"].update({kw: kwargs[kw]})
+            pop_out.append(kw)
+    for p in pop_out:
+        kwargs.pop(p)
     return attr.ib(*args, **kwargs)
 
 
@@ -58,11 +85,11 @@ class ModelMeta(type):
                 _implement_validators(f, k, annotations)
             if "__annotations__" not in attrs:
                 attrs["__annotations__"] = annotations
-            else:
-                for k in annotations:
-                    if k not in attrs["__annotations__"]:
-                        # XXX does it get here?
-                        attrs["__annotations__"].update({k: annotations[k]})
+            # else:
+            #     for k in annotations:
+            #         if k not in attrs["__annotations__"]:
+            #             # XXX does it get here?
+            #             attrs["__annotations__"].update({k: annotations[k]})
         # "unscramble" fields with default values to the end of the line
         _keys = list(attrs.keys())
         _max_counter = max(
@@ -110,10 +137,10 @@ class Model(metaclass=ModelMeta):
 
 
 # --------------------------------------------------------------- #
-# Add the Model class itself to TYPE_REGISTRY
+# Add the Model class itself to TypeRegistry
 # --------------------------------------------------------------- #
 
-TYPE_REGISTRY[ModelMeta] = Model
+TypeRegistry[ModelMeta] = Model
 
 # --------------------------------------------------------------- #
 # Simple member definition to attr.ib
@@ -123,9 +150,8 @@ TYPE_REGISTRY[ModelMeta] = Model
 def _translate_to_attrib(key, data, annotations, cls_name):
     if not isinstance(data, dict):
         data = {}
-    anchor = object()
-    type_ = data.pop("type", annotations.get(key, anchor))
-    if type_ == anchor:
+    type_ = data.pop("type", annotations.get(key, _sentinel))
+    if type_ == _sentinel:
         raise TypeError(
             "type not specified for field {}.{}".format(cls_name, key)
         )

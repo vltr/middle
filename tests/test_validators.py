@@ -3,27 +3,42 @@ from typing import Dict
 from typing import List
 from typing import Set
 
+import attr
 import pytest
+from attr._make import _AndValidator
+from attr.validators import _InstanceOfValidator
 
 import middle
 from middle.exceptions import ValidationError
+from middle.validators import BaseValidator
 
 # #############################################################################
 # str
 
 
 @pytest.mark.parametrize(
-    "test_value,error_values,kwargs",
+    "test_value,error_values,kwargs,descriptor",
     [
-        pytest.param("foo", ["fo", ""], {"min_length": 3}, id="str_min"),
-        pytest.param("", [], {"min_length": None}, id="str_min_none"),
         pytest.param(
-            "foo", ["foobar", "      "], {"max_length": 5}, id="str_max"
+            "foo",
+            ["fo", ""],
+            {"min_length": 3},
+            {"min_length": 3},
+            id="str_min",
         ),
-        pytest.param("", [], {"max_length": None}, id="str_max_none"),
+        pytest.param("", [], {"min_length": None}, {}, id="str_min_none"),
+        pytest.param(
+            "foo",
+            ["foobar", "      "],
+            {"max_length": 5},
+            {"max_length": 5},
+            id="str_max",
+        ),
+        pytest.param("", [], {"max_length": None}, {}, id="str_max_none"),
         pytest.param(
             "foo",
             ["fo", "foobar"],
+            {"min_length": 3, "max_length": 5},
             {"min_length": 3, "max_length": 5},
             id="str_min_max",
         ),
@@ -31,21 +46,27 @@ from middle.exceptions import ValidationError
             "foo",
             [],
             {"min_length": None, "max_length": None},
+            {},
             id="str_min_max_none",
         ),
         pytest.param(
-            "foo", ["fo1", " foo "], {"pattern": "^[a-z]+$"}, id="str_pattern"
+            "foo",
+            ["fo1", " foo "],
+            {"pattern": "^[a-z]+$"},
+            {"pattern": "^[a-z]+$"},
+            id="str_pattern",
         ),
-        pytest.param("foo", [], {"pattern": None}, id="str_pattern_none"),
+        pytest.param("foo", [], {"pattern": None}, {}, id="str_pattern_none"),
         pytest.param(
             "foo",
             ["fo1", " foo "],
             {"pattern": re.compile("^[a-z]+$")},
+            {"pattern": "^[a-z]+$"},
             id="str_re_object",
         ),
     ],
 )
-def test_str(test_value, error_values, kwargs):
+def test_str(test_value, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         name = middle.field(type=str, **kwargs)
 
@@ -57,6 +78,20 @@ def test_str(test_value, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(name=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "name":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == str
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == str
 
 
 @pytest.mark.parametrize(
@@ -119,34 +154,69 @@ def test_str_with_default():
 
 
 @pytest.mark.parametrize(
-    "test_value,error_values,kwargs",
+    "test_value,error_values,kwargs,descriptor",
     [
-        pytest.param(20, [19, 18], {"minimum": 20}, id="int_min"),
+        pytest.param(
+            20,
+            [19, 18],
+            {"minimum": 20, "maximum": None},
+            {"minimum": 20},
+            id="int_min",
+        ),
         pytest.param(
             21,
             [20, 19],
+            {
+                "minimum": 20,
+                "exclusive_minimum": True,
+                "exclusive_maximum": False,
+            },
             {"minimum": 20, "exclusive_minimum": True},
             id="int_excl_min",
         ),
-        pytest.param(20, [21, 22], {"maximum": 20}, id="int_max"),
+        pytest.param(
+            20, [21, 22], {"maximum": 20}, {"maximum": 20}, id="int_max"
+        ),
         pytest.param(
             19,
             [20, 21],
+            {"maximum": 20, "exclusive_maximum": True, "minimum": None},
             {"maximum": 20, "exclusive_maximum": True},
             id="int_excl_max",
         ),
         pytest.param(
-            15, [9, 21], {"minimum": 10, "maximum": 20}, id="int_min_max"
+            15,
+            [9, 21],
+            {
+                "minimum": 10,
+                "maximum": 20,
+                "exclusive_maximum": False,
+                "exclusive_minimum": False,
+            },
+            {"minimum": 10, "maximum": 20},
+            id="int_min_max",
         ),
         pytest.param(
             15,
             [10, 21],
+            {
+                "minimum": 10,
+                "exclusive_minimum": True,
+                "maximum": 20,
+                "exclusive_maximum": False,
+            },
             {"minimum": 10, "exclusive_minimum": True, "maximum": 20},
             id="int_excl_min_max",
         ),
         pytest.param(
             15,
             [9, 20],
+            {
+                "minimum": 10,
+                "maximum": 20,
+                "exclusive_maximum": True,
+                "exclusive_minimum": False,
+            },
             {"minimum": 10, "maximum": 20, "exclusive_maximum": True},
             id="int_min_excl_max",
         ),
@@ -158,13 +228,26 @@ def test_str_with_default():
                 "exclusive_minimum": True,
                 "maximum": 20,
                 "exclusive_maximum": True,
+                "multiple_of": None,
+            },
+            {
+                "minimum": 10,
+                "exclusive_minimum": True,
+                "maximum": 20,
+                "exclusive_maximum": True,
             },
             id="int_excl_min_excl_max",
         ),
-        pytest.param(20, [21, 99], {"multiple_of": 5}, id="int_multiple_of"),
+        pytest.param(
+            20,
+            [21, 99],
+            {"multiple_of": 5},
+            {"multiple_of": 5},
+            id="int_multiple_of",
+        ),
     ],
 )
-def test_int(test_value, error_values, kwargs):
+def test_int(test_value, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         age = middle.field(type=int, **kwargs)
 
@@ -176,6 +259,20 @@ def test_int(test_value, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(age=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "age":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == int
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == int
 
 
 @pytest.mark.parametrize(
@@ -250,37 +347,69 @@ def test_int_with_default():
 
 
 @pytest.mark.parametrize(
-    "test_value,error_values,kwargs",
+    "test_value,error_values,kwargs,descriptor",
     [
-        pytest.param(1.0, [0.9, 0.99], {"minimum": 1.0}, id="float_min"),
+        pytest.param(
+            1.0,
+            [0.9, 0.99],
+            {"minimum": 1.0, "maximum": None, "exclusive_minimum": False},
+            {"minimum": 1.0},
+            id="float_min",
+        ),
         pytest.param(
             1.01,
             [1.0, 0.999],
+            {"minimum": 1.0, "exclusive_minimum": True, "maximum": None},
             {"minimum": 1.0, "exclusive_minimum": True},
             id="float_excl_min",
         ),
-        pytest.param(1.0, [1.01, 1.1], {"maximum": 1.0}, id="float_max"),
+        pytest.param(
+            1.0,
+            [1.01, 1.1],
+            {"maximum": 1.0, "minimum": None, "exclusive_maximum": False},
+            {"maximum": 1.0},
+            id="float_max",
+        ),
         pytest.param(
             0.999,
             [1.0, 1.001],
+            {
+                "maximum": 1.0,
+                "exclusive_maximum": True,
+                "exclusive_minimum": False,
+            },
             {"maximum": 1.0, "exclusive_maximum": True},
             id="float_excl_max",
         ),
         pytest.param(
             0.5,
             [-0.01, 1.001],
+            {"minimum": 0.0, "maximum": 1.0, "multiple_of": None},
             {"minimum": 0.0, "maximum": 1.0},
             id="float_min_max",
         ),
         pytest.param(
             0.5,
             [-0.01, 0.0, 1.1],
+            {
+                "minimum": 0.0,
+                "exclusive_minimum": True,
+                "maximum": 1.0,
+                "exclusive_maximum": False,
+            },
             {"minimum": 0.0, "exclusive_minimum": True, "maximum": 1.0},
             id="float_excl_min_max",
         ),
         pytest.param(
             0.5,
             [-0.01, 1.0, 1.001],
+            {
+                "minimum": 0.0,
+                "maximum": 1.0,
+                "exclusive_maximum": True,
+                "exclusive_minimum": False,
+                "multiple_of": None,
+            },
             {"minimum": 0.0, "maximum": 1.0, "exclusive_maximum": True},
             id="float_min_excl_max",
         ),
@@ -292,15 +421,26 @@ def test_int_with_default():
                 "exclusive_minimum": True,
                 "maximum": 1.0,
                 "exclusive_maximum": True,
+                "multiple_of": None,
+            },
+            {
+                "minimum": 0.0,
+                "exclusive_minimum": True,
+                "maximum": 1.0,
+                "exclusive_maximum": True,
             },
             id="float_excl_min_excl_max",
         ),
         pytest.param(
-            3.3, [2.21, 99.3], {"multiple_of": 1.1}, id="float_multiple_of"
+            3.3,
+            [2.21, 99.3],
+            {"multiple_of": 1.1, "exclusive_minimum": False},
+            {"multiple_of": 1.1},
+            id="float_multiple_of",
         ),
     ],
 )
-def test_float(test_value, error_values, kwargs):
+def test_float(test_value, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         age = middle.field(type=float, **kwargs)
 
@@ -312,6 +452,20 @@ def test_float(test_value, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(age=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "age":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == float
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == float
 
 
 @pytest.mark.parametrize(
@@ -389,12 +543,13 @@ def test_float_with_default():
 
 
 @pytest.mark.parametrize(
-    "list_type,test_values,error_values,kwargs",
+    "list_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
             List[int],
             [0, 1, 2, 3],
             [[0, 1], []],
+            {"min_items": 3, "max_items": None},
             {"min_items": 3},
             id="list_min_items",
         ),
@@ -402,6 +557,7 @@ def test_float_with_default():
             List[str],
             ["foo", "bar"],
             [["foo", "bar", "baz", "wee"]],
+            {"max_items": 3, "unique_items": False},
             {"max_items": 3},
             id="list_max_items",
         ),
@@ -409,6 +565,7 @@ def test_float_with_default():
             List[float],
             [1.0, 1.5, 2.0],
             [[1.0, 1.2, 1.4, 1.2, 1.5]],
+            {"unique_items": True, "max_items": None, "min_items": None},
             {"unique_items": True},
             id="list_unique_items",
         ),
@@ -417,18 +574,20 @@ def test_float_with_default():
             [1.0, 1.5, 2.0],
             [],
             {"unique_items": False},
+            {},
             id="list_unique_items_false",
         ),
         pytest.param(
             List[str],
             ["foo", "bar", "baz"],
             [["foo", "bar"], ["foo", "bar", "baz", "FOO", "BAR"]],
+            {"min_items": 3, "max_items": 4, "unique_items": False},
             {"min_items": 3, "max_items": 4},
             id="list_min_max_items",
         ),
     ],
 )
-def test_list(list_type, test_values, error_values, kwargs):
+def test_list(list_type, test_values, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         values = middle.field(type=list_type, **kwargs)
 
@@ -440,6 +599,20 @@ def test_list(list_type, test_values, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(values=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "values":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == list
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == list
 
 
 @pytest.mark.parametrize(
@@ -523,12 +696,13 @@ def test_list_with_default():
 
 
 @pytest.mark.parametrize(
-    "set_type,test_values,error_values,kwargs",
+    "set_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
             Set[int],
             {0, 1, 2, 3},
             [{0, 1}, {}],
+            {"min_items": 3, "max_items": None},
             {"min_items": 3},
             id="set_min_items",
         ),
@@ -536,6 +710,7 @@ def test_list_with_default():
             Set[str],
             {"foo", "bar"},
             [{"foo", "bar", "baz", "wee"}],
+            {"max_items": 3, "min_items": None},
             {"max_items": 3},
             id="set_max_items",
         ),
@@ -543,6 +718,7 @@ def test_list_with_default():
             Set[float],
             {1.0, 1.5, 2.0},
             [],
+            {"unique_items": True, "max_items": None},
             {"unique_items": True},
             id="set_unique_items",
         ),
@@ -550,12 +726,13 @@ def test_list_with_default():
             Set[str],
             {"foo", "bar", "baz"},
             [{"foo", "bar"}, {"foo", "bar", "baz", "FOO", "BAR"}],
+            {"min_items": 3, "max_items": 4, "unique_items": False},
             {"min_items": 3, "max_items": 4},
             id="set_min_max_items",
         ),
     ],
 )
-def test_set(set_type, test_values, error_values, kwargs):
+def test_set(set_type, test_values, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         values = middle.field(type=set_type, **kwargs)
 
@@ -567,6 +744,20 @@ def test_set(set_type, test_values, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(values=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "values":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == set
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == set
 
 
 @pytest.mark.parametrize(
@@ -650,12 +841,13 @@ def test_set_with_default():
 
 
 @pytest.mark.parametrize(
-    "dict_type,test_values,error_values,kwargs",
+    "dict_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
             Dict[int, str],
             {0: "hello", 1: "world", 2: "foo", 3: "bar"},
             [{0: "hello", 1: "world"}, {}],
+            {"min_properties": 3, "max_properties": None},
             {"min_properties": 3},
             id="dict_min_properties",
         ),
@@ -663,6 +855,7 @@ def test_set_with_default():
             Dict[str, int],
             {"foo": 1, "bar": 2},
             [{"foo": 1, "bar": 2, "baz": 3, "wee": 4}],
+            {"max_properties": 3, "min_properties": None},
             {"max_properties": 3},
             id="dict_max_properties",
         ),
@@ -674,11 +867,12 @@ def test_set_with_default():
                 {"foo": 1.1, "bar": 1.3, "baz": 1.7, "FOO": 1.8, "BAR": 2.1},
             ],
             {"min_properties": 3, "max_properties": 4},
+            {"min_properties": 3, "max_properties": 4},
             id="dict_min_max_properties",
         ),
     ],
 )
-def test_dict(dict_type, test_values, error_values, kwargs):
+def test_dict(dict_type, test_values, error_values, kwargs, descriptor):
     class TestModel(middle.Model):
         values = middle.field(type=dict_type, **kwargs)
 
@@ -690,6 +884,20 @@ def test_dict(dict_type, test_values, error_values, kwargs):
     for ev in error_values:
         with pytest.raises(ValidationError):
             TestModel(values=ev)
+
+    for field in attr.fields(TestModel):  # noqa
+        if field.name == "values":
+            if isinstance(field.validator, _AndValidator):
+                for validator in field.validator._validators:
+                    if isinstance(validator, BaseValidator):
+                        assert validator.descriptor == descriptor
+                    elif isinstance(validator, _InstanceOfValidator):
+                        assert validator.type == dict
+            else:
+                if isinstance(field.validator, BaseValidator):
+                    assert field.validator.descriptor == descriptor
+                elif (field.validator, _InstanceOfValidator):
+                    assert field.validator.type == dict
 
 
 @pytest.mark.parametrize(

@@ -2,6 +2,7 @@ import re
 
 import pytest
 
+from middle.options import MetadataOption
 from middle.options import metadata_options
 
 
@@ -10,11 +11,7 @@ def _get_option(name):
 
 
 @pytest.mark.parametrize(
-    "option_name",
-    [
-        pytest.param("description", id="description_str"),
-        pytest.param("format", id="format_str"),
-    ],
+    "option_name", [pytest.param("format", id="format_str")]
 )
 def test_metadata_option_str(option_name):
     option = _get_option(option_name)
@@ -95,7 +92,8 @@ def test_metadata_option_multiple_of():
 
 def test_metadata_option_pattern():
     pattern = _get_option("pattern")
-    assert pattern("^[a-z]+$") == re.compile("^[a-z]+$")
+    assert pattern("^[a-z]+$") == "^[a-z]+$"
+    assert pattern(re.compile("^[a-z]+$")) == re.compile("^[a-z]+$")
 
     with pytest.raises(TypeError):
         assert pattern(20)
@@ -138,3 +136,34 @@ def test_metadata_option_ranges(option_name, keys):
         option(-5, -2)
 
     assert set(option.keys) == keys
+
+
+def test_metadata_custom_option():
+    foo_bar = MetadataOption(name="foo_bar", type_=str)
+    metadata_options.append(foo_bar)
+
+    assert foo_bar("foo, bar!") == "foo, bar!"
+
+    with pytest.raises(TypeError):
+        assert foo_bar(3.14)
+
+    assert set(foo_bar.keys) == {"foo_bar"}
+
+
+def test_metadata_custom_option_with_custom_check():
+    def check_value(value):
+        if value == 3.14:
+            return value
+        raise ValueError(
+            "The value given '{}' does not match pi '3.14'".format(value)
+        )
+
+    pi_value = MetadataOption(name="pi", type_=float, option_check=check_value)
+    metadata_options.append(pi_value)
+
+    assert pi_value(3.14) == 3.14
+
+    with pytest.raises(ValueError):
+        pi_value(3.15)
+
+    assert set(pi_value.keys) == {"pi"}

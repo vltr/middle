@@ -8,7 +8,7 @@ from . import model
 from . import options
 from . import validators
 from . import values
-from .compat import TYPE_REGISTRY
+from .compat import TypeRegistry
 from .compat import get_type
 from .config import config
 from .converters import converter
@@ -33,7 +33,7 @@ __all__ = (
     "model",
     "options",
     "type_dispatch",
-    "TYPE_REGISTRY",
+    "TypeRegistry",
     "validate",
     "validators",
     "value_of",

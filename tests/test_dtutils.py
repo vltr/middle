@@ -33,8 +33,10 @@ def test_datetime_no_tzinfo_to_iso_string():
 
 
 def test_datetime_with_tzinfo_nonutc_to_iso_string():
-    dt = datetime.datetime(2018, 7, 2, 8, 30, 0, 0, pytz.timezone("CET"))
-    assert dt_to_iso_string(dt) == "2018-07-02T07:30:00+00:00"
+    dt = datetime.datetime(
+        2018, 7, 2, 8, 30, 0, 0, tzinfo=pytz.timezone("Etc/GMT+5")
+    )
+    assert dt_to_iso_string(dt) == "2018-07-02T13:30:00+00:00"
 
 
 def test_dt_withtz_from_iso_string():
@@ -92,13 +94,17 @@ def test_dt_from_timestamp_error(value):
 
 def test_dt_convert_to_utc():
     assert dt_convert_to_utc(
-        datetime.datetime(2018, 7, 2, 8, 30, 0, 0, pytz.timezone("CET"))
-    ) == datetime.datetime(2018, 7, 2, 7, 30, 0, 0, datetime.timezone.utc)
+        datetime.datetime(2018, 7, 2, 8, 30, 0, 0, tzinfo=pytz.timezone("CET"))
+    ) == datetime.datetime(
+        2018, 7, 2, 7, 30, 0, 0, tzinfo=datetime.timezone.utc
+    )
 
     assert dt_convert_to_utc(
-        datetime.datetime(2018, 7, 2, 8, 30, 0, 0, datetime.timezone.utc)
+        datetime.datetime(
+            2018, 7, 2, 8, 30, 0, 0, tzinfo=datetime.timezone.utc
+        )
     ) == dt_convert_to_utc(
-        datetime.datetime(2018, 7, 2, 9, 30, 0, 0, pytz.timezone("CET"))
+        datetime.datetime(2018, 7, 2, 9, 30, 0, 0, tzinfo=pytz.timezone("CET"))
     )
 
 

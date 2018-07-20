@@ -1013,6 +1013,12 @@ def test_register_new_type():
     assert middle.converter(Foo) == _convert_to_foo
     assert middle.validate(Foo, {}) == [attr.validators.instance_of(Foo)]
 
+    with pytest.raises(TypeError):
+
+        @middle.value_of.register(Foo)
+        def value_of_foo_again(type_):  # noqa
+            return _get_value_of_foo
+
 
 def test_converter_new_type():
     assert middle.converter(Foo)("baz").foo == Foo(foo="baz").foo

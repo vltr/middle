@@ -1,3 +1,4 @@
+import re
 import sys
 import typing
 from datetime import date
@@ -6,23 +7,28 @@ from decimal import Decimal
 from enum import EnumMeta
 from functools import lru_cache
 
-IS_PY36 = False
+_IS_PY36 = False
+RegexPatternType = None
 if sys.version_info[:2] >= (3, 7):
     from typing import _GenericAlias as GenericType
+
+    RegexPatternType = re.Pattern
 else:
     from typing import GenericMeta as GenericType
 
-    IS_PY36 = True
+    RegexPatternType = re._pattern_type
+
+    _IS_PY36 = True
 
 
-TYPE_REGISTRY = {}
-NONETYPE = type(None)
+TypeRegistry = {}
+NoneType = type(None)
 
 
 @lru_cache(maxsize=None)
 def get_type(type_):
     if type_ is None:
-        return NONETYPE
+        return NoneType
     if type_ in (
         str,
         int,
@@ -44,7 +50,7 @@ def get_type(type_):
     if tt == type:
         tt = type_
     if hasattr(type_, "__origin__") or isinstance(tt, GenericType):
-        if IS_PY36:  # py36
+        if _IS_PY36:  # py36
             return type_.__origin__
         else:  # py37
             if hasattr(type_, "_name") and isinstance(type_._name, str):
@@ -52,6 +58,9 @@ def get_type(type_):
             return type_.__origin__
     elif tt == EnumMeta:
         return tt
-    elif tt in TYPE_REGISTRY:
-        return TYPE_REGISTRY[tt]
+    elif tt in TypeRegistry:
+        return TypeRegistry[tt]
     return type_
+
+
+__all__ = ("get_type", "NoneType", "RegexPatternType", "TypeRegistry")

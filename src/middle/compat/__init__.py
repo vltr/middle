@@ -1,5 +1,6 @@
-from .types import NONETYPE
-from .types import TYPE_REGISTRY
+from .types import NoneType
+from .types import RegexPatternType
+from .types import TypeRegistry
 from .types import get_type
 
-__all__ = ("NONETYPE", "TYPE_REGISTRY", "get_type")
+__all__ = ("get_type", "NoneType", "RegexPatternType", "TypeRegistry")

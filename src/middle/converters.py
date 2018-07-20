@@ -7,7 +7,7 @@ from functools import partial
 
 import attr
 
-from .compat import NONETYPE
+from .compat import NoneType
 from .config import config
 from .dispatch import type_dispatch
 from .dtutils import dt_convert_to_utc
@@ -115,8 +115,6 @@ def _multiple_types_converter(converters, value):
             converted_values.append(c(value))
         except TypeError:
             continue
-        except Exception as e:
-            raised_exc.append(e)
 
     if raised_exc:
         pass  # TODO do something (?)
@@ -156,7 +154,7 @@ def converter(type_):
         raise InvalidType()
 
 
-@converter.register(NONETYPE)
+@converter.register(NoneType)
 def _converter_none(type_):
     return partial(_none_or_converter, lambda _: None)
 
@@ -239,18 +237,18 @@ def _converter_union(type_):
         )
     converter_fns = []
     for arg in type_.__args__:
-        if arg == NONETYPE:
+        if arg == NoneType:
             continue
         converter_fns.append(converter(arg))
 
     if len(converter_fns) == 1:  # only possible is NoneType present
-        if NONETYPE not in type_.__args__:  # noqa
+        if NoneType not in type_.__args__:  # noqa
             raise TypeError(
                 "There should be None inside with the usage of Optional"
             )
         return partial(_none_or_converter, converter_fns[0])
     else:
-        if NONETYPE in type_.__args__:
+        if NoneType in type_.__args__:
             return partial(
                 _none_or_converter,
                 partial(_multiple_types_converter, converter_fns),

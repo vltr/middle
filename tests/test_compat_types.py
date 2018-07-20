@@ -63,7 +63,7 @@ def test_registered_custom_type():
     class Foo:
         pass
 
-    middle.TYPE_REGISTRY[Foo] = Foo
+    middle.TypeRegistry[Foo] = Foo
     assert middle.get_type(Foo) == Foo
 
 
