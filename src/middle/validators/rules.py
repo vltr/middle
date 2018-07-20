@@ -2,6 +2,7 @@ import datetime
 import typing
 from decimal import Decimal
 from enum import EnumMeta
+from functools import partial
 
 import attr
 
@@ -11,6 +12,29 @@ from .dicts import DictValidator
 from .lists import ListValidator
 from .numbers import NumberValidator
 from .strings import StringValidator
+
+
+def _complex_validator(validator_cls, sub_type, type_, field):
+    validators = []
+    if validator_cls is not None:
+        kwargs = {}
+        for key in validator_cls.validator_keys():
+            if key in field.metadata:
+                kwargs.update({key: field.metadata.get(key)})
+        if kwargs:
+            validators.append(validator_cls(**kwargs))
+    validators.append(
+        attr.validators.instance_of(_get_instances_of(sub_type, field))
+    )
+    return validators
+
+
+_generic_fn = partial(_complex_validator, None)
+_str_fn = partial(_complex_validator, StringValidator)
+_num_fn = partial(_complex_validator, NumberValidator)
+_list_fn = partial(_complex_validator, ListValidator, list)
+_set_fn = partial(_complex_validator, ListValidator, set)
+_dict_fn = partial(_complex_validator, DictValidator, dict)
 
 
 def _get_instances_of(type_, field):
@@ -26,91 +50,41 @@ def validate(type_, field):
 
 @validate.register(str)
 def _apply_str(type_, field):
-    validators = []
-    kwargs = {}
-    for key in StringValidator.validator_keys():
-        if key in field.metadata:
-            kwargs.update({key: field.metadata.get(key)})
-    if kwargs:
-        validators.append(StringValidator(**kwargs))
-    validators.append(
-        attr.validators.instance_of(_get_instances_of(type_, field))
-    )
-    return validators
+    return _str_fn(type_, type_, field)
 
 
 @validate.register(int)
 @validate.register(float)
 @validate.register(Decimal)
 def _apply_number(type_, field):
-    validators = []
-    kwargs = {}
-    for key in NumberValidator.validator_keys():
-        if key in field.metadata:
-            kwargs.update({key: field.metadata.get(key)})
-    if kwargs:
-        validators.append(NumberValidator(**kwargs))
-    validators.append(
-        attr.validators.instance_of(_get_instances_of(type_, field))
-    )
-    return validators
+    return _num_fn(type_, type_, field)
 
 
 @validate.register(bool)
 @validate.register(datetime.date)
 @validate.register(datetime.datetime)
 def _apply_bool_dt_dttime(type_, field):
-    return [attr.validators.instance_of(_get_instances_of(type_, field))]
+    return _generic_fn(type_, type_, field)
 
 
 @validate.register(EnumMeta)
 def _validate_enum(type_, field):
-    return [attr.validators.instance_of(_get_instances_of(type_, field))]
+    return _generic_fn(type_, type_, field)
 
 
 @validate.register(typing.List)
 def _validate_list(type_, field):
-    validators = []
-    kwargs = {}
-    for key in ListValidator.validator_keys():
-        if key in field.metadata:
-            kwargs.update({key: field.metadata.get(key)})
-    if kwargs:
-        validators.append(ListValidator(**kwargs))
-    validators.append(
-        attr.validators.instance_of(_get_instances_of(list, field))
-    )
-    return validators
+    return _list_fn(type_, field)
 
 
 @validate.register(typing.Set)
 def _validate_set(type_, field):
-    validators = []
-    kwargs = {}
-    for key in ListValidator.validator_keys():
-        if key in field.metadata:
-            kwargs.update({key: field.metadata.get(key)})
-    if kwargs:
-        validators.append(ListValidator(**kwargs))
-    validators.append(
-        attr.validators.instance_of(_get_instances_of(set, field))
-    )
-    return validators
+    return _set_fn(type_, field)
 
 
 @validate.register(typing.Dict)
 def _validate_dict(type_, field):
-    validators = []
-    kwargs = {}
-    for key in DictValidator.validator_keys():
-        if key in field.metadata:
-            kwargs.update({key: field.metadata.get(key)})
-    if kwargs:
-        validators.append(DictValidator(**kwargs))
-    validators.append(
-        attr.validators.instance_of(_get_instances_of(dict, field))
-    )
-    return validators
+    return _dict_fn(type_, field)
 
 
 @validate.register(typing.Union)
