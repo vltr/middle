@@ -3,8 +3,8 @@ import attr
 
 @attr.s(slots=True, hash=True)
 class BaseValidator:
-    def __call__(self, inst, attr, value):
-        raise Exception("this method needs to be implemented")
+    def __call__(self, inst, attr, value):  # noqa
+        raise Exception("this method needs to be implemented in a subclass")
 
     @property
     def descriptor(self):
