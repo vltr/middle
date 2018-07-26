@@ -26,7 +26,7 @@ project = 'middle'
 year = '2018'
 author = 'Richard Kuesters'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '0.2.0'
+version = release = '0.2.1'
 
 pygments_style = 'default'
 templates_path = ['.']
