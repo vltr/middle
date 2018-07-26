@@ -2,6 +2,11 @@
 Changelog
 =========
 
+v0.2.1 on 2018-07-26
+--------------------
+
+* Quick fix related to the change log and MANIFEST.in files
+
 v0.2.0 on 2018-07-26
 --------------------
 
