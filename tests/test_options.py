@@ -167,3 +167,15 @@ def test_metadata_custom_option_with_custom_check():
         pi_value(3.15)
 
     assert set(pi_value.keys) == {"pi"}
+
+
+def test_metadata_custom_option_with_custom_type():
+    float_option = MetadataOption(name="float_value", type_=float)
+    metadata_options.append(float_option)
+
+    assert float_option(20.5) == 20.5
+
+    with pytest.raises(TypeError):
+        assert float_option("hello")
+
+    assert set(float_option.keys) == {"float_value"}
