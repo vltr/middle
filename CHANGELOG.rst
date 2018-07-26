@@ -2,11 +2,12 @@
 Changelog
 =========
 
-v0.2.0 on 2018-07-??
+v0.2.0 on 2018-07-26
 --------------------
 
-* Released documentation
-* Got 98% coverage (finally combined)
+* Released (part) of the documentation
+* Got 99% coverage (finally combined)
+* Python 3.5 support added
 
 v0.1.1 on 2018-07-02
 --------------------
