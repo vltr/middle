@@ -59,7 +59,7 @@ stevedore==1.29.0         # via doc8
 toml==0.9.4               # via black
 tornado==5.1            # via livereload, sphinx-autobuild
 tox==3.1.2
-tqdm==4.23.4              # via twine
+tqdm==4.24.0              # via twine
 twine==1.11.0
 urllib3==1.23             # via requests
 virtualenv==16.0.0        # via tox
