@@ -37,7 +37,7 @@ pluggy==0.6.0             # via pytest, tox
 port_for==0.4           # via sphinx-autobuild
 py==1.5.4                 # via pytest, tox
 pycodestyle==2.4.0
-pyflakes==1.6.0           # via flake8, pytest-flakes
+pyflakes==2.0.0           # via flake8, pytest-flakes
 pygments==2.2.0
 pyparsing==2.2.0          # via packaging
 pytest-cache==1.0         # via pytest-flakes, pytest-pep8
