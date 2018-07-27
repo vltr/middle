@@ -33,8 +33,8 @@ clean: cleanpycache
 
 requirements-dev:
 	pip install pip-tools
-	pip-compile requirements-dev.in --output-file requirements-dev.txt
-	pip-compile
+	pip-compile -r -U requirements-dev.in --output-file requirements-dev.txt
+	pip-compile -r -U
 	pip-sync requirements-dev.txt requirements.txt
 
 release:

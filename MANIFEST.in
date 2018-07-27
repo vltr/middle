@@ -20,6 +20,7 @@ include tox.ini .travis.yml appveyor.yml .codacy.yml
 
 exclude .github
 exclude .python-version
+exclude .pyup.yml
 exclude .venv
 exclude .vscode
 exclude benchmarks

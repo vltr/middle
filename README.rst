@@ -4,27 +4,9 @@
 
 .. start-badges
 
-A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid of a lot of them in the near future.
-
-.. image:: https://readthedocs.org/projects/middle/badge/?style=flat
-    :target: https://readthedocs.org/projects/middle
-    :alt: Documentation Status
-
-.. image:: https://travis-ci.org/vltr/middle.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/vltr/middle
-
-.. image:: https://ci.appveyor.com/api/projects/status/github/vltr/middle?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/vltr/middle
-
-.. image:: https://codecov.io/github/vltr/middle/coverage.svg?branch=master
-    :alt: Coverage Status
-    :target: https://codecov.io/github/vltr/middle
-
-.. image:: https://api.codacy.com/project/badge/Grade/10c6ef32dfbe497087d57c9d86c02c80
-    :alt: Codacy Grade
-    :target: https://www.codacy.com/app/vltr/middle?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vltr/middle&amp;utm_campaign=Badge_Grade
+.. image:: https://img.shields.io/pypi/status/middle.svg
+    :alt: PyPI - Status
+    :target: https://pypi.org/project/middle/
 
 .. image:: https://img.shields.io/pypi/v/middle.svg
     :alt: PyPI Package latest release
@@ -34,13 +16,29 @@ A lot of badges from the ``cookiecutter`` template I used. I think I'll get rid 
     :alt: Supported versions
     :target: https://pypi.org/project/middle/
 
-.. image:: https://img.shields.io/pypi/implementation/middle.svg
-    :alt: Supported implementations
-    :target: https://pypi.org/project/middle/
+.. image:: https://travis-ci.org/vltr/middle.svg?branch=master
+    :alt: Travis-CI Build Status
+    :target: https://travis-ci.org/vltr/middle
 
-.. image:: https://img.shields.io/pypi/status/middle.svg
-    :alt: PyPI - Status
-    :target: https://pypi.org/project/middle/
+.. image:: https://ci.appveyor.com/api/projects/status/github/vltr/middle?branch=master&svg=true
+    :alt: AppVeyor Build Status
+    :target: https://ci.appveyor.com/project/vltr/middle
+
+.. image:: https://readthedocs.org/projects/middle/badge/?style=flat
+    :target: https://readthedocs.org/projects/middle
+    :alt: Documentation Status
+
+.. image:: https://codecov.io/github/vltr/middle/coverage.svg?branch=master
+    :alt: Coverage Status
+    :target: https://codecov.io/github/vltr/middle
+
+.. image:: https://api.codacy.com/project/badge/Grade/10c6ef32dfbe497087d57c9d86c02c80
+    :alt: Codacy Grade
+    :target: https://www.codacy.com/app/vltr/middle?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vltr/middle&amp;utm_campaign=Badge_Grade
+
+.. image:: https://pyup.io/repos/github/vltr/middle/shield.svg
+    :target: https://pyup.io/account/repos/github/vltr/middle/
+    :alt: Packages status
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :alt: Code style: black
@@ -52,8 +50,52 @@ Flexible, extensible Python data structures for general usage. Get data in and o
 
 ``middle`` stands on the shoulders of ``attrs`` and aims to be as simple as possible to get data from complex objects to Python primitives and vice-versa, with validators, converters, a lot of sugar and other utilities! ``middle`` can be used with your preferred web framework, background job application, configuration parser and more!
 
-Quick peak
+Sneak peek
 ----------
+
+The most simple example of ``middle`` and some of its features (using Python 3.6+ syntax):
+
+.. code-block:: pycon
+
+    >>> import typing
+    >>> import middle
+
+    >>> class Address(middle.Model):
+    ...     street_name: str
+    ...     number: typing.Optional[int]
+    ...     city: str
+
+    >>> class Person(middle.Model):
+    ...     name: str
+    ...     age: int
+    ...     address: typing.Dict[str, Address]
+
+    >>> data = {
+    ...     "name": "John Doe",
+    ...     "age": 42,
+    ...     "address": {
+    ...         "home": {
+    ...             "street_name": "Foo St",
+    ...             "number": None,
+    ...             "city": "Python Park"
+    ...         },
+    ...         "work": {
+    ...             "street_name": "Bar Blvd",
+    ...             "number": "1337",
+    ...             "city": "Park City"
+    ...         }
+    ...     }
+    ... }
+
+    >>> person = Person(data)
+
+    >>> person
+    Person(name='John Doe', age=42, address={'home': Address(street_name='Foo St', number=None, city='Python Park'), 'work': Address(street_name='Bar Blvd', number=1337, city='Park City')})
+
+    >>> middle.asdict(person)
+    {'name': 'John Doe', 'age': 42, 'address': {'home': {'street_name': 'Foo St', 'number': None, 'city': 'Python Park'}, 'work': {'street_name': 'Bar Blvd', 'number': 1337, 'city': 'Park City'}}}
+
+Wanted a more complex example, with Python 3.5 compatible syntax? For sure!
 
 .. code-block:: pycon
 
@@ -101,7 +143,7 @@ TODO
 - Read-only and write-only fields;
 - Better error handling (almost everywhere);
 - Create a benchmark suite against other solutions;
-- Some formatters are still missing;
+- Formatters are still missing;
 - Possibility to "cast" an instance to another instance where the original object is a subclass of it;
 
 Done
@@ -114,17 +156,28 @@ Done
 - Support more types (``typing.Tuple``, ``decimal.Decimal``);
 - Get 100% (or closer) in code coverage;
 - Lots of documentation;
-- Python 3.5 support;
+- Python 3.5 support (with the exception of Windows platforms, see warning for Windows developers below);
 
 Future discussions
 ------------------
 
 - In Python 3.7, a neat feature was added: ``dataclasses``. I know it sounds really awesome to not depend on a 3rd-party library - such as ``attrs``, but the latest provides a lot of functionalities that can't be found on Python 3.7 ``dataclasses`` (for now), so I'll leave this open for further discussion.
 
+Warning for Windows developers
+------------------------------
+
+If you're using Windows and Python 3.5, I think ``middle`` would not work well for you. CI in AppVeyor was disabled for Python 3.5 because of `this issue <https://github.com/python/typing/issues/523>`_. If Guido doesn't care, why should I (or you) ?
+
 Documentation
 =============
 
 https://middle.readthedocs.io/en/latest/
+
+Useful links
+------------
+
+* `Source code <https://github.com/vltr/middle>`_
+* `Issues <https://github.com/vltr/middle/issues>`_
 
 Inspirations and thanks
 =======================
@@ -137,7 +190,7 @@ Some libs that inspired the creation of ``middle``:
 - `mashmallow <https://marshmallow.readthedocs.io/en/latest/>`_: it is one of the most feature rich modelling APIs I've seen;
 - `apistar <https://docs.apistar.com/>`_: it's almost magical!
 - `Sanic <http://sanic.readthedocs.io/en/latest/>`_: "*Gotta go fast!*"
-- `ionelmc/cookiecutter-pylibrary <https://github.com/ionelmc/cookiecutter-pylibrary>`_: The most complete (or interesting) ``cookiecutter`` template I found so far (make sure to `read this <https://blog.ionelmc.ro/2014/05/25/python-packaging/>`_ article too);
+- `ionelmc/cookiecutter-pylibrary <https://github.com/ionelmc/cookiecutter-pylibrary>`_: The most complete (or interesting) ``cookiecutter`` template I found so far (make sure to `read this article <https://blog.ionelmc.ro/2014/05/25/python-packaging/>`_ too);
 
 License
 =======
