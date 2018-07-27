@@ -36,7 +36,7 @@ pkginfo==1.4.2            # via twine
 pluggy==0.6.0             # via pytest, tox
 port_for==0.4           # via sphinx-autobuild
 py==1.5.4                 # via pytest, tox
-pycodestyle==2.3.1
+pycodestyle==2.4.0
 pyflakes==1.6.0           # via flake8, pytest-flakes
 pygments==2.2.0
 pyparsing==2.2.0          # via packaging
