@@ -45,7 +45,7 @@ pytest-cov==2.5.1
 pytest-flakes==3.0.2
 pytest-pep8==1.0.6
 pytest==3.6.3
-pytz==2018.4              # via babel
+pytz==2018.5              # via babel
 pyyaml==3.12              # via sphinx-autobuild, watchdog
 requests-toolbelt==0.8.0  # via twine
 requests==2.19.1          # via requests-toolbelt, sphinx, twine
