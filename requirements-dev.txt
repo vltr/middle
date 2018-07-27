@@ -57,7 +57,7 @@ sphinx==1.7.6
 sphinxcontrib-websupport==1.1.0  # via sphinx
 stevedore==1.29.0         # via doc8
 toml==0.9.4               # via black
-tornado==5.0.2            # via livereload, sphinx-autobuild
+tornado==5.1            # via livereload, sphinx-autobuild
 tox==3.0.0
 tqdm==4.23.4              # via twine
 twine==1.11.0
