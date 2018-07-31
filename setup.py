@@ -62,7 +62,7 @@ setup(
         "customizable",
         "utilities",
     ],
-    install_requires=["attrs>=17.4.0", "pytz>=2018", "python-dateutil>=2.6.0"],
+    install_requires=["attrs>=18", "python-dateutil>=2.6.0"],
     extras_require={
         # eg:
         #   'rst': ['docutils>=0.11'],
