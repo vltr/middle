@@ -40,10 +40,6 @@
     :target: https://pyup.io/account/repos/github/vltr/middle/
     :alt: Packages status
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :alt: Code style: black
-    :target: https://github.com/ambv/black
-
 .. end-badges
 
 Flexible, extensible Python data structures for general usage. Get data in and out, reliably, without boilerplate and with speed!
