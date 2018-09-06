@@ -51,7 +51,7 @@ class _Config:
                     if isinstance(kwargs.get(p), self.__param_types.get(p)):
                         self.__changed_params.update({p: kwargs.get(p)})
                     else:
-                        logger.warn(
+                        logger.warning(
                             'The config value provided for "{}" doesn\'t match type {!r}'.format(
                                 p, self.__param_types.get(p)
                             )
