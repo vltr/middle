@@ -15,7 +15,7 @@ from .dtutils import dt_from_iso_string
 from .dtutils import dt_from_timestamp
 from .exceptions import InvalidType
 
-_num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
+_num_re = re.compile(r"^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
 
 def model_converter(model_cls, value):

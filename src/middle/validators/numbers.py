@@ -57,7 +57,7 @@ class NumberValidator(BaseValidator):
             if (
                 isinstance(multiple_of, float)
                 and float(Decimal(str(value)) % Decimal(str(multiple_of)))
-                != 0.
+                != 0.0
             ):
                 is_multiple_of = False
             if isinstance(multiple_of, int) and value % multiple_of != 0:

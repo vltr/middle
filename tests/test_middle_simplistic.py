@@ -40,7 +40,7 @@ class Game(middle.Model):
     name = {"type": str}
     platform = {"type": PlatformEnum}
     score = {"type": float}
-    resolution_tested = {"pattern": "^\d+x\d+$", "type": str}
+    resolution_tested = {"pattern": r"^\d+x\d+$", "type": str}
     genre = {"type": List[str]}
     rating = {"type": Dict[str, float]}
     players = {"type": Set[str]}

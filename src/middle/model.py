@@ -1,3 +1,4 @@
+import inspect
 import re
 from functools import partial
 
@@ -78,6 +79,16 @@ class ModelMeta(type):
                 if _reserved_keys.match(k):
                     continue
                 if not isinstance(f, _CountingAttr):
+                    tests = [
+                        inspect.isfunction(f),
+                        inspect.iscoroutinefunction(f),
+                        inspect.isgeneratorfunction(f),
+                        inspect.ismethod(f),
+                        inspect.isroutine(f),
+                        type(f) == property,
+                    ]
+                    if any(tests):
+                        continue
                     f, type_ = _translate_to_attrib(k, f, annotations, name)
                     attrs[k] = f
                     annotations.update({k: type_})

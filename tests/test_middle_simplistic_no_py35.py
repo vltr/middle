@@ -40,7 +40,7 @@ class Game(middle.Model):
     name: str
     platform: PlatformEnum
     score: float
-    resolution_tested: str = {"pattern": "^\d+x\d+$"}
+    resolution_tested: str = {"pattern": r"^\d+x\d+$"}
     genre: List[str]
     rating: Dict[str, float]
     players: Set[str]
