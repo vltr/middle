@@ -5,5 +5,5 @@
 #    pip-compile --output-file requirements.txt setup.py
 #
 attrs==19.1.0
-python-dateutil==2.7.5
+python-dateutil==2.8.0
 six==1.11.0               # via python-dateutil
