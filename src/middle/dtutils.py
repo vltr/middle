@@ -1,9 +1,9 @@
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 
 from dateutil import parser
 
 from .config import config
+
 
 # the current machine Time Zone
 _current_tz = datetime.now(timezone.utc).astimezone().tzinfo
@@ -45,7 +45,14 @@ def dt_convert_to_utc(dt: datetime, tz=_current_tz) -> datetime:
 
 
 def _dt_from_iso_string(dt_str):
-    dt = parser.parse(dt_str)
+    dt = None
+    try:
+        dt = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S")
+    except Exception:
+        try:
+            dt = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S%z")
+        except Exception:
+            dt = parser.parse(dt_str)
     return dt_convert_to_utc(dt)
 
 

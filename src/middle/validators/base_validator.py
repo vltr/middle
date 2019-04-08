@@ -1,8 +1,12 @@
+import typing as t
+
 import attr
 
 
 @attr.s(slots=True, hash=True)
 class BaseValidator:
+    _validate = attr.ib(type=t.Callable, default=lambda *a: None)
+
     def __call__(self, inst, attr, value):  # noqa
         raise Exception("this method needs to be implemented in a subclass")
 

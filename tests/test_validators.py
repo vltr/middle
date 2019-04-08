@@ -1,16 +1,18 @@
 import re
-from typing import Dict
-from typing import List
-from typing import Set
+
+from typing import Dict, List, Set
 
 import attr
 import pytest
+
 from attr._make import _AndValidator
 from attr.validators import _InstanceOfValidator
 
 import middle
+
 from middle.exceptions import ValidationError
 from middle.validators import BaseValidator
+
 
 # #############################################################################
 # str

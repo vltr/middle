@@ -1,5 +1,6 @@
 import datetime
 import typing
+
 from decimal import Decimal
 from enum import EnumMeta
 

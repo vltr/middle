@@ -3,8 +3,8 @@ import typing
 
 import attr
 
+from ..ast import build_string_validator
 from ..compat import RegexPatternType
-from ..exceptions import ValidationError
 from .base_validator import BaseValidator
 
 
@@ -24,34 +24,11 @@ class StringValidator(BaseValidator):
                 self._re_instance = inst
             elif isinstance(self.pattern, str):
                 self._re_instance = re.compile(self.pattern)
+        self._validate = build_string_validator(
+            min_length=self.min_length,
+            max_length=self.max_length,
+            re_instance=self._re_instance,
+        )
 
     def __call__(self, inst, attr, value):
-        if attr.default is None and value is None:
-            return
-
-        min_length = self.min_length
-        max_length = self.max_length
-        pattern = self._re_instance
-
-        if min_length is not None:
-            if len(value) < min_length:
-                raise ValidationError(
-                    "'{}' must have a minimum length of {} chars".format(
-                        attr.name, min_length
-                    )
-                )
-        if max_length is not None:
-            if len(value) > max_length:
-                raise ValidationError(
-                    "'{}' must have a maximum length of {} chars".format(
-                        attr.name, max_length
-                    )
-                )
-        if pattern is not None:
-            match = pattern.match(value)
-            if match is None:
-                raise ValidationError(
-                    "'{}' did not match the given pattern: '{}'".format(
-                        attr.name, self.pattern
-                    )
-                )
+        self._validate(attr, value)

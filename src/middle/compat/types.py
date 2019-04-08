@@ -1,11 +1,12 @@
 import re
 import sys
 import typing
-from datetime import date
-from datetime import datetime
+
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import EnumMeta
 from functools import lru_cache
+
 
 _IS_PY36 = False
 RegexPatternType = None
@@ -35,8 +36,12 @@ def get_type(type_):
         float,
         bool,
         bytes,
+        dict,
+        list,
         date,
         datetime,
+        time,
+        timedelta,
         Decimal,
         typing.Dict,
         typing.List,

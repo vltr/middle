@@ -3,6 +3,8 @@ bumpversion
 coverage
 doc8
 flake8
+isort
+mkinit
 pycodestyle
 pygments
 pytest
@@ -12,5 +14,5 @@ pytest-pep8
 Sphinx
 sphinx-autobuild
 tox
-twine
+#twine
 wheel

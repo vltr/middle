@@ -3,6 +3,7 @@ SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = middle
 SOURCEDIR     = docs/source
 BUILDDIR      = docs/build
+TOXTARGETS    = py3{5,6,7}-linux
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -19,6 +20,9 @@ help:
 black:
 	black ./src/middle/ ./tests setup.py
 
+fix-import: black
+	isort -rc ./src/middle
+
 cleanpycache:
 	find . -type d | grep "__pycache__" | xargs rm -rf
 
@@ -33,9 +37,15 @@ clean: cleanpycache
 
 requirements-dev:
 	pip install pip-tools
-	pip-compile -r -U requirements-dev.in --output-file requirements-dev.txt
-	pip-compile -r -U
+	pip-compile -r -U requirements-dev.in -o requirements-dev.txt
+	pip-compile -r -U -o requirements.txt
 	pip-sync requirements-dev.txt requirements.txt
+
+test-local: clean
+ifdef check
+	tox -e check
+endif
+	tox -e `echo "$(TOXTARGETS)" | tr " " ","`
 
 release:
 	tox -e check

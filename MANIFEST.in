@@ -14,7 +14,6 @@ include CHANGELOG.rst
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
-include requirements-dev.*
 
 include tox.ini .travis.yml appveyor.yml .codacy.yml
 
@@ -25,7 +24,8 @@ exclude .venv
 exclude .vscode
 exclude benchmarks
 exclude Makefile
-exclude requirements.txt
+exclude requirements.*
+exclude requirements-dev.*
 
 recursive-exclude .github *
 recursive-exclude .vscode *

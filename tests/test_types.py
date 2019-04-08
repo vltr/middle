@@ -1,22 +1,15 @@
-from datetime import date
-from datetime import datetime
-from datetime import timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
-from enum import Enum
-from enum import IntEnum
-from enum import unique
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from enum import Enum, IntEnum, unique
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import attr
 import pytest
 
 import middle
+
 from middle.exceptions import InvalidType
+
 
 # #############################################################################
 # str

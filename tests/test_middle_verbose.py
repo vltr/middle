@@ -1,9 +1,5 @@
-from enum import Enum
-from enum import IntEnum
-from enum import unique
-from typing import Dict
-from typing import List
-from typing import Set
+from enum import Enum, IntEnum, unique
+from typing import Dict, List, Set
 
 import middle
 
@@ -49,7 +45,7 @@ class Game(middle.Model):
     resolution_tested = middle.field(
         type=str,
         description="The resolution which the game was tested",
-        pattern="^\d+x\d+$",
+        pattern=r"^\d+x\d+$",
     )
     genre = middle.field(
         type=List[str], description="One or more genres this game is part of"

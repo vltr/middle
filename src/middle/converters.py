@@ -1,6 +1,7 @@
 import datetime
 import re
 import typing
+
 from decimal import Decimal
 from enum import EnumMeta
 from functools import partial
@@ -10,12 +11,11 @@ import attr
 from .compat import NoneType
 from .config import config
 from .dispatch import type_dispatch
-from .dtutils import dt_convert_to_utc
-from .dtutils import dt_from_iso_string
-from .dtutils import dt_from_timestamp
+from .dtutils import dt_convert_to_utc, dt_from_iso_string, dt_from_timestamp
 from .exceptions import InvalidType
 
-_num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
+
+_num_re = re.compile(r"^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
 
 def model_converter(model_cls, value):

@@ -1,8 +1,10 @@
 import logging
+
 from contextlib import contextmanager
 from functools import partial
 
 import attr
+
 
 logger = logging.getLogger(__name__)
 
