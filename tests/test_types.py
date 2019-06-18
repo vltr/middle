@@ -1,22 +1,16 @@
-from datetime import date
-from datetime import datetime
-from datetime import timezone
+import typing as t
+
+from datetime import date, datetime, timezone
 from decimal import Decimal
-from enum import Enum
-from enum import IntEnum
-from enum import unique
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from enum import Enum, IntEnum, unique
 
 import attr
 import pytest
 
 import middle
-from middle.exceptions import InvalidType
+
+from middle.exceptions import InvalidType, ValidationError
+
 
 # #############################################################################
 # str
@@ -448,12 +442,12 @@ def test_model_working():
     class PersonModel(middle.Model):
         name = middle.field(type=str)
         age = middle.field(type=int)
-        children = middle.field(type=List[ChildModel])
+        children = middle.field(type=t.List[ChildModel])
 
     class CompanyModel(middle.Model):
         name = middle.field(type=str)
         manager = middle.field(type=PersonModel)
-        employees = middle.field(type=List[PersonModel])
+        employees = middle.field(type=t.List[PersonModel])
 
     inst = CompanyModel(
         {
@@ -513,7 +507,7 @@ def test_model_converter():
     class PersonModel(middle.Model):
         name = middle.field(type=str)
         age = middle.field(type=int)
-        children = middle.field(type=List[ChildModel])
+        children = middle.field(type=t.List[ChildModel])
 
     test_child = ChildModel(name="Robert", age=10)
 
@@ -545,13 +539,13 @@ def test_model_default():
         name = middle.field(type=str, default="Paul")
         age = middle.field(type=int, default=42)
         children = middle.field(
-            type=List[ChildModel], default=[{"name": "James", "age": 12}]
+            type=t.List[ChildModel], default=[{"name": "James", "age": 12}]
         )
 
     class PersonNoneModel(middle.Model):
         name = middle.field(type=str, default="Paul")
         age = middle.field(type=int, default=42)
-        children = middle.field(type=List[ChildModel], default=None)
+        children = middle.field(type=t.List[ChildModel], default=None)
 
     instance = PersonModel()
     assert instance.name == "Paul"
@@ -572,7 +566,7 @@ class SomeJunk:
         return "hello"
 
 
-@pytest.mark.parametrize("list_type", [pytest.param(List, id="List")])
+@pytest.mark.parametrize("list_type", [pytest.param(t.List, id="List")])
 def test_list_working(list_type):
     class TestModel(middle.Model):
         names = middle.field(type=list_type[str])
@@ -588,7 +582,7 @@ def test_list_working(list_type):
     assert data.get("names", None) == ["foo", "bar"]
 
 
-@pytest.mark.parametrize("list_type", [pytest.param(List, id="List")])
+@pytest.mark.parametrize("list_type", [pytest.param(t.List, id="List")])
 def test_list_converter(list_type):
     class TestModel(middle.Model):
         names = middle.field(type=list_type[str])
@@ -606,7 +600,7 @@ def test_list_converter(list_type):
     assert inst.names[1] == "hello"
 
 
-@pytest.mark.parametrize("list_type", [pytest.param(List, id="List")])
+@pytest.mark.parametrize("list_type", [pytest.param(t.List, id="List")])
 def test_list_invalid(list_type):
 
     with pytest.raises(InvalidType):
@@ -620,7 +614,7 @@ def test_list_invalid(list_type):
             names = middle.field(type=list_type[int, float])
 
 
-@pytest.mark.parametrize("list_type", [pytest.param(List[str], id="List")])
+@pytest.mark.parametrize("list_type", [pytest.param(t.List[str], id="List")])
 def test_list_default(list_type):
     class TestModel(middle.Model):
         names = middle.field(type=list_type, default=["foo", "bar", "baz"])
@@ -636,7 +630,7 @@ def test_list_default(list_type):
 # Set
 
 
-@pytest.mark.parametrize("set_type", [pytest.param(Set, id="Set")])
+@pytest.mark.parametrize("set_type", [pytest.param(t.Set, id="Set")])
 def test_set_working(set_type):
     class TestModel(middle.Model):
         names = middle.field(type=set_type[str])
@@ -652,7 +646,7 @@ def test_set_working(set_type):
     assert data.get("names", None) == {"bar", "foo"}
 
 
-@pytest.mark.parametrize("set_type", [pytest.param(Set, id="Set")])
+@pytest.mark.parametrize("set_type", [pytest.param(t.Set, id="Set")])
 def test_set_converter(set_type):
     class TestModel(middle.Model):
         names = middle.field(type=set_type[str])
@@ -662,7 +656,7 @@ def test_set_converter(set_type):
     assert inst.names == {"1", "hello"}
 
 
-@pytest.mark.parametrize("set_type", [pytest.param(Set, id="Set")])
+@pytest.mark.parametrize("set_type", [pytest.param(t.Set, id="Set")])
 def test_set_invalid(set_type):
 
     with pytest.raises(InvalidType):
@@ -676,7 +670,7 @@ def test_set_invalid(set_type):
             names = middle.field(type=set_type[int, float])
 
 
-@pytest.mark.parametrize("set_type", [pytest.param(Set[str], id="Set")])
+@pytest.mark.parametrize("set_type", [pytest.param(t.Set[str], id="Set")])
 def test_set_default(set_type):
     class TestModel(middle.Model):
         names = middle.field(
@@ -694,7 +688,7 @@ def test_set_default(set_type):
 # Dict
 
 
-@pytest.mark.parametrize("dict_type", [pytest.param(Dict, id="Dict")])
+@pytest.mark.parametrize("dict_type", [pytest.param(t.Dict, id="Dict")])
 def test_dict_working(dict_type):
     class TestModel(middle.Model):
         ratings = middle.field(type=dict_type[str, float])
@@ -725,7 +719,7 @@ def test_dict_working(dict_type):
     }
 
 
-@pytest.mark.parametrize("dict_type", [pytest.param(Dict, id="Dict")])
+@pytest.mark.parametrize("dict_type", [pytest.param(t.Dict, id="Dict")])
 def test_dict_converter(dict_type):
     class TestModel(middle.Model):
         ratings = middle.field(type=dict_type[str, float])
@@ -735,7 +729,7 @@ def test_dict_converter(dict_type):
     assert inst.ratings == {"hello": 5.0}
 
 
-@pytest.mark.parametrize("dict_type", [pytest.param(Dict, id="Dict")])
+@pytest.mark.parametrize("dict_type", [pytest.param(t.Dict, id="Dict")])
 def test_dict_invalid(dict_type):
 
     with pytest.raises(InvalidType):
@@ -750,7 +744,7 @@ def test_dict_invalid(dict_type):
 
 
 @pytest.mark.parametrize(
-    "dict_type", [pytest.param(Dict[str, int], id="Dict")]
+    "dict_type", [pytest.param(t.Dict[str, int], id="Dict")]
 )
 def test_dict_default(dict_type):
     class TestModel(middle.Model):
@@ -777,7 +771,7 @@ def test_dict_default(dict_type):
 )
 def test_optional_working(value, expected):
     class TestModel(middle.Model):
-        name = middle.field(type=Optional[str])
+        name = middle.field(type=t.Optional[str])
 
     inst = TestModel(name=value)
     assert isinstance(inst, TestModel)
@@ -799,7 +793,7 @@ def test_optional_working(value, expected):
 )
 def test_optional_default(value, expected):
     class TestModel(middle.Model):
-        name = middle.field(type=Optional[str], default=value)
+        name = middle.field(type=t.Optional[str], default=value)
 
     assert TestModel().name == expected
 
@@ -818,7 +812,7 @@ def test_optional_default(value, expected):
 )
 def test_union_working(value, expected):
     class TestModel(middle.Model):
-        value = middle.field(type=Union[str, int, float])
+        value = middle.field(type=t.Union[str, int, float])
 
     inst = TestModel(value=value)
     assert isinstance(inst, TestModel)
@@ -835,7 +829,7 @@ def test_union_working(value, expected):
 )
 def test_union_working_with_none(val, expected):
     class TestModel(middle.Model):
-        value = middle.field(type=Union[str, int, float, None])
+        value = middle.field(type=t.Union[str, int, float, None])
 
     inst = TestModel(value=val)
     assert isinstance(inst, TestModel)
@@ -852,7 +846,7 @@ def test_union_invalid():
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            names = middle.field(type=Union)
+            names = middle.field(type=t.Union)
 
 
 @pytest.mark.parametrize(
@@ -865,7 +859,7 @@ def test_union_invalid():
 )
 def test_union_one_parameter(val, expected, type_):
     class TestModel(middle.Model):
-        value = middle.field(type=Union[type_])
+        value = middle.field(type=t.Union[type_])
 
     inst = TestModel(value=val)
     assert isinstance(inst, TestModel)
@@ -887,7 +881,7 @@ def test_union_one_parameter(val, expected, type_):
 )
 def test_union_default(val, expected, type_):
     class TestModel(middle.Model):
-        value = middle.field(type=Union[type_], default=val)
+        value = middle.field(type=t.Union[type_], default=val)
 
     assert TestModel().value == expected
 
@@ -898,7 +892,7 @@ def test_union_default(val, expected, type_):
 
 def test_tuple_working():
     class TestModel(middle.Model):
-        value = middle.field(type=Tuple[str, int, float])
+        value = middle.field(type=t.Tuple[str, int, float])
 
     inst = TestModel(value=["hello", 1, "-.4"])
     assert isinstance(inst, TestModel)
@@ -918,20 +912,61 @@ def test_tuple_invalid():
     with pytest.raises(InvalidType):
 
         class TestModel(middle.Model):
-            value = middle.field(type=Tuple)
+            value = middle.field(type=t.Tuple)
 
 
 def test_tuple_default():
     class TestModel(middle.Model):
         value = middle.field(
-            type=Tuple[str, int, float], default=["foo", 42, 3.14]
+            type=t.Tuple[str, int, float], default=["foo", 42, 3.14]
         )
 
     class TestNoneModel(middle.Model):
-        value = middle.field(type=Tuple[str, int, float], default=None)
+        value = middle.field(type=t.Tuple[str, int, float], default=None)
 
     assert TestModel().value == ("foo", 42, 3.14)
     assert TestNoneModel().value is None
+
+
+def test_tuple_optional():
+    opt_tup = t.Optional[t.Tuple[float, int]]
+    # opt_tup = t.Tuple[float, int]
+
+    class TestModel(middle.Model):
+        value = middle.field(
+            type=t.Dict[int, t.Tuple[opt_tup, opt_tup, opt_tup, opt_tup]]
+        )
+
+    inst = TestModel(value={1: [[0.9, 1], [0.9, 1], [2.1, 2], [2.1, 2]]})
+    assert inst.value[1][0] == (0.9, 1)
+    assert inst.value[1][1] == (0.9, 1)
+    assert inst.value[1][2] == (2.1, 2)
+    assert inst.value[1][3] == (2.1, 2)
+
+    inst = TestModel(value={5: [[0.9, 1], None, [2.1, 2], None]})
+    assert inst.value[5][0] == (0.9, 1)
+    assert inst.value[5][1] is None
+    assert inst.value[5][2] == (2.1, 2)
+    assert inst.value[5][3] is None
+
+
+@pytest.mark.xfail  # ! TODO - this shoud not fail on pytest.raises
+def test_tuple_no_optional():
+    opt_tup = t.Tuple[float, int]
+
+    class TestModel(middle.Model):
+        value = middle.field(
+            type=t.Dict[int, t.Tuple[opt_tup, opt_tup, opt_tup, opt_tup]]
+        )
+
+    inst = TestModel(value={1: [[0.9, 1], [0.9, 1], [2.1, 2], [2.1, 2]]})
+    assert inst.value[1][0] == (0.9, 1)
+    assert inst.value[1][1] == (0.9, 1)
+    assert inst.value[1][2] == (2.1, 2)
+    assert inst.value[1][3] == (2.1, 2)
+
+    with pytest.raises(ValidationError):
+        TestModel(value={5: [[0.9, 1], None, [2.1, 2], None]})
 
 
 # #############################################################################
@@ -1117,7 +1152,7 @@ def test_attr_class():
         age = attr.ib(type=int)
 
     class TestModel(middle.Model):
-        people = middle.field(type=List[AttrModel])
+        people = middle.field(type=t.List[AttrModel])
 
     inst = TestModel(
         people=[AttrModel(name="Foo", age=21), AttrModel(name="Bar", age=42)]
@@ -1141,7 +1176,7 @@ def test_attr_class_union():
         age = attr.ib(type=int)
 
     class TestModel(middle.Model):
-        agent = middle.field(type=Optional[AttrModel])
+        agent = middle.field(type=t.Optional[AttrModel])
 
     inst = TestModel(agent=AttrModel(name="Foo", age=21))
     assert isinstance(inst, TestModel)

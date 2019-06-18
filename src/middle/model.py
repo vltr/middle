@@ -1,17 +1,18 @@
 import re
+
 from functools import partial
 
 import attr
+
 from attr._make import NOTHING  # NOTE: this is internal to attrs
 from attr._make import _CountingAttr  # NOTE: this is internal to attrs
 
 from .compat import TypeRegistry
-from .converters import converter
-from .converters import model_converter
+from .converters import converter, model_converter
 from .options import metadata_options
 from .validators import validate
-from .values import asdict
-from .values import value_of
+from .values import asdict, value_of
+
 
 _attr_ib_whitelist_kwargs = [
     "cmp",

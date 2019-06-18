@@ -1,9 +1,6 @@
-from enum import Enum
-from enum import IntEnum
-from enum import unique
-from typing import Dict
-from typing import List
-from typing import Set
+import typing as t
+
+from enum import Enum, IntEnum, unique
 
 import middle
 
@@ -46,15 +43,15 @@ class Game(middle.Model):
     score: float = middle.field(description="The average score of the game")
     resolution_tested: str = middle.field(
         description="The resolution which the game was tested",
-        pattern="^\d+x\d+$",
+        pattern=r"^\d+x\d+$",
     )
-    genre: List[str] = middle.field(
+    genre: t.List[str] = middle.field(
         description="One or more genres this game is part of"
     )
-    rating: Dict[str, float] = middle.field(
+    rating: t.Dict[str, float] = middle.field(
         description="Ratings given on specialized websites"
     )
-    players: Set[str] = middle.field(
+    players: t.Set[str] = middle.field(
         description="Some of the notorious players of this game"
     )
     language: LanguageEnum = middle.field(

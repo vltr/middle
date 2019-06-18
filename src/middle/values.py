@@ -1,5 +1,6 @@
 import datetime
-import typing
+import typing as t
+
 from decimal import Decimal
 from enum import EnumMeta
 
@@ -83,21 +84,21 @@ def _value_of_enum(type_):
     return _raw_enum
 
 
-@value_of.register(typing.List)
+@value_of.register(t.List)
 def _value_of_list(type_):
     return _raw_list
 
 
-@value_of.register(typing.Set)
+@value_of.register(t.Set)
 def _value_of_set(type_):
     return _raw_set
 
 
-@value_of.register(typing.Dict)
+@value_of.register(t.Dict)
 def _value_of_dict(type_):
     return _raw_dict
 
 
-@value_of.register(typing.Tuple)
+@value_of.register(t.Tuple)
 def _value_of_tuple(type_):
     return _raw_tuple

@@ -1,6 +1,7 @@
 import datetime
 import re
-import typing
+import typing as t
+
 from decimal import Decimal
 from enum import EnumMeta
 from functools import partial
@@ -10,12 +11,11 @@ import attr
 from .compat import NoneType
 from .config import config
 from .dispatch import type_dispatch
-from .dtutils import dt_convert_to_utc
-from .dtutils import dt_from_iso_string
-from .dtutils import dt_from_timestamp
+from .dtutils import dt_convert_to_utc, dt_from_iso_string, dt_from_timestamp
 from .exceptions import InvalidType
 
-_num_re = re.compile("^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
+
+_num_re = re.compile(r"^[+-]?([0-9]+([\.][0-9]*)?|[.][0-9]+)$")
 
 
 def model_converter(model_cls, value):
@@ -132,6 +132,8 @@ def _multiple_types_converter(converters, value):
 
 
 def _multiple_types_converter_ordered(converters, value):
+    if value is None:
+        return value
     converted_values = []
     if len(converters) != len(value):
         raise ValueError(
@@ -192,7 +194,7 @@ def _converter_enum(type_):
     return type_
 
 
-@converter.register(typing.List)
+@converter.register(t.List)
 def _converter_iterable_list(type_):
     if not type_.__args__:
         raise InvalidType(
@@ -203,7 +205,7 @@ def _converter_iterable_list(type_):
     return partial(_iterable_converter, converter(type_.__args__[0]), False)
 
 
-@converter.register(typing.Set)
+@converter.register(t.Set)
 def _converter_iterable_set(type_):
     if not type_.__args__:
         raise InvalidType(
@@ -214,7 +216,7 @@ def _converter_iterable_set(type_):
     return partial(_iterable_converter, converter(type_.__args__[0]), True)
 
 
-@converter.register(typing.Dict)
+@converter.register(t.Dict)
 def _converter_dict(type_):
     if not type_.__args__:
         raise InvalidType(
@@ -229,7 +231,7 @@ def _converter_dict(type_):
     )
 
 
-@converter.register(typing.Union)
+@converter.register(t.Union)
 def _converter_union(type_):
     if not hasattr(type_, "__args__") or not type_.__args__:
         raise InvalidType(
@@ -256,11 +258,11 @@ def _converter_union(type_):
         return partial(_multiple_types_converter, converter_fns)
 
 
-@converter.register(typing.Tuple)
+@converter.register(t.Tuple)
 def _converter_tuple(type_):
     if not type_.__args__:
         raise InvalidType(
-            "Tuple must be set with at least one parameters, e.g. Tuple[bool]"
+            "Tuple must be set with at least one parameter, e.g. Tuple[bool]"
         )
     return partial(
         _multiple_types_converter_ordered,

@@ -2,13 +2,17 @@ import datetime
 
 import pytest
 import pytz
+
 from freezegun import freeze_time
 
 import middle
-from middle.dtutils import dt_convert_to_utc
-from middle.dtutils import dt_from_iso_string
-from middle.dtutils import dt_from_timestamp
-from middle.dtutils import dt_to_iso_string
+
+from middle.dtutils import (
+    dt_convert_to_utc,
+    dt_from_iso_string,
+    dt_from_timestamp,
+    dt_to_iso_string,
+)
 
 
 def test_datetime_with_tzinfo_to_iso_string():

@@ -1,9 +1,6 @@
-from enum import Enum
-from enum import IntEnum
-from enum import unique
-from typing import Dict
-from typing import List
-from typing import Set
+import typing as t
+
+from enum import Enum, IntEnum, unique
 
 import middle
 
@@ -40,10 +37,10 @@ class Game(middle.Model):
     name: str
     platform: PlatformEnum
     score: float
-    resolution_tested: str = {"pattern": "^\d+x\d+$"}
-    genre: List[str]
-    rating: Dict[str, float]
-    players: Set[str]
+    resolution_tested: str = {"pattern": r"^\d+x\d+$"}
+    genre: t.List[str]
+    rating: t.Dict[str, float]
+    players: t.Set[str]
     language: LanguageEnum
     awesome_city: City
 

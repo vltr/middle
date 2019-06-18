@@ -67,3 +67,4 @@ docs/_build
 .venv
 playground.py
 requirements.txt
+.vscode

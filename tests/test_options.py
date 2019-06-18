@@ -2,8 +2,7 @@ import re
 
 import pytest
 
-from middle.options import MetadataOption
-from middle.options import metadata_options
+from middle.options import MetadataOption, metadata_options
 
 
 def _get_option(name):

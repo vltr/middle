@@ -1,4 +1,4 @@
-import typing
+import typing as t
 
 import pytest
 
@@ -11,7 +11,7 @@ def test_mixed_schema():
         name = {"type": str}
         surname: str = middle.field()
         age: int
-        hobby = middle.field(type=typing.List[str])
+        hobby = middle.field(type=t.List[str])
 
     inst = TestModel(name="my", surname="model", age=1, hobby=["coding"])
     assert isinstance(inst, TestModel)

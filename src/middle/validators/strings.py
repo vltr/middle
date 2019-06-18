@@ -1,5 +1,5 @@
 import re
-import typing
+import typing as t
 
 import attr
 
@@ -12,7 +12,7 @@ from .base_validator import BaseValidator
 class StringValidator(BaseValidator):
     min_length = attr.ib(type=int, default=None)
     max_length = attr.ib(type=int, default=None)
-    pattern = attr.ib(type=typing.Union[RegexPatternType, str], default=None)
+    pattern = attr.ib(type=t.Union[RegexPatternType, str], default=None)
     _re_instance = attr.ib(type=RegexPatternType, default=None)
     # format = attr.ib(type=str, default=None)  # TODO
 

@@ -1,13 +1,10 @@
 import io
 import re
-from glob import glob
-from os.path import basename
-from os.path import dirname
-from os.path import join
-from os.path import splitext
 
-from setuptools import find_packages
-from setuptools import setup
+from glob import glob
+from os.path import basename, dirname, join, splitext
+
+from setuptools import find_packages, setup
 
 
 def read(*names, **kwargs):
@@ -62,7 +59,7 @@ setup(
         "customizable",
         "utilities",
     ],
-    install_requires=["attrs>=18", "python-dateutil>=2.6.0"],
+    install_requires=["attrs>=19.1.0", "python-dateutil>=2.8.0"],
     extras_require={
         # eg:
         #   'rst': ['docutils>=0.11'],

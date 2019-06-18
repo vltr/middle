@@ -1,5 +1,6 @@
 import datetime
-import typing
+import typing as t
+
 from decimal import Decimal
 from enum import EnumMeta
 from functools import partial
@@ -68,22 +69,22 @@ def _apply_bool_dt_dttime_enum(type_, field):
     return _generic_fn(type_, type_, field)
 
 
-@validate.register(typing.List)
+@validate.register(t.List)
 def _validate_list(type_, field):
     return _list_fn(type_, field)
 
 
-@validate.register(typing.Set)
+@validate.register(t.Set)
 def _validate_set(type_, field):
     return _set_fn(type_, field)
 
 
-@validate.register(typing.Dict)
+@validate.register(t.Dict)
 def _validate_dict(type_, field):
     return _dict_fn(type_, field)
 
 
-@validate.register(typing.Union)
+@validate.register(t.Union)
 def _validate_union(type_, field):
     validator_types = []
     for arg in type_.__args__:

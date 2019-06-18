@@ -1,8 +1,8 @@
 import datetime
-import typing
+import typing as t
+
 from decimal import Decimal
-from enum import Enum
-from enum import EnumMeta
+from enum import Enum, EnumMeta
 
 import pytest
 
@@ -23,27 +23,21 @@ import middle
             datetime.datetime, datetime.datetime, id="datetime_datetime"
         ),
         pytest.param(Decimal, Decimal, id="Decimal"),
-        pytest.param(typing.Dict, typing.Dict, id="typing.Dict"),
+        pytest.param(t.Dict, t.Dict, id="typing.Dict"),
+        pytest.param(t.Dict[str, float], t.Dict, id="typing.Dict[str,float]"),
+        pytest.param(t.List, t.List, id="typing.List"),
+        pytest.param(t.List[int], t.List, id="typing.List[int]"),
+        pytest.param(t.Set, t.Set, id="typing.Set"),
+        pytest.param(t.Set[float], t.Set, id="typing.Set[float]"),
+        pytest.param(t.Tuple, t.Tuple, id="typing.Tuple"),
         pytest.param(
-            typing.Dict[str, float], typing.Dict, id="typing.Dict[str,float]"
-        ),
-        pytest.param(typing.List, typing.List, id="typing.List"),
-        pytest.param(typing.List[int], typing.List, id="typing.List[int]"),
-        pytest.param(typing.Set, typing.Set, id="typing.Set"),
-        pytest.param(typing.Set[float], typing.Set, id="typing.Set[float]"),
-        pytest.param(typing.Tuple, typing.Tuple, id="typing.Tuple"),
-        pytest.param(
-            typing.Tuple[Decimal, float, None, int],
-            typing.Tuple,
+            t.Tuple[Decimal, float, None, int],
+            t.Tuple,
             id="typing.Tuple[Decimal,float,None,int]",
         ),
-        pytest.param(typing.Union, typing.Union, id="typing.Union"),
-        pytest.param(
-            typing.Union[str, int], typing.Union, id="typing.Union[str,int]"
-        ),
-        pytest.param(
-            typing.Optional[str], typing.Union, id="typing.Union[str,None]"
-        ),
+        pytest.param(t.Union, t.Union, id="typing.Union"),
+        pytest.param(t.Union[str, int], t.Union, id="typing.Union[str,int]"),
+        pytest.param(t.Optional[str], t.Union, id="typing.Union[str,None]"),
     ],
 )
 def test_get_type(type_, expected):

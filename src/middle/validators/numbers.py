@@ -1,4 +1,5 @@
-import typing
+import typing as t
+
 from decimal import Decimal
 
 import attr
@@ -9,11 +10,11 @@ from .base_validator import BaseValidator
 
 @attr.s(slots=True, hash=True)
 class NumberValidator(BaseValidator):
-    minimum = attr.ib(type=typing.Union[int, float], default=None)
-    maximum = attr.ib(type=typing.Union[int, float], default=None)
+    minimum = attr.ib(type=t.Union[int, float], default=None)
+    maximum = attr.ib(type=t.Union[int, float], default=None)
     exclusive_minimum = attr.ib(type=bool, default=False)
     exclusive_maximum = attr.ib(type=bool, default=False)
-    multiple_of = attr.ib(type=typing.Union[int, float], default=None)
+    multiple_of = attr.ib(type=t.Union[int, float], default=None)
 
     def __call__(self, inst, attr, value):
         if attr.default is None and value is None:
@@ -57,7 +58,7 @@ class NumberValidator(BaseValidator):
             if (
                 isinstance(multiple_of, float)
                 and float(Decimal(str(value)) % Decimal(str(multiple_of)))
-                != 0.
+                != 0.0
             ):
                 is_multiple_of = False
             if isinstance(multiple_of, int) and value % multiple_of != 0:

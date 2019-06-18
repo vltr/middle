@@ -1,11 +1,12 @@
 import re
 import sys
-import typing
-from datetime import date
-from datetime import datetime
+import typing as t
+
+from datetime import date, datetime
 from decimal import Decimal
 from enum import EnumMeta
 from functools import lru_cache
+
 
 _IS_PY36 = False
 RegexPatternType = None
@@ -38,11 +39,11 @@ def get_type(type_):
         date,
         datetime,
         Decimal,
-        typing.Dict,
-        typing.List,
-        typing.Set,
-        typing.Tuple,
-        typing.Union,
+        t.Dict,
+        t.List,
+        t.Set,
+        t.Tuple,
+        t.Union,
     ):
         return type_
 
@@ -54,7 +55,7 @@ def get_type(type_):
             return type_.__origin__
         else:  # py37
             if hasattr(type_, "_name") and isinstance(type_._name, str):
-                return getattr(typing, type_._name)
+                return getattr(t, type_._name)
             return type_.__origin__
     elif tt == EnumMeta:
         return tt

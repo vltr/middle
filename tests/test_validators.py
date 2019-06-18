@@ -1,16 +1,17 @@
 import re
-from typing import Dict
-from typing import List
-from typing import Set
+import typing as t
 
 import attr
 import pytest
+
 from attr._make import _AndValidator
 from attr.validators import _InstanceOfValidator
 
 import middle
+
 from middle.exceptions import ValidationError
 from middle.validators import BaseValidator
+
 
 # #############################################################################
 # str
@@ -546,7 +547,7 @@ def test_float_with_default():
     "list_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
-            List[int],
+            t.List[int],
             [0, 1, 2, 3],
             [[0, 1], []],
             {"min_items": 3, "max_items": None},
@@ -554,7 +555,7 @@ def test_float_with_default():
             id="list_min_items",
         ),
         pytest.param(
-            List[str],
+            t.List[str],
             ["foo", "bar"],
             [["foo", "bar", "baz", "wee"]],
             {"max_items": 3, "unique_items": False},
@@ -562,7 +563,7 @@ def test_float_with_default():
             id="list_max_items",
         ),
         pytest.param(
-            List[float],
+            t.List[float],
             [1.0, 1.5, 2.0],
             [[1.0, 1.2, 1.4, 1.2, 1.5]],
             {"unique_items": True, "max_items": None, "min_items": None},
@@ -570,7 +571,7 @@ def test_float_with_default():
             id="list_unique_items",
         ),
         pytest.param(
-            List[float],
+            t.List[float],
             [1.0, 1.5, 2.0],
             [],
             {"unique_items": False},
@@ -578,7 +579,7 @@ def test_float_with_default():
             id="list_unique_items_false",
         ),
         pytest.param(
-            List[str],
+            t.List[str],
             ["foo", "bar", "baz"],
             [["foo", "bar"], ["foo", "bar", "baz", "FOO", "BAR"]],
             {"min_items": 3, "max_items": 4, "unique_items": False},
@@ -666,15 +667,15 @@ def test_list_errors(test_value, raised_exc, kwargs):
     with pytest.raises(raised_exc):
 
         class TestModel(middle.Model):
-            value = middle.field(type=List[str], **kwargs)
+            value = middle.field(type=t.List[str], **kwargs)
 
 
 def test_list_with_default():
     class TestModel(middle.Model):
-        value = middle.field(type=List[int], max_items=3, default=[2, 3])
+        value = middle.field(type=t.List[int], max_items=3, default=[2, 3])
 
     class TestNoneModel(middle.Model):
-        value = middle.field(type=List[int], max_items=3, default=None)
+        value = middle.field(type=t.List[int], max_items=3, default=None)
 
     assert TestModel().value == [2, 3]
     assert TestModel(value=[3, 4]).value == [3, 4]
@@ -699,7 +700,7 @@ def test_list_with_default():
     "set_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
-            Set[int],
+            t.Set[int],
             {0, 1, 2, 3},
             [{0, 1}, {}],
             {"min_items": 3, "max_items": None},
@@ -707,7 +708,7 @@ def test_list_with_default():
             id="set_min_items",
         ),
         pytest.param(
-            Set[str],
+            t.Set[str],
             {"foo", "bar"},
             [{"foo", "bar", "baz", "wee"}],
             {"max_items": 3, "min_items": None},
@@ -715,7 +716,7 @@ def test_list_with_default():
             id="set_max_items",
         ),
         pytest.param(
-            Set[float],
+            t.Set[float],
             {1.0, 1.5, 2.0},
             [],
             {"unique_items": True, "max_items": None},
@@ -723,7 +724,7 @@ def test_list_with_default():
             id="set_unique_items",
         ),
         pytest.param(
-            Set[str],
+            t.Set[str],
             {"foo", "bar", "baz"},
             [{"foo", "bar"}, {"foo", "bar", "baz", "FOO", "BAR"}],
             {"min_items": 3, "max_items": 4, "unique_items": False},
@@ -811,15 +812,15 @@ def test_set_errors(test_value, raised_exc, kwargs):
     with pytest.raises(raised_exc):
 
         class TestModel(middle.Model):
-            value = middle.field(type=Set[str], **kwargs)
+            value = middle.field(type=t.Set[str], **kwargs)
 
 
 def test_set_with_default():
     class TestModel(middle.Model):
-        value = middle.field(type=Set[int], max_items=3, default={2, 3})
+        value = middle.field(type=t.Set[int], max_items=3, default={2, 3})
 
     class TestNoneModel(middle.Model):
-        value = middle.field(type=Set[int], max_items=3, default=None)
+        value = middle.field(type=t.Set[int], max_items=3, default=None)
 
     assert TestModel().value == {2, 3}
     assert TestModel(value=[3, 4]).value == {3, 4}
@@ -844,7 +845,7 @@ def test_set_with_default():
     "dict_type,test_values,error_values,kwargs,descriptor",
     [
         pytest.param(
-            Dict[int, str],
+            t.Dict[int, str],
             {0: "hello", 1: "world", 2: "foo", 3: "bar"},
             [{0: "hello", 1: "world"}, {}],
             {"min_properties": 3, "max_properties": None},
@@ -852,7 +853,7 @@ def test_set_with_default():
             id="dict_min_properties",
         ),
         pytest.param(
-            Dict[str, int],
+            t.Dict[str, int],
             {"foo": 1, "bar": 2},
             [{"foo": 1, "bar": 2, "baz": 3, "wee": 4}],
             {"max_properties": 3, "min_properties": None},
@@ -860,7 +861,7 @@ def test_set_with_default():
             id="dict_max_properties",
         ),
         pytest.param(
-            Dict[str, float],
+            t.Dict[str, float],
             {"foo": 1.0, "bar": 1.1, "baz": 1.2},
             [
                 {"foo": 0.0, "bar": 0.2},
@@ -939,13 +940,13 @@ def test_dict_errors(test_value, raised_exc, kwargs):
     with pytest.raises(raised_exc):
 
         class TestModel(middle.Model):
-            value = middle.field(type=Dict[str, str], **kwargs)
+            value = middle.field(type=t.Dict[str, str], **kwargs)
 
 
 def test_dict_with_default():
     class TestModel(middle.Model):
         value = middle.field(
-            type=Dict[str, int],
+            type=t.Dict[str, int],
             min_properties=1,
             max_properties=2,
             default={"hello": 1},
@@ -953,7 +954,7 @@ def test_dict_with_default():
 
     class TestNoneModel(middle.Model):
         value = middle.field(
-            type=Dict[str, int],
+            type=t.Dict[str, int],
             min_properties=1,
             max_properties=2,
             default=None,

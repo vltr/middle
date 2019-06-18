@@ -4,6 +4,7 @@ import attr
 
 from .compat import RegexPatternType
 
+
 SENTINEL = object()
 
 _type_messages = {

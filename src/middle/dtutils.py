@@ -1,9 +1,9 @@
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 
 from dateutil import parser
 
 from .config import config
+
 
 # the current machine Time Zone
 _current_tz = datetime.now(timezone.utc).astimezone().tzinfo
