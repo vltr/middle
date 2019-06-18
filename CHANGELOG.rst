@@ -2,6 +2,11 @@
 Changelog
 =========
 
+v0.2.2 on 2018-10-28
+--------------------
+
+* Added the possibility for models to have methods, functions, properties and etc.
+
 v0.2.1 on 2018-07-26
 --------------------
 
