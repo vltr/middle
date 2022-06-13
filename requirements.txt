@@ -6,4 +6,4 @@
 #
 attrs==21.4.0
 python-dateutil==2.8.2
-six==1.12.0               # via python-dateutil
+six==1.16.0               # via python-dateutil
