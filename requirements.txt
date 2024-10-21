@@ -4,6 +4,6 @@
 #
 #    pip-compile
 #
-attrs==19.1.0
-python-dateutil==2.8.0
-six==1.12.0               # via python-dateutil
+attrs==24.2.0
+python-dateutil==2.9.0.post0
+six==1.16.0               # via python-dateutil
